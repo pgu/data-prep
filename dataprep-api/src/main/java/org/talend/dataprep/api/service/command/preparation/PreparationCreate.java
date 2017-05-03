@@ -13,7 +13,7 @@
 package org.talend.dataprep.api.service.command.preparation;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.talend.dataprep.command.Defaults.asString;
+import static org.talend.daikon.hystrix.Defaults.asString;
 import static org.talend.dataprep.exception.error.APIErrorCodes.UNABLE_TO_CREATE_PREPARATION;
 
 import java.io.IOException;
@@ -26,12 +26,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.preparation.Preparation;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 
 @Component
 @Scope("request")
-public class PreparationCreate extends GenericCommand<String> {
+public class PreparationCreate extends TDPGenericCommand<String> {
 
     /**
      * Private constructor to ensure the use of IoC.
@@ -40,7 +40,7 @@ public class PreparationCreate extends GenericCommand<String> {
      * @param folderId the optional folder ID to create the preparation into.
      */
     private PreparationCreate(Preparation preparation, String folderId) {
-        super(GenericCommand.PREPARATION_GROUP);
+        super(TDPGenericCommand.PREPARATION_GROUP);
         execute(() -> onExecute(preparation, folderId));
         onError(e -> new TDPException(UNABLE_TO_CREATE_PREPARATION, e));
         on(HttpStatus.OK).then(asString());

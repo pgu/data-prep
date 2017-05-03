@@ -12,7 +12,7 @@
 
 package org.talend.dataprep.api.service.command.dataset;
 
-import static org.talend.dataprep.command.Defaults.asString;
+import static org.talend.daikon.hystrix.Defaults.asString;
 import static org.talend.dataprep.exception.error.CommonErrorCodes.UNEXPECTED_EXCEPTION;
 
 import java.net.URISyntaxException;
@@ -23,7 +23,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 
 /**
@@ -31,7 +31,7 @@ import org.talend.dataprep.exception.TDPException;
  */
 @Component
 @Scope("request")
-public class CopyDataSet extends GenericCommand<String> {
+public class CopyDataSet extends TDPGenericCommand<String> {
 
     /**
      * Private constructor.
@@ -40,7 +40,7 @@ public class CopyDataSet extends GenericCommand<String> {
      * @param name the copy name.
      */
     private CopyDataSet(String id, String name) {
-        super(GenericCommand.DATASET_GROUP);
+        super(TDPGenericCommand.DATASET_GROUP);
         execute(() -> {
             try {
                 URIBuilder uriBuilder = new URIBuilder(datasetServiceUrl + "/datasets/" + id + "/copy");

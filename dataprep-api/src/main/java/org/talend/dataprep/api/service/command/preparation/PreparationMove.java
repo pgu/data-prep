@@ -1,5 +1,4 @@
 // ============================================================================
-//
 // Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
 // This source code is available under agreement available at
@@ -13,8 +12,6 @@
 
 package org.talend.dataprep.api.service.command.preparation;
 
-import static org.talend.dataprep.command.Defaults.asNull;
-
 import java.net.URISyntaxException;
 
 import org.apache.commons.lang.StringUtils;
@@ -24,16 +21,18 @@ import org.apache.http.client.utils.URIBuilder;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
+
+import static org.talend.daikon.hystrix.Defaults.asNull;
 
 /**
  * Command used to move a preparation.
  */
 @Component
 @Scope("request")
-public class PreparationMove extends GenericCommand<Void> {
+public class PreparationMove extends TDPGenericCommand<Void> {
 
 
     /**
@@ -46,7 +45,7 @@ public class PreparationMove extends GenericCommand<Void> {
      */
     // private constructor to ensure the IoC
     private PreparationMove(String id, String folder, String destination, String newName) {
-        super(GenericCommand.DATASET_GROUP);
+        super(TDPGenericCommand.DATASET_GROUP);
 
         execute(() -> onExecute(id, folder, destination, newName));
         on(HttpStatus.OK).then(asNull());

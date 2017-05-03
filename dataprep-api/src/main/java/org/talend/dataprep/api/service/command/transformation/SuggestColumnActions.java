@@ -1,20 +1,19 @@
-//  ============================================================================
+// ============================================================================
+// Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
-//  Copyright (C) 2006-2016 Talend Inc. - www.talend.com
+// This source code is available under agreement available at
+// https://github.com/Talend/data-prep/blob/master/LICENSE
 //
-//  This source code is available under agreement available at
-//  https://github.com/Talend/data-prep/blob/master/LICENSE
+// You should have received a copy of the agreement
+// along with this program; if not, write to Talend SA
+// 9 rue Pages 92150 Suresnes, France
 //
-//  You should have received a copy of the agreement
-//  along with this program; if not, write to Talend SA
-//  9 rue Pages 92150 Suresnes, France
-//
-//  ============================================================================
+// ============================================================================
 
 package org.talend.dataprep.api.service.command.transformation;
 
-import static org.talend.dataprep.command.Defaults.asNull;
-import static org.talend.dataprep.command.Defaults.pipeStream;
+import static org.talend.daikon.hystrix.Defaults.asNull;
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 
 import java.io.InputStream;
 
@@ -25,7 +24,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.APIErrorCodes;
 
@@ -34,7 +33,7 @@ import org.talend.dataprep.exception.error.APIErrorCodes;
  */
 @Component
 @Scope("request")
-public class SuggestColumnActions extends GenericCommand<InputStream> {
+public class SuggestColumnActions extends TDPGenericCommand<InputStream> {
 
     /**
      * Constructor.
@@ -42,7 +41,7 @@ public class SuggestColumnActions extends GenericCommand<InputStream> {
      * @param input the column metadata to get the actions for (in json).
      */
     private SuggestColumnActions(InputStream input) {
-        super(GenericCommand.TRANSFORM_GROUP);
+        super(TDPGenericCommand.TRANSFORM_GROUP);
         execute(() -> {
             HttpPost post = new HttpPost(transformationServiceUrl + "/suggest/column");
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);

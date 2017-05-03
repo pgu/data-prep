@@ -1,5 +1,4 @@
 // ============================================================================
-//
 // Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
 // This source code is available under agreement available at
@@ -28,7 +27,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.folder.Folder;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 
 /**
@@ -36,11 +35,11 @@ import org.talend.dataprep.exception.TDPException;
  */
 @Component
 @Scope("prototype")
-public class LocatePreparation extends GenericCommand<Folder> {
+public class LocatePreparation extends TDPGenericCommand<Folder> {
 
     /**
      * Constructor.
-     * 
+     *
      * @param id the preparation id to locate.
      */
     // private constructor to ensure IoC

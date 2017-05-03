@@ -1,5 +1,4 @@
 // ============================================================================
-//
 // Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
 // This source code is available under agreement available at
@@ -13,8 +12,6 @@
 
 package org.talend.dataprep.api.service.command.dataset;
 
-import static org.talend.dataprep.command.Defaults.*;
-
 import java.io.InputStream;
 import java.net.URISyntaxException;
 
@@ -25,17 +22,21 @@ import org.apache.http.entity.InputStreamEntity;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.APIErrorCodes;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
+
+import static org.talend.daikon.hystrix.Defaults.asString;
+import static org.talend.daikon.hystrix.Defaults.emptyString;
+import static org.talend.daikon.hystrix.Defaults.passthrough;
 
 /**
  * Command used to create a dataset. Basically pass through all data to the DataSet low level API.
  */
 @Component
 @Scope("prototype")
-public class CreateDataSet extends GenericCommand<String> {
+public class CreateDataSet extends TDPGenericCommand<String> {
 
     /**
      * Default constructor.
@@ -45,7 +46,7 @@ public class CreateDataSet extends GenericCommand<String> {
      * @param dataSetContent Dataset content or import parameters in json for remote datasets.
      */
     private CreateDataSet(String name, String tag, String contentType, InputStream dataSetContent) {
-        super(GenericCommand.DATASET_GROUP);
+        super(TDPGenericCommand.DATASET_GROUP);
         execute(() -> onExecute(name, tag, contentType, dataSetContent));
         onError(e -> {
             if (e instanceof TDPException) {

@@ -1,20 +1,19 @@
-//  ============================================================================
+// ============================================================================
+// Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
-//  Copyright (C) 2006-2016 Talend Inc. - www.talend.com
+// This source code is available under agreement available at
+// https://github.com/Talend/data-prep/blob/master/LICENSE
 //
-//  This source code is available under agreement available at
-//  https://github.com/Talend/data-prep/blob/master/LICENSE
+// You should have received a copy of the agreement
+// along with this program; if not, write to Talend SA
+// 9 rue Pages 92150 Suresnes, France
 //
-//  You should have received a copy of the agreement
-//  along with this program; if not, write to Talend SA
-//  9 rue Pages 92150 Suresnes, France
-//
-//  ============================================================================
+// ============================================================================
 
 package org.talend.dataprep.api.service.command.transformation;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.talend.dataprep.command.Defaults.asNull;
+import static org.talend.daikon.hystrix.Defaults.asNull;
 
 import java.io.IOException;
 import java.util.function.BiFunction;
@@ -31,7 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.dataset.DataSetMetadata;
 import org.talend.dataprep.api.service.command.common.ChainedCommand;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.command.dataset.DataSetGetMetadata;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.APIErrorCodes;
@@ -62,7 +61,7 @@ public class SuggestDataSetActions extends ChainedCommand<String, DataSetMetadat
      * @param retrieveMetadata the previous command to execute.
      */
     private SuggestDataSetActions(DataSetGetMetadata retrieveMetadata) {
-        super(GenericCommand.TRANSFORM_GROUP, retrieveMetadata);
+        super(TDPGenericCommand.TRANSFORM_GROUP, retrieveMetadata);
         execute(this::onExecute);
         onError(e -> new TDPException(APIErrorCodes.UNABLE_TO_RETRIEVE_SUGGESTED_ACTIONS, e));
         on(HttpStatus.OK).then(onOk());

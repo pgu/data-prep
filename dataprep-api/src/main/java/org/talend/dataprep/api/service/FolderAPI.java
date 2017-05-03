@@ -28,12 +28,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.talend.daikon.hystrix.CommandHelper;
 import org.talend.dataprep.api.folder.Folder;
 import org.talend.dataprep.api.service.api.EnrichedPreparation;
 import org.talend.dataprep.api.service.command.folder.*;
 import org.talend.dataprep.api.service.command.preparation.PreparationListByFolder;
-import org.talend.dataprep.command.CommandHelper;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.command.dataset.DataSetGetMetadata;
 import org.talend.dataprep.dataset.DataSetMetadataBuilder;
 import org.talend.dataprep.exception.TDPException;
@@ -66,7 +66,7 @@ public class FolderAPI extends APIService {
     @Timed
     public ResponseEntity<StreamingResponseBody> children(@RequestParam(required = false) String parentId) {
         try {
-            final GenericCommand<InputStream> foldersList = getCommand(FolderChildrenList.class, parentId);
+            final TDPGenericCommand<InputStream> foldersList = getCommand(FolderChildrenList.class, parentId);
             return CommandHelper.toStreaming(foldersList);
         } catch (Exception e) {
             throw new TDPException(APIErrorCodes.UNABLE_TO_LIST_FOLDERS, e);
@@ -152,7 +152,7 @@ public class FolderAPI extends APIService {
     @Timed
     public ResponseEntity<StreamingResponseBody> search(@RequestParam final String name, @RequestParam(required = false) final boolean strict) {
         try {
-            final GenericCommand<InputStream> searchFolders = getCommand(SearchFolders.class, name, strict);
+            final TDPGenericCommand<InputStream> searchFolders = getCommand(SearchFolders.class, name, strict);
             return CommandHelper.toStreaming(searchFolders);
         } catch (Exception e) {
             throw new TDPException(APIErrorCodes.UNABLE_TO_LIST_FOLDERS, e);

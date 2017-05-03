@@ -12,7 +12,7 @@
 
 package org.talend.dataprep.api.service.command.preparation;
 
-import static org.talend.dataprep.command.Defaults.convertResponse;
+import static org.talend.daikon.hystrix.Defaults.convertResponse;
 import static org.talend.dataprep.exception.error.CommonErrorCodes.UNEXPECTED_EXCEPTION;
 
 import java.net.URISyntaxException;
@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.preparation.Step;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 
 /**
@@ -34,7 +34,7 @@ import org.talend.dataprep.exception.TDPException;
  */
 @Component
 @Scope("prototype")
-public class FindStep extends GenericCommand<Step> {
+public class FindStep extends TDPGenericCommand<Step> {
 
     private final String stepId;
 

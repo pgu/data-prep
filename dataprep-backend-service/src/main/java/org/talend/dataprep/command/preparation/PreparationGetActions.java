@@ -13,7 +13,7 @@
 package org.talend.dataprep.command.preparation;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
-import static org.talend.dataprep.command.Defaults.pipeStream;
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 import static org.talend.dataprep.exception.error.APIErrorCodes.UNABLE_TO_GET_PREPARATION_DETAILS;
 import static org.talend.dataprep.exception.error.PreparationErrorCodes.PREPARATION_DOES_NOT_EXIST;
 
@@ -23,7 +23,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 
 /**
@@ -31,7 +31,7 @@ import org.talend.dataprep.exception.TDPException;
  */
 @Component
 @Scope(SCOPE_PROTOTYPE)
-public class PreparationGetActions extends GenericCommand<InputStream> {
+public class PreparationGetActions extends TDPGenericCommand<InputStream> {
 
     /**
      * Default constructor that retrieves the prepration actions at for the head.

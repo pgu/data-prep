@@ -15,9 +15,9 @@ package org.talend.dataprep.api.service.delegate;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Component;
+import org.talend.daikon.hystrix.CommandHelper;
 import org.talend.dataprep.api.folder.Folder;
 import org.talend.dataprep.api.service.command.folder.SearchFolders;
-import org.talend.dataprep.command.CommandHelper;
 
 /**
  * A {@link SearchDelegate} implementation to search in folders.

@@ -14,8 +14,8 @@ package org.talend.dataprep.api.service.command.preparation;
 
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.talend.dataprep.command.CommandHelper.toStream;
-import static org.talend.dataprep.command.Defaults.asNull;
+import static org.talend.daikon.hystrix.CommandHelper.toStream;
+import static org.talend.daikon.hystrix.Defaults.asNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

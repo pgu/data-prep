@@ -1,5 +1,4 @@
 // ============================================================================
-//
 // Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
 // This source code is available under agreement available at
@@ -13,7 +12,7 @@
 
 package org.talend.dataprep.api.service.command.preparation;
 
-import static org.talend.dataprep.command.Defaults.pipeStream;
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 
 import java.io.InputStream;
 import java.util.Collection;
@@ -28,7 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.talend.dataprep.api.export.ExportParameters;
 import org.talend.dataprep.api.preparation.Action;
 import org.talend.dataprep.api.preparation.Preparation;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.TransformationErrorCodes;
 import org.talend.dataprep.transformation.preview.api.PreviewParameters;
@@ -38,7 +37,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 /**
  * Base class for preview commands.
  */
-public abstract class PreviewAbstract extends GenericCommand<InputStream> {
+public abstract class PreviewAbstract extends TDPGenericCommand<InputStream> {
 
     /** The preview parameters. */
     private PreviewParameters parameters;
@@ -54,7 +53,7 @@ public abstract class PreviewAbstract extends GenericCommand<InputStream> {
      */
     // private constructor to ensure the IoC
     protected PreviewAbstract(Preparation preparation, List<Action> actions) {
-        super(GenericCommand.PREPARATION_GROUP);
+        super(TDPGenericCommand.PREPARATION_GROUP);
         this.preparation = preparation;
         this.actions = actions;
     }

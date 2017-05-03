@@ -12,7 +12,7 @@
 
 package org.talend.dataprep.api.service.command.common;
 
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
@@ -22,7 +22,7 @@ import com.netflix.hystrix.HystrixCommandGroupKey;
  * @param <O> Output of this command.
  * @param <I> Result of the previous command chained into this one as input.
  */
-public abstract class ChainedCommand<O, I> extends GenericCommand<O> {
+public abstract class ChainedCommand<O, I> extends TDPGenericCommand<O> {
 
     /** The command to execute to get the input for this one. */
     protected final HystrixCommand<I> input;

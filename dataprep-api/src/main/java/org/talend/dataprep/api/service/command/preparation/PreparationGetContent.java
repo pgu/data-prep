@@ -1,5 +1,4 @@
 // ============================================================================
-//
 // Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
 // This source code is available under agreement available at
@@ -13,8 +12,8 @@
 
 package org.talend.dataprep.api.service.command.preparation;
 
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 import static org.talend.dataprep.api.export.ExportParameters.SourceType.HEAD;
-import static org.talend.dataprep.command.Defaults.pipeStream;
 
 import java.io.InputStream;
 
@@ -25,7 +24,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.export.ExportParameters;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.APIErrorCodes;
 
@@ -34,7 +33,7 @@ import org.talend.dataprep.exception.error.APIErrorCodes;
  */
 @Component
 @Scope("request")
-public class PreparationGetContent extends GenericCommand<InputStream> {
+public class PreparationGetContent extends TDPGenericCommand<InputStream> {
 
     /** The preparation id. */
     private final String id;

@@ -118,6 +118,10 @@
             <artifactId>daikon</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.talend.daikon</groupId>
+            <artifactId>hystrix-utils</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.talend.dataquality</groupId>
             <artifactId>dataquality-common</artifactId>
         </dependency>

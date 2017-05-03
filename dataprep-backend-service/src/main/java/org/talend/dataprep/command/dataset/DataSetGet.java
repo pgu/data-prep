@@ -1,5 +1,4 @@
 // ============================================================================
-//
 // Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
 // This source code is available under agreement available at
@@ -15,8 +14,8 @@ package org.talend.dataprep.command.dataset;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static org.talend.daikon.exception.ExceptionContext.build;
-import static org.talend.dataprep.command.Defaults.emptyStream;
-import static org.talend.dataprep.command.Defaults.pipeStream;
+import static org.talend.daikon.hystrix.Defaults.emptyStream;
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 import static org.talend.dataprep.exception.error.APIErrorCodes.UNABLE_TO_RETRIEVE_DATASET_CONTENT;
 import static org.talend.dataprep.exception.error.DataSetErrorCodes.DATASET_DOES_NOT_EXIST;
 
@@ -29,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.dataset.store.content.DataSetContentLimit;
 import org.talend.dataprep.exception.TDPException;
 
@@ -38,7 +37,7 @@ import org.talend.dataprep.exception.TDPException;
  */
 @Component
 @Scope(SCOPE_PROTOTYPE)
-public class DataSetGet extends GenericCommand<InputStream> {
+public class DataSetGet extends TDPGenericCommand<InputStream> {
 
     private final boolean fullContent;
 

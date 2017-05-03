@@ -15,7 +15,7 @@ package org.talend.dataprep.api.service;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
-import static org.talend.dataprep.command.CommandHelper.*;
+import static org.talend.daikon.hystrix.CommandHelper.*;
 
 import java.io.InputStream;
 import java.util.List;
@@ -28,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.talend.daikon.hystrix.CommandHelper;
 import org.talend.dataprep.api.dataset.DataSetMetadata;
 import org.talend.dataprep.api.dataset.Import;
 import org.talend.dataprep.api.dataset.statistics.SemanticDomain;
@@ -38,8 +39,7 @@ import org.talend.dataprep.api.service.command.preparation.PreparationList;
 import org.talend.dataprep.api.service.command.preparation.PreparationSearchByDataSetId;
 import org.talend.dataprep.api.service.command.transformation.SuggestDataSetActions;
 import org.talend.dataprep.api.service.command.transformation.SuggestLookupActions;
-import org.talend.dataprep.command.CommandHelper;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.command.dataset.DataSetGet;
 import org.talend.dataprep.command.dataset.DataSetGetMetadata;
 import org.talend.dataprep.dataset.service.UserDataSetMetadata;
@@ -227,7 +227,7 @@ public class DataSetAPI extends APIService {
             LOG.debug("Requesting dataset #{} (pool: {})...", id, getConnectionStats());
         }
         try {
-            GenericCommand<InputStream> retrievalCommand = getCommand(DataSetPreview.class, id, metadata, sheetName);
+            TDPGenericCommand<InputStream> retrievalCommand = getCommand(DataSetPreview.class, id, metadata, sheetName);
             return toStreaming(retrievalCommand);
         } finally {
             if (LOG.isDebugEnabled()) {
@@ -248,7 +248,7 @@ public class DataSetAPI extends APIService {
             @ApiParam(value = "Filter on recent data sets") @RequestParam(defaultValue = "false") boolean limit) {
         return () -> {
             try {
-                GenericCommand<InputStream> listCommand = getCommand(DataSetList.class, sort, order, name, certified, favorite, limit);
+                TDPGenericCommand<InputStream> listCommand = getCommand(DataSetList.class, sort, order, name, certified, favorite, limit);
                 return toStream(UserDataSetMetadata.class, mapper, listCommand);
             } finally {
                 LOG.info("listing datasets done [favorite: {}, certified: {}, name: {}, limit: {}]", favorite, certified, name,
@@ -271,13 +271,13 @@ public class DataSetAPI extends APIService {
             LOG.debug("Listing datasets summary (pool: {})...", getConnectionStats());
         }
         return () -> {
-            GenericCommand<InputStream> listDataSets = getCommand(DataSetList.class, sort, order, name, certified, favorite, limit);
-            return Flux.from(CommandHelper.toPublisher(UserDataSetMetadata.class, mapper, listDataSets)) //
+            TDPGenericCommand<InputStream> listDataSets = getCommand(DataSetList.class, sort, order, name, certified, favorite, limit);
+            return Flux.from(toPublisher(UserDataSetMetadata.class, mapper, listDataSets)) //
                     .map(m -> {
                         // Add the related preparations list to the given dataset metadata.
                         final PreparationSearchByDataSetId getPreparations = getCommand(PreparationSearchByDataSetId.class,
                                 m.getId());
-                        return Flux.from(CommandHelper.toPublisher(Preparation.class, mapper, getPreparations)).collectList() //
+                        return Flux.from(toPublisher(Preparation.class, mapper, getPreparations)).collectList() //
                                 .map(preparations -> {
                                     final List<Preparation> list = preparations.stream() //
                                             .filter(p -> p.getSteps() != null) //
@@ -331,13 +331,13 @@ public class DataSetAPI extends APIService {
                 LOG.debug("Listing compatible preparations (pool: {})...", getConnectionStats());
             }
             // get the list of compatible data sets
-            GenericCommand<InputStream> compatibleDataSetList = getCommand(CompatibleDataSetList.class, dataSetId, sort, order);
+            TDPGenericCommand<InputStream> compatibleDataSetList = getCommand(CompatibleDataSetList.class, dataSetId, sort, order);
             final Mono<List<DataSetMetadata>> compatibleList = Flux
                     .from(toPublisher(DataSetMetadata.class, mapper, compatibleDataSetList)) //
                     .collectList() //
                     .cache(); // Keep it in cache for later reuse
             // get list of preparations
-            GenericCommand<InputStream> preparationList = getCommand(PreparationList.class, PreparationList.Format.LONG, sort, order);
+            TDPGenericCommand<InputStream> preparationList = getCommand(PreparationList.class, PreparationList.Format.LONG, sort, order);
             return Flux.from(toPublisher(Preparation.class, mapper, preparationList)) //
                     .filter(p -> compatibleList.flatMapIterable(l -> l) //
                             .map(DataSetMetadata::getId) //

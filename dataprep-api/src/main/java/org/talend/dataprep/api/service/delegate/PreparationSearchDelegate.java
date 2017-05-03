@@ -15,11 +15,11 @@ package org.talend.dataprep.api.service.delegate;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Component;
+import org.talend.daikon.hystrix.CommandHelper;
 import org.talend.dataprep.api.folder.Folder;
 import org.talend.dataprep.api.service.api.EnrichedPreparation;
 import org.talend.dataprep.api.service.command.preparation.LocatePreparation;
 import org.talend.dataprep.api.service.command.preparation.PreparationSearchByName;
-import org.talend.dataprep.command.CommandHelper;
 import org.talend.dataprep.preparation.service.UserPreparation;
 
 /**

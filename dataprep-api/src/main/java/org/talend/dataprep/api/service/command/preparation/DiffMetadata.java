@@ -16,8 +16,8 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static org.talend.daikon.exception.ExceptionContext.withBuilder;
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 import static org.talend.dataprep.api.export.ExportParameters.SourceType.HEAD;
-import static org.talend.dataprep.command.Defaults.pipeStream;
 import static org.talend.dataprep.exception.error.PreparationErrorCodes.UNABLE_TO_READ_PREPARATION;
 
 import java.io.IOException;
@@ -34,7 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.preparation.Action;
 import org.talend.dataprep.api.service.command.common.ChainedCommand;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.command.preparation.PreparationGetActions;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
@@ -59,7 +59,7 @@ public class DiffMetadata extends ChainedCommand<InputStream, InputStream> {
      * @param input         the command to execute to get the actions of the preparation.
      */
     public DiffMetadata(String dataSetId, String preparationId, List<Action> actionsToAdd, PreparationGetActions input) {
-        super(GenericCommand.PREPARATION_GROUP, input);
+        super(TDPGenericCommand.PREPARATION_GROUP, input);
         execute(() -> onExecute(dataSetId, preparationId, actionsToAdd));
         on(HttpStatus.OK).then(pipeStream());
     }

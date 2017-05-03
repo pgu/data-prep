@@ -12,8 +12,8 @@
 
 package org.talend.dataprep.api.service.command.preparation;
 
-import static org.talend.dataprep.command.Defaults.emptyStream;
-import static org.talend.dataprep.command.Defaults.pipeStream;
+import static org.talend.daikon.hystrix.Defaults.emptyStream;
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 import static org.talend.dataprep.util.SortAndOrderHelper.Sort;
 
 import java.io.InputStream;
@@ -25,7 +25,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.APIErrorCodes;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
@@ -33,10 +33,10 @@ import org.talend.dataprep.util.SortAndOrderHelper.Order;
 
 @Component
 @Scope("request")
-public class PreparationList extends GenericCommand<InputStream> {
+public class PreparationList extends TDPGenericCommand<InputStream> {
 
     private PreparationList(Format format, Sort sort, Order order) {
-        super(GenericCommand.PREPARATION_GROUP);
+        super(TDPGenericCommand.PREPARATION_GROUP);
         execute(() -> onExecute(sort, order, format));
         onError(e -> new TDPException(APIErrorCodes.UNABLE_TO_RETRIEVE_PREPARATION_LIST, e));
         on(HttpStatus.NO_CONTENT, HttpStatus.ACCEPTED).then(emptyStream());

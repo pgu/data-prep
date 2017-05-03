@@ -14,7 +14,7 @@ package org.talend.dataprep.command.preparation;
 
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.talend.dataprep.command.Defaults.asString;
+import static org.talend.daikon.hystrix.Defaults.asString;
 import static org.talend.dataprep.exception.error.APIErrorCodes.UNABLE_TO_UPDATE_PREPARATION;
 
 import org.apache.http.client.methods.HttpPut;
@@ -25,7 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.talend.daikon.exception.ExceptionContext;
 import org.talend.dataprep.api.preparation.Preparation;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
 
@@ -33,10 +33,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 @Component
 @Scope("prototype")
-public class PreparationUpdate extends GenericCommand<String> {
+public class PreparationUpdate extends TDPGenericCommand<String> {
 
     private PreparationUpdate(String id, Preparation preparation) {
-        super(GenericCommand.PREPARATION_GROUP);
+        super(TDPGenericCommand.PREPARATION_GROUP);
         execute(() -> onExecute(id, preparation));
         onError(e -> new TDPException(UNABLE_TO_UPDATE_PREPARATION, e, ExceptionContext.build().put("id", id)));
         on(HttpStatus.OK).then(asString());

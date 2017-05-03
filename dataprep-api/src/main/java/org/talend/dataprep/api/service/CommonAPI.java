@@ -1,15 +1,14 @@
-//  ============================================================================
+// ============================================================================
+// Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
-//  Copyright (C) 2006-2016 Talend Inc. - www.talend.com
+// This source code is available under agreement available at
+// https://github.com/Talend/data-prep/blob/master/LICENSE
 //
-//  This source code is available under agreement available at
-//  https://github.com/Talend/data-prep/blob/master/LICENSE
+// You should have received a copy of the agreement
+// along with this program; if not, write to Talend SA
+// 9 rue Pages 92150 Suresnes, France
 //
-//  You should have received a copy of the agreement
-//  along with this program; if not, write to Talend SA
-//  9 rue Pages 92150 Suresnes, France
-//
-//  ============================================================================
+// ============================================================================
 
 package org.talend.dataprep.api.service;
 
@@ -28,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.talend.daikon.exception.error.ErrorCode;
 import org.talend.dataprep.api.service.command.error.ErrorList;
 import org.talend.dataprep.api.type.Type;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.error.APIErrorCodes;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
 import org.talend.dataprep.exception.json.JsonErrorCodeDescription;
@@ -52,7 +51,7 @@ public class CommonAPI extends APIService {
 
     /**
      * Describe the supported error codes.
-     * 
+     *
      * @param output the http response.
      */
     @RequestMapping(value = "/api/errors", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
@@ -74,19 +73,19 @@ public class CommonAPI extends APIService {
         writeErrorsFromEnum(generator, APIErrorCodes.values());
 
         // get dataset api errors
-        HystrixCommand<InputStream> datasetErrors = getCommand(ErrorList.class, GenericCommand.DATASET_GROUP, DATASET);
+        HystrixCommand<InputStream> datasetErrors = getCommand(ErrorList.class, TDPGenericCommand.DATASET_GROUP, DATASET);
         try (InputStream errorsInput = datasetErrors.execute()) {
             writeErrorsFromApi(generator, errorsInput);
         }
 
         // get preparation api errors
-        HystrixCommand<InputStream> preparationErrors = getCommand(ErrorList.class, GenericCommand.PREPARATION_GROUP, PREPARATION);
+        HystrixCommand<InputStream> preparationErrors = getCommand(ErrorList.class, TDPGenericCommand.PREPARATION_GROUP, PREPARATION);
         try (InputStream errorsInput = preparationErrors.execute()) {
             writeErrorsFromApi(generator, errorsInput);
         }
 
         // get transformation api errors
-        HystrixCommand<InputStream> transformationErrors = getCommand(ErrorList.class, GenericCommand.TRANSFORM_GROUP, TRANSFORMATION);
+        HystrixCommand<InputStream> transformationErrors = getCommand(ErrorList.class, TDPGenericCommand.TRANSFORM_GROUP, TRANSFORMATION);
         try (InputStream errorsInput = transformationErrors.execute()) {
             writeErrorsFromApi(generator, errorsInput);
         }

@@ -1,7 +1,19 @@
+// ============================================================================
+// Copyright (C) 2006-2016 Talend Inc. - www.talend.com
+//
+// This source code is available under agreement available at
+// https://github.com/Talend/data-prep/blob/master/LICENSE
+//
+// You should have received a copy of the agreement
+// along with this program; if not, write to Talend SA
+// 9 rue Pages 92150 Suresnes, France
+//
+// ============================================================================
+
 package org.talend.dataprep.api.service.command.dataset;
 
-import static org.talend.dataprep.command.Defaults.emptyStream;
-import static org.talend.dataprep.command.Defaults.pipeStream;
+import static org.talend.daikon.hystrix.Defaults.emptyStream;
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 import static org.talend.dataprep.util.SortAndOrderHelper.Order;
 import static org.talend.dataprep.util.SortAndOrderHelper.Sort;
 
@@ -14,14 +26,14 @@ import org.apache.http.client.utils.URIBuilder;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.APIErrorCodes;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
 
 @Component
 @Scope("request")
-public class CompatibleDataSetList extends GenericCommand<InputStream> {
+public class CompatibleDataSetList extends TDPGenericCommand<InputStream> {
 
     /**
      * Constructor.
@@ -32,7 +44,7 @@ public class CompatibleDataSetList extends GenericCommand<InputStream> {
      */
     // private constructor to ensure the IoC
     private CompatibleDataSetList(String dataSetId, Sort sort, Order order) {
-        super(GenericCommand.DATASET_GROUP);
+        super(TDPGenericCommand.DATASET_GROUP);
 
         try {
             execute(() -> onExecute(dataSetId, sort, order));

@@ -15,7 +15,7 @@ package org.talend.dataprep.api.service;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.talend.dataprep.command.CommandHelper.toStream;
+import static org.talend.daikon.hystrix.CommandHelper.toStream;
 import static org.talend.dataprep.format.export.ExportFormat.PREFIX;
 
 import java.io.IOException;
@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.talend.daikon.hystrix.CommandHelper;
 import org.talend.dataprep.api.dataset.DataSetMetadata;
 import org.talend.dataprep.api.export.ExportParameters;
 import org.talend.dataprep.api.preparation.Preparation;
@@ -42,8 +43,7 @@ import org.talend.dataprep.api.service.command.export.DataSetExportTypes;
 import org.talend.dataprep.api.service.command.export.Export;
 import org.talend.dataprep.api.service.command.export.ExportTypes;
 import org.talend.dataprep.api.service.command.export.PreparationExportTypes;
-import org.talend.dataprep.command.CommandHelper;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.command.dataset.DataSetGetMetadata;
 import org.talend.dataprep.command.preparation.PreparationDetailsGet;
 import org.talend.dataprep.exception.TDPException;
@@ -77,7 +77,7 @@ public class ExportAPI extends APIService {
             final String exportName = getExportNameAndConsolidateParameters(parameters);
             parameters.setExportName(exportName);
 
-            final GenericCommand<InputStream> command = getCommand(Export.class, parameters);
+            final TDPGenericCommand<InputStream> command = getCommand(Export.class, parameters);
             return CommandHelper.toStreaming(command);
         } catch (TDPException e) {
             throw e;

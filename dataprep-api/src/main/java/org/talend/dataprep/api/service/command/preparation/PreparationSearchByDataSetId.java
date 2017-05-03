@@ -1,5 +1,4 @@
 // ============================================================================
-//
 // Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
 // This source code is available under agreement available at
@@ -13,8 +12,6 @@
 
 package org.talend.dataprep.api.service.command.preparation;
 
-import static org.talend.dataprep.command.Defaults.pipeStream;
-
 import java.io.InputStream;
 import java.net.URISyntaxException;
 
@@ -23,16 +20,18 @@ import org.apache.http.client.utils.URIBuilder;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
+
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 
 /**
  * Command used to retrieve the preparations based on a dataset.
  */
 @Component
 @Scope("prototype")
-public class PreparationSearchByDataSetId extends GenericCommand<InputStream> {
+public class PreparationSearchByDataSetId extends TDPGenericCommand<InputStream> {
 
     /**
      * Private constructor used to construct the generic command used to list of preparations based on a dataset id.
@@ -40,7 +39,7 @@ public class PreparationSearchByDataSetId extends GenericCommand<InputStream> {
      * @param datasetId the dataset id.
      */
     private PreparationSearchByDataSetId(String datasetId) {
-        super(GenericCommand.PREPARATION_GROUP);
+        super(TDPGenericCommand.PREPARATION_GROUP);
         execute(() -> {
             try {
                 URIBuilder uriBuilder = new URIBuilder(preparationServiceUrl + "/preparations/search");

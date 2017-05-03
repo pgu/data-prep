@@ -1,15 +1,14 @@
-//  ============================================================================
+// ============================================================================
+// Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
-//  Copyright (C) 2006-2016 Talend Inc. - www.talend.com
+// This source code is available under agreement available at
+// https://github.com/Talend/data-prep/blob/master/LICENSE
 //
-//  This source code is available under agreement available at
-//  https://github.com/Talend/data-prep/blob/master/LICENSE
+// You should have received a copy of the agreement
+// along with this program; if not, write to Talend SA
+// 9 rue Pages 92150 Suresnes, France
 //
-//  You should have received a copy of the agreement
-//  along with this program; if not, write to Talend SA
-//  9 rue Pages 92150 Suresnes, France
-//
-//  ============================================================================
+// ============================================================================
 
 package org.talend.dataprep.api.service;
 
@@ -25,9 +24,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.talend.daikon.hystrix.CommandHelper;
 import org.talend.dataprep.api.service.command.aggregation.Aggregate;
-import org.talend.dataprep.command.CommandHelper;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.transformation.aggregation.api.AggregationParameters;
 
 import io.swagger.annotations.Api;
@@ -51,7 +50,7 @@ public class AggregationAPI extends APIService {
         LOG.debug("Aggregation computation requested (pool: {} )...", getConnectionStats());
         // get the command and execute it, then copy the content to the http response
         try {
-            GenericCommand<InputStream> command = getCommand(Aggregate.class, input);
+            TDPGenericCommand<InputStream> command = getCommand(Aggregate.class, input);
             return CommandHelper.toStreaming(command);
         } finally {
             LOG.debug("Aggregation done (pool: {} )...", getConnectionStats());

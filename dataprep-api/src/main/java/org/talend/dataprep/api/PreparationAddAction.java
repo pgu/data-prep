@@ -1,3 +1,15 @@
+// ============================================================================
+// Copyright (C) 2006-2016 Talend Inc. - www.talend.com
+//
+// This source code is available under agreement available at
+// https://github.com/Talend/data-prep/blob/master/LICENSE
+//
+// You should have received a copy of the agreement
+// along with this program; if not, write to Talend SA
+// 9 rue Pages 92150 Suresnes, France
+//
+// ============================================================================
+
 package org.talend.dataprep.api;
 
 import java.io.ByteArrayInputStream;
@@ -15,15 +27,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.preparation.AppendStep;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
 
-import static org.talend.dataprep.command.Defaults.asNull;
+import static org.talend.daikon.hystrix.Defaults.asNull;
 
 @Component("PreparationAddActionv2")
 @Scope("request")
-public class PreparationAddAction extends GenericCommand<Void> {
+public class PreparationAddAction extends TDPGenericCommand<Void> {
 
     /**
      * Default constructor.

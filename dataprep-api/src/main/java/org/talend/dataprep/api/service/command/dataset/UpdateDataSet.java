@@ -1,20 +1,19 @@
-//  ============================================================================
+// ============================================================================
+// Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
-//  Copyright (C) 2006-2016 Talend Inc. - www.talend.com
+// This source code is available under agreement available at
+// https://github.com/Talend/data-prep/blob/master/LICENSE
 //
-//  This source code is available under agreement available at
-//  https://github.com/Talend/data-prep/blob/master/LICENSE
+// You should have received a copy of the agreement
+// along with this program; if not, write to Talend SA
+// 9 rue Pages 92150 Suresnes, France
 //
-//  You should have received a copy of the agreement
-//  along with this program; if not, write to Talend SA
-//  9 rue Pages 92150 Suresnes, France
-//
-//  ============================================================================
+// ============================================================================
 
 package org.talend.dataprep.api.service.command.dataset;
 
-import static org.talend.dataprep.command.Defaults.asString;
-import static org.talend.dataprep.command.Defaults.emptyString;
+import static org.talend.daikon.hystrix.Defaults.asString;
+import static org.talend.daikon.hystrix.Defaults.emptyString;
 
 import java.io.InputStream;
 
@@ -24,14 +23,14 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 
 @Component
 @Scope("request")
-public class UpdateDataSet extends GenericCommand<String> {
+public class UpdateDataSet extends TDPGenericCommand<String> {
 
     private UpdateDataSet(String id, InputStream dataSetContent) {
-        super(GenericCommand.DATASET_GROUP);
+        super(TDPGenericCommand.DATASET_GROUP);
         execute(() -> {
             final HttpPut put = new HttpPut(datasetServiceUrl + "/datasets/" + id); //$NON-NLS-1$ //$NON-NLS-2$
             put.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);

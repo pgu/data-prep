@@ -1,5 +1,4 @@
 // ============================================================================
-//
 // Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
 // This source code is available under agreement available at
@@ -13,7 +12,7 @@
 
 package org.talend.dataprep.api.service.command.preparation;
 
-import static org.talend.dataprep.command.Defaults.asString;
+import static org.talend.daikon.hystrix.Defaults.asString;
 import static org.talend.dataprep.exception.error.CommonErrorCodes.UNEXPECTED_EXCEPTION;
 
 import java.net.URISyntaxException;
@@ -25,7 +24,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 
 /**
@@ -33,7 +32,7 @@ import org.talend.dataprep.exception.TDPException;
  */
 @Component
 @Scope("request")
-public class PreparationReorderStep extends GenericCommand<String> {
+public class PreparationReorderStep extends TDPGenericCommand<String> {
 
     /**
      * Constructor.

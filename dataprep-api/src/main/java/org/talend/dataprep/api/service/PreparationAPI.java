@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.talend.daikon.hystrix.CommandHelper;
 import org.talend.dataprep.api.PreparationAddAction;
 import org.talend.dataprep.api.dataset.DataSetMetadata;
 import org.talend.dataprep.api.export.ExportParameters;
@@ -49,8 +50,7 @@ import org.talend.dataprep.api.service.api.PreviewUpdateParameters;
 import org.talend.dataprep.api.service.command.dataset.CompatibleDataSetList;
 import org.talend.dataprep.api.service.command.preparation.*;
 import org.talend.dataprep.api.service.command.transformation.GetPreparationColumnTypes;
-import org.talend.dataprep.command.CommandHelper;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.command.dataset.DataSetGetMetadata;
 import org.talend.dataprep.command.preparation.PreparationDetailsGet;
 import org.talend.dataprep.command.preparation.PreparationGetActions;
@@ -85,7 +85,7 @@ public class PreparationAPI extends APIService {
             LOG.debug("Listing preparations (pool: {} )...", getConnectionStats());
         }
         PreparationList.Format listFormat = PreparationList.Format.valueOf(format.toUpperCase());
-        GenericCommand<InputStream> command = getCommand(PreparationList.class, listFormat, sort, order);
+        TDPGenericCommand<InputStream> command = getCommand(PreparationList.class, listFormat, sort, order);
         return CommandHelper.toStreaming(command);
     }
 
@@ -591,7 +591,7 @@ public class PreparationAPI extends APIService {
      */
     private Preparation internalGetPreparation(String preparationId) {
         try {
-            GenericCommand<InputStream> command = getCommand(PreparationDetailsGet.class, preparationId);
+            TDPGenericCommand<InputStream> command = getCommand(PreparationDetailsGet.class, preparationId);
             return mapper.readerFor(Preparation.class).readValue(command.execute());
         } catch (IOException e) {
             throw new TDPException(UNABLE_TO_READ_PREPARATION, e, withBuilder().put("id", preparationId).build());

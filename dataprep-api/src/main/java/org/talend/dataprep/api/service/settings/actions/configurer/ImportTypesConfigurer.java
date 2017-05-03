@@ -12,8 +12,8 @@
 
 package org.talend.dataprep.api.service.settings.actions.configurer;
 
+import static org.talend.daikon.hystrix.CommandHelper.toStream;
 import static org.talend.dataprep.api.service.settings.actions.provider.DatasetActions.DATASET_CREATE;
-import static org.talend.dataprep.command.CommandHelper.toStream;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

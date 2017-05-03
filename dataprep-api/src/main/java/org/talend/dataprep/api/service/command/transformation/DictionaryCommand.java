@@ -12,19 +12,19 @@
 
 package org.talend.dataprep.api.service.command.transformation;
 
-import static org.talend.dataprep.command.Defaults.pipeStream;
-
 import java.io.InputStream;
 
 import org.apache.http.client.methods.HttpGet;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
+
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 
 @Component
 @Scope("request")
-public class DictionaryCommand extends GenericCommand<InputStream> {
+public class DictionaryCommand extends TDPGenericCommand<InputStream> {
 
     /**
      * Protected constructor.

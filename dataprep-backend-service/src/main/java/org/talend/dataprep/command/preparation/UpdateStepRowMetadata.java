@@ -15,7 +15,7 @@ package org.talend.dataprep.command.preparation;
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.talend.dataprep.command.Defaults.asString;
+import static org.talend.daikon.hystrix.Defaults.asString;
 import static org.talend.dataprep.exception.error.CommonErrorCodes.UNEXPECTED_EXCEPTION;
 
 import java.util.List;
@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.preparation.Step;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,7 +37,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  */
 @Component
 @Scope("prototype")
-public class UpdateStepRowMetadata extends GenericCommand<String> {
+public class UpdateStepRowMetadata extends TDPGenericCommand<String> {
 
     /**
      * Private constructor to ensure the IoC.

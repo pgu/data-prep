@@ -1,5 +1,4 @@
 // ============================================================================
-//
 // Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
 // This source code is available under agreement available at
@@ -26,7 +25,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.dataset.DataSetMetadata;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.command.dataset.DataSetGetMetadata;
 import org.talend.dataprep.command.preparation.PreparationDetailsGet;
 import org.talend.dataprep.security.SecurityProxy;
@@ -40,7 +39,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  */
 @Component
 @Scope("prototype")
-public class EnrichedPreparationDetails extends GenericCommand<InputStream> {
+public class EnrichedPreparationDetails extends TDPGenericCommand<InputStream> {
 
     private static final String JOB_TYPE = "job";
 
@@ -71,7 +70,7 @@ public class EnrichedPreparationDetails extends GenericCommand<InputStream> {
     /**
      * Wraps the call to get the dataset as the technical user as the dataset may not be shared for instance.
      *
-     * @see GenericCommand#run()
+     * @see TDPGenericCommand#run()
      */
     @Override
     protected InputStream run() throws Exception {

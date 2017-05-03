@@ -15,7 +15,7 @@ package org.talend.dataprep.api.service;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.talend.dataprep.command.CommandHelper.toStream;
+import static org.talend.daikon.hystrix.CommandHelper.toStream;
 
 import java.io.InputStream;
 import java.util.stream.Stream;
@@ -28,12 +28,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.talend.daikon.hystrix.CommandHelper;
 import org.talend.dataprep.api.action.ActionDefinition;
 import org.talend.dataprep.api.service.api.DynamicParamsInput;
 import org.talend.dataprep.api.service.command.preparation.PreparationGetContent;
 import org.talend.dataprep.api.service.command.transformation.*;
-import org.talend.dataprep.command.CommandHelper;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.command.dataset.DataSetGet;
 import org.talend.dataprep.metrics.Timed;
 
@@ -107,7 +107,7 @@ public class TransformAPI extends APIService {
         }
 
         // get params, passing content in the body
-        final GenericCommand<InputStream> getActionDynamicParams = getCommand(SuggestActionParams.class, inputData, action,
+        final TDPGenericCommand<InputStream> getActionDynamicParams = getCommand(SuggestActionParams.class, inputData, action,
                 dynamicParamsInput.getColumnId());
         return CommandHelper.toStreaming(getActionDynamicParams);
     }

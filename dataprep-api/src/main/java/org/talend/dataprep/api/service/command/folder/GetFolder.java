@@ -18,22 +18,22 @@ import org.apache.http.client.utils.URIBuilder;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
 
 import java.io.InputStream;
 import java.net.URISyntaxException;
 
-import static org.talend.dataprep.command.Defaults.pipeStream;
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 
 @Component
 @Scope("request")
 public class GetFolder
-    extends GenericCommand<InputStream> {
+    extends TDPGenericCommand<InputStream> {
 
     public GetFolder(final String id) {
-        super(GenericCommand.PREPARATION_GROUP);
+        super(TDPGenericCommand.PREPARATION_GROUP);
         execute(() -> onExecute(id));
         on(HttpStatus.OK).then(pipeStream());
     }

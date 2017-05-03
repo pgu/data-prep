@@ -1,5 +1,4 @@
 // ============================================================================
-//
 // Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
 // This source code is available under agreement available at
@@ -13,7 +12,7 @@
 
 package org.talend.dataprep.api.service.command.dataset;
 
-import static org.talend.dataprep.command.Defaults.pipeStream;
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 import static org.talend.dataprep.exception.error.CommonErrorCodes.UNEXPECTED_EXCEPTION;
 
 import java.io.InputStream;
@@ -25,7 +24,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 
 /**
@@ -33,16 +32,16 @@ import org.talend.dataprep.exception.TDPException;
  */
 @Component
 @Scope("prototype")
-public class SearchDataSets extends GenericCommand<InputStream> {
+public class SearchDataSets extends TDPGenericCommand<InputStream> {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name the name to search.
      */
     // private constructor to ensure IoC
     private SearchDataSets(final String name, final boolean strict) {
-        super(GenericCommand.DATASET_GROUP);
+        super(TDPGenericCommand.DATASET_GROUP);
         execute(() -> onExecute(name, strict));
         on(HttpStatus.OK).then(pipeStream());
 

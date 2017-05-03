@@ -15,9 +15,9 @@ package org.talend.dataprep.api.service.delegate;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Component;
+import org.talend.daikon.hystrix.CommandHelper;
 import org.talend.dataprep.api.dataset.DataSetMetadata;
 import org.talend.dataprep.api.service.command.dataset.SearchDataSets;
-import org.talend.dataprep.command.CommandHelper;
 
 /**
  * A {@link SearchDelegate} implementation to search in datasets.

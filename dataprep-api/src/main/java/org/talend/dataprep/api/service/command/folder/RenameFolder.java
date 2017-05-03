@@ -12,7 +12,7 @@
 
 package org.talend.dataprep.api.service.command.folder;
 
-import static org.talend.dataprep.command.Defaults.asNull;
+import static org.talend.daikon.hystrix.Defaults.asNull;
 import static org.talend.dataprep.exception.error.APIErrorCodes.UNABLE_TO_RENAME_FOLDER;
 
 import java.io.UnsupportedEncodingException;
@@ -26,17 +26,17 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.talend.daikon.exception.ExceptionContext;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
 
 @Component
 @Scope("request")
 public class RenameFolder
-        extends GenericCommand<Void> {
+        extends TDPGenericCommand<Void> {
 
     public RenameFolder(final String id, final String newName) {
-        super(GenericCommand.DATASET_GROUP);
+        super(TDPGenericCommand.DATASET_GROUP);
         execute(() -> onExecute(id, newName));
         onError(e -> new TDPException(UNABLE_TO_RENAME_FOLDER, e, ExceptionContext.build()));
         on(HttpStatus.OK).then(asNull());

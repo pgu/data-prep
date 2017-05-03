@@ -12,7 +12,7 @@
 
 package org.talend.dataprep.api.service.command.export;
 
-import static org.talend.dataprep.command.Defaults.pipeStream;
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 
 import java.io.InputStream;
 
@@ -20,14 +20,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 
 @Component
 @Scope("request")
-public class DataSetExportTypes extends GenericCommand<InputStream> {
+public class DataSetExportTypes extends TDPGenericCommand<InputStream> {
 
     private DataSetExportTypes(String dataSetId) {
-        super(GenericCommand.TRANSFORM_GROUP);
+        super(TDPGenericCommand.TRANSFORM_GROUP);
         execute(() -> new HttpGet(this.transformationServiceUrl + "/export/formats/datasets/" + dataSetId));
         on(HttpStatus.OK).then(pipeStream());
     }

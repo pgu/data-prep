@@ -1,22 +1,20 @@
-//  ============================================================================
+// ============================================================================
+// Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
-//  Copyright (C) 2006-2016 Talend Inc. - www.talend.com
+// This source code is available under agreement available at
+// https://github.com/Talend/data-prep/blob/master/LICENSE
 //
-//  This source code is available under agreement available at
-//  https://github.com/Talend/data-prep/blob/master/LICENSE
+// You should have received a copy of the agreement
+// along with this program; if not, write to Talend SA
+// 9 rue Pages 92150 Suresnes, France
 //
-//  You should have received a copy of the agreement
-//  along with this program; if not, write to Talend SA
-//  9 rue Pages 92150 Suresnes, France
-//
-//  ============================================================================
+// ============================================================================
 
 package org.talend.dataprep.api.service.command.preparation;
 
-
 import static org.springframework.http.HttpStatus.*;
-import static org.talend.dataprep.command.Defaults.emptyStream;
-import static org.talend.dataprep.command.Defaults.pipeStream;
+import static org.talend.daikon.hystrix.Defaults.emptyStream;
+import static org.talend.daikon.hystrix.Defaults.pipeStream;
 import static org.talend.dataprep.exception.error.APIErrorCodes.UNABLE_TO_RETRIEVE_PREPARATION_LIST;
 
 import java.io.InputStream;
@@ -26,7 +24,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.command.GenericCommand;
+import org.talend.dataprep.command.TDPGenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
 import org.talend.dataprep.util.SortAndOrderHelper.Order;
@@ -37,7 +35,7 @@ import org.talend.dataprep.util.SortAndOrderHelper.Sort;
  */
 @Component
 @Scope("prototype")
-public class PreparationListByFolder extends GenericCommand<InputStream> {
+public class PreparationListByFolder extends TDPGenericCommand<InputStream> {
 
     /**
      * Private constructor used to construct the generic command used to list of preparations matching name.
@@ -47,7 +45,7 @@ public class PreparationListByFolder extends GenericCommand<InputStream> {
      * @param order the order to apply to the sort.
      */
     private PreparationListByFolder(final String folderId, final Sort sort, final Order order) {
-        super(GenericCommand.PREPARATION_GROUP);
+        super(TDPGenericCommand.PREPARATION_GROUP);
         execute(() -> {
             try {
                 final URIBuilder uriBuilder = new URIBuilder(preparationServiceUrl + "/preparations/search");
