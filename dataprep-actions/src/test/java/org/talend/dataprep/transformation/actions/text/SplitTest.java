@@ -26,7 +26,6 @@ import java.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.talend.dataprep.api.action.ActionDefinition;
 import org.talend.dataprep.api.dataset.ColumnMetadata;
 import org.talend.dataprep.api.dataset.RowMetadata;
 import org.talend.dataprep.api.dataset.row.DataSetRow;
@@ -35,6 +34,7 @@ import org.talend.dataprep.api.dataset.statistics.Statistics;
 import org.talend.dataprep.api.type.Type;
 import org.talend.dataprep.parameters.Parameter;
 import org.talend.dataprep.transformation.actions.AbstractMetadataBaseTest;
+import org.talend.dataprep.transformation.actions.ActionDefinition;
 import org.talend.dataprep.transformation.actions.ActionMetadataTestUtils;
 import org.talend.dataprep.transformation.actions.category.ActionCategory;
 import org.talend.dataprep.transformation.api.action.ActionTestWorkbench;
@@ -105,10 +105,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         expectedValues.put("0002", "01/01/2015");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters));
 
         // then
-        assertEquals(expectedValues, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(expectedValues, actualRow.values());
     }
 
     @Test
@@ -126,10 +127,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         expectedValues.put("0002", "01/01/2015");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters));
 
         // then
-        assertEquals(expectedValues, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(expectedValues, actualRow.values());
     }
 
     @Test
@@ -148,10 +150,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         expectedValues.put("0002", "01/01/2015");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters));
 
         // then
-        assertEquals(expectedValues, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(expectedValues, actualRow.values());
     }
 
     @Test
@@ -170,10 +173,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         expectedValues.put("0002", "01/01/2015");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters));
 
         // then
-        assertEquals(expectedValues, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(expectedValues, actualRow.values());
     }
 
     @Test
@@ -189,10 +193,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         parameters.put(Split.MANUAL_SEPARATOR_PARAMETER_STRING, "");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters));
 
         // then
-        assertEquals(values, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(values, actualRow.values());
     }
 
     @Test
@@ -208,10 +213,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         parameters.put(Split.MANUAL_SEPARATOR_PARAMETER_STRING, "(");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters));
 
         // then
-        assertEquals(values, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(values, actualRow.values());
     }
 
     @Test
@@ -230,10 +236,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         expectedValues.put("0004", "tout va bien)");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters));
 
         // then
-        assertEquals(expectedValues, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(expectedValues, actualRow.values());
     }
 
     @Test
@@ -252,10 +259,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         expectedValues.put("0002", "01/01/2015");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters));
 
         // then
-        assertEquals(expectedValues, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(expectedValues, actualRow.values());
     }
 
     @Test
@@ -274,10 +282,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         expectedValues.put("0002", "01/01/2015");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters));
 
         // then
-        assertEquals(expectedValues, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(expectedValues, actualRow.values());
     }
 
     @Test
@@ -290,12 +299,13 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
                 .build();
 
         // when
-        ActionTestWorkbench.test(Collections.singletonList(row), //
-                analyzerService, // Test requires some analysis in asserts
-                actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(Collections.singletonList(row), //
+                // Test requires some analysis in asserts
+                factory.create(action, parameters));
 
         // then
-        final RowMetadata actual = row.getRowMetadata();
+        final DataSetRow actualRow = collected.get(0);
+        final RowMetadata actual = actualRow.getRowMetadata();
         Statistics originalStats = actual.getById("0001").getStatistics();
         final List<PatternFrequency> originalPatterns = originalStats.getPatternFrequencies();
 
@@ -318,10 +328,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         expectedValues.put("0002", "01/01/2015");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters), factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters), factory.create(action, parameters));
 
         // then
-        assertEquals(expectedValues, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(expectedValues, actualRow.values());
     }
 
     @Test
@@ -337,10 +348,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         expectedValues.put("0002", "01/01/2015");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters));
 
         // then
-        assertEquals(expectedValues, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(expectedValues, actualRow.values());
     }
 
     @Test
@@ -356,10 +368,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         expectedValues.put("0002", "01/01/2015");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters));
 
         // then
-        assertEquals(expectedValues, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(expectedValues, actualRow.values());
     }
 
     @Test
@@ -379,10 +392,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         expected.add(createMetadata("0002", "last update"));
 
         // when
-        ActionTestWorkbench.test(rowMetadata, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(new DataSetRow(rowMetadata), factory.create(action, parameters));
 
         // then
-        assertEquals(expected, rowMetadata.getColumns());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(expected, actualRow.getRowMetadata().getColumns());
     }
 
     @Test
@@ -404,10 +418,10 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         expected.add(createMetadata("0002", "last update"));
 
         // when
-        ActionTestWorkbench.test(rowMetadata, actionRegistry, factory.create(action, parameters),
-                factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(new DataSetRow(rowMetadata), factory.create(action, parameters), factory.create(action, parameters));
 
-        assertEquals(expected, rowMetadata.getColumns());
+        // then
+        assertEquals(expected, collected.get(0).getRowMetadata().getColumns());
     }
 
     @Test
@@ -419,7 +433,7 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         parameters.put(Split.LIMIT, "4");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters));
 
         // then
         final Map<String, String> expectedValues = new HashMap<>();
@@ -431,7 +445,8 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         expectedValues.put("0006", "");
         expectedValues.put("0002", "01/01/2015");
 
-        assertEquals(expectedValues, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(expectedValues, actualRow.values());
     }
 
     @Test
@@ -446,10 +461,11 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         parameters.put(Split.SEPARATOR_PARAMETER, "");
 
         // when
-        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(row, factory.create(action, parameters));
 
         // then
-        assertEquals(values, row.values());
+        final DataSetRow actualRow = collected.get(0);
+        assertEquals(values, actualRow.values());
     }
 
     @Test
@@ -464,10 +480,10 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
         parameters.put(Split.SEPARATOR_PARAMETER, "");
 
         // when
-        ActionTestWorkbench.test(rowMetadata, actionRegistry, factory.create(action, parameters));
+        final List<DataSetRow> collected = ActionTestWorkbench.test(new DataSetRow(rowMetadata), factory.create(action, parameters));
 
         // then
-        assertEquals(rowMetadata, rowMetadata);
+        assertEquals(rowMetadata, collected.get(0).getRowMetadata());
     }
 
     @Test
@@ -513,10 +529,10 @@ public class SplitTest extends AbstractMetadataBaseTest<Split> {
                 .computedId(id)
                 .name(name)
                 .type(Type.STRING)
-                .headerSize(12)
+                .headerSize(1)
                 .empty(0)
-                .invalid(2)
-                .valid(5)
+                .invalid(0)
+                .valid(1)
                 .build();
     }
 

@@ -17,7 +17,7 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.talend.dataprep.api.type.Type.STRING;
 import static org.talend.dataprep.parameters.Parameter.parameter;
 import static org.talend.dataprep.parameters.SelectParameter.selectParameter;
-import static org.talend.dataprep.transformation.api.action.context.ActionContext.ActionStatus.OK;
+import static org.talend.dataprep.transformation.actions.context.ActionContext.ActionStatus.OK;
 
 import java.util.*;
 
@@ -31,7 +31,7 @@ import org.talend.dataprep.transformation.actions.category.ActionCategory;
 import org.talend.dataprep.transformation.actions.common.AbstractActionMetadata;
 import org.talend.dataprep.transformation.actions.common.ActionsUtils;
 import org.talend.dataprep.transformation.actions.common.ColumnAction;
-import org.talend.dataprep.transformation.api.action.context.ActionContext;
+import org.talend.dataprep.transformation.actions.context.ActionContext;
 import org.talend.dataquality.converters.StringTrimmer;
 
 /**
@@ -116,18 +116,19 @@ public class Trim extends AbstractActionMetadata implements ColumnAction {
      * @see ColumnAction#applyOnColumn(DataSetRow, ActionContext)
      */
     @Override
-    public void applyOnColumn(DataSetRow row, ActionContext context) {
+    public Collection<DataSetRow> applyOnColumn(DataSetRow row, ActionContext context) {
         final String columnId = context.getColumnId();
         final String toTrim = row.get(columnId);
         if (toTrim != null) {
             final Map<String, String> parameters = context.getParameters();
             final StringTrimmer stringTrimmer = context.get(STRING_TRIMMER);
             if (CUSTOM.equals(parameters.get(PADDING_CHAR_PARAMETER))) {
-                row.set(ActionsUtils.getTargetColumnId(context), stringTrimmer.removeTrailingAndLeading(toTrim, parameters.get(CUSTOM_PADDING_CHAR_PARAMETER)));
+                return Collections.singletonList(row.set(ActionsUtils.getTargetColumnId(context), stringTrimmer.removeTrailingAndLeading(toTrim, parameters.get(CUSTOM_PADDING_CHAR_PARAMETER))));
             } else {
-                row.set(ActionsUtils.getTargetColumnId(context), stringTrimmer.removeTrailingAndLeadingWhitespaces(toTrim));
+                return Collections.singletonList(row.set(ActionsUtils.getTargetColumnId(context), stringTrimmer.removeTrailingAndLeadingWhitespaces(toTrim)));
             }
         }
+        return Collections.singletonList(row);
     }
 
     @Override

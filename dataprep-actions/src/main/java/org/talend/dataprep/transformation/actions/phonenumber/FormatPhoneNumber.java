@@ -12,6 +12,20 @@
 // ============================================================================
 package org.talend.dataprep.transformation.actions.phonenumber;
 
+import static java.util.Collections.singletonList;
+import static org.apache.commons.lang.StringUtils.EMPTY;
+import static org.talend.dataprep.parameters.Parameter.parameter;
+import static org.talend.dataprep.parameters.ParameterType.COLUMN;
+import static org.talend.dataprep.parameters.ParameterType.STRING;
+import static org.talend.dataprep.parameters.SelectParameter.selectParameter;
+import static org.talend.dataprep.transformation.actions.common.OtherColumnParameters.*;
+import static org.talend.dataprep.transformation.actions.context.ActionContext.ActionStatus.CANCELED;
+import static org.talend.dataprep.transformation.actions.context.ActionContext.ActionStatus.OK;
+
+import java.util.*;
+
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,26 +34,14 @@ import org.talend.dataprep.api.dataset.ColumnMetadata;
 import org.talend.dataprep.api.dataset.row.DataSetRow;
 import org.talend.dataprep.api.type.Type;
 import org.talend.dataprep.parameters.Parameter;
+import org.talend.dataprep.transformation.actions.ActionDefinition;
 import org.talend.dataprep.transformation.actions.category.ActionCategory;
 import org.talend.dataprep.transformation.actions.common.AbstractActionMetadata;
 import org.talend.dataprep.transformation.actions.common.ActionsUtils;
 import org.talend.dataprep.transformation.actions.common.ColumnAction;
 import org.talend.dataprep.transformation.actions.common.OtherColumnParameters;
-import org.talend.dataprep.transformation.api.action.context.ActionContext;
+import org.talend.dataprep.transformation.actions.context.ActionContext;
 import org.talend.dataquality.standardization.phone.PhoneNumberHandlerBase;
-
-import javax.annotation.Nonnull;
-import java.util.*;
-
-import static java.util.Collections.singletonList;
-import static org.apache.commons.lang.StringUtils.EMPTY;
-import static org.talend.dataprep.parameters.Parameter.parameter;
-import static org.talend.dataprep.parameters.ParameterType.COLUMN;
-import static org.talend.dataprep.parameters.ParameterType.STRING;
-import static org.talend.dataprep.parameters.SelectParameter.selectParameter;
-import static org.talend.dataprep.transformation.actions.common.OtherColumnParameters.*;
-import static org.talend.dataprep.transformation.api.action.context.ActionContext.ActionStatus.CANCELED;
-import static org.talend.dataprep.transformation.api.action.context.ActionContext.ActionStatus.OK;
 
 /**
  * Format a validated phone number to a specified format.
@@ -112,19 +114,18 @@ public class FormatPhoneNumber extends AbstractActionMetadata implements ColumnA
     }
 
     @Override
-    public void applyOnColumn(DataSetRow row, ActionContext context) {
+    public Collection<DataSetRow> applyOnColumn(DataSetRow row, ActionContext context) {
         final String columnId = context.getColumnId();
         final String possiblePhoneValue = row.get(columnId);
         if (StringUtils.isEmpty(possiblePhoneValue)) {
-            row.set(ActionsUtils.getTargetColumnId(context), possiblePhoneValue);
-            return;
+            return Collections.singletonList(row.set(ActionsUtils.getTargetColumnId(context), possiblePhoneValue));
         }
 
         final String regionCode = getRegionCode(context, row);
 
-        final String formatedStr = formatIfValid(regionCode,
+        final String formattedStr = formatIfValid(regionCode,
                 context.getParameters().get(FORMAT_TYPE_PARAMETER), possiblePhoneValue);
-        row.set(ActionsUtils.getTargetColumnId(context), formatedStr);
+        return Collections.singletonList(row.set(ActionsUtils.getTargetColumnId(context), formattedStr));
     }
 
     /**
@@ -189,21 +190,21 @@ public class FormatPhoneNumber extends AbstractActionMetadata implements ColumnA
         final Map<String, String> parameters = context.getParameters();
         final String regionParam;
         switch (parameters.get(OtherColumnParameters.MODE_PARAMETER)) {
-            case CONSTANT_MODE:
-                if (StringUtils.equals(OTHER_REGION_TO_BE_SPECIFIED, parameters.get(REGIONS_PARAMETER_CONSTANT_MODE))) {
-                    regionParam = parameters.get(MANUAL_REGION_PARAMETER_STRING);
-                } else {
-                    regionParam = parameters.get(REGIONS_PARAMETER_CONSTANT_MODE);
-                }
-                break;
-            case OTHER_COLUMN_MODE:
-                final ColumnMetadata selectedColumn = context.getRowMetadata()
-                        .getById(parameters.get(OtherColumnParameters.SELECTED_COLUMN_PARAMETER));
-                regionParam = row.get(selectedColumn.getId());
-                break;
-            default:
-                regionParam = Locale.getDefault().getCountry();
-                break;
+        case CONSTANT_MODE:
+            if (StringUtils.equals(OTHER_REGION_TO_BE_SPECIFIED, parameters.get(REGIONS_PARAMETER_CONSTANT_MODE))) {
+                regionParam = parameters.get(MANUAL_REGION_PARAMETER_STRING);
+            } else {
+                regionParam = parameters.get(REGIONS_PARAMETER_CONSTANT_MODE);
+            }
+            break;
+        case OTHER_COLUMN_MODE:
+            final ColumnMetadata selectedColumn = row.getRowMetadata()
+                    .getById(parameters.get(OtherColumnParameters.SELECTED_COLUMN_PARAMETER));
+            regionParam = row.get(selectedColumn.getId());
+            break;
+        default:
+            regionParam = Locale.getDefault().getCountry();
+            break;
         }
         return regionParam;
     }
@@ -228,8 +229,8 @@ public class FormatPhoneNumber extends AbstractActionMetadata implements ColumnA
     }
 
     @Override
-    public Set<Behavior> getBehavior() {
-        return EnumSet.of(Behavior.VALUES_COLUMN);
+    public Set<ActionDefinition.Behavior> getBehavior() {
+        return EnumSet.of(ActionDefinition.Behavior.VALUES_COLUMN);
     }
 
 }

@@ -98,16 +98,16 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        datasetRowFromValues.set("0001", "toto");
+        datasetRowFromValues = datasetRowFromValues.set("0001", "toto");
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "Toto"); //different case
+        datasetRowFromValues = datasetRowFromValues.set("0001", "Toto"); //different case
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "tatatoto"); //contains but different
+        datasetRowFromValues = datasetRowFromValues.set("0001", "tatatoto"); //contains but different
         assertThat(filter.test(datasetRowFromValues), is(false));
 
-        datasetRowFromValues.set("0001", ""); //empty
+        datasetRowFromValues = datasetRowFromValues.set("0001", ""); //empty
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", null); //null
+        datasetRowFromValues = datasetRowFromValues.set("0001", null); //null
         assertThat(filter.test(datasetRowFromValues), is(false));
     }
 
@@ -125,26 +125,26 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        datasetRowFromValues.set("0001", "5.0"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5.0"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "5,00"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5,00"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "05.0"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "05.0"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "0 005"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "0 005"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
 
-        datasetRowFromValues.set("0001", "4.5"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4.5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "4,5"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4,5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", ",5"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", ",5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", ".5"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", ".5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "1.000,5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "1.000,5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "1 000.5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "1 000.5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(false));
     }
 
@@ -162,26 +162,26 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        datasetRowFromValues.set("0001", "5.35"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5.35"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "5,35"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5,35"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "05.35"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "05.35"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "0 005.35"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "0 005.35"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
 
-        datasetRowFromValues.set("0001", "4.5"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4.5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "4,5"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4,5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", ",5"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", ",5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", ".5"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", ".5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "1.000,5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "1.000,5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "1 000.5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "1 000.5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(false));
     }
 
@@ -198,12 +198,12 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.set("0001", "toto");
-        row.set("0002", "toto");
+        row = row.set("0001", "toto");
+        row = row.set("0002", "toto");
         assertThat(filter.test(row), is(true));
-        row.set("0001", "Toto"); //different case on 0001
+        row = row.set("0001", "Toto"); //different case on 0001
         assertThat(filter.test(row), is(true)); // "0002" still contains "toto"
-        row.set("0002", "Toto"); //different case on 0002
+        row = row.set("0002", "Toto"); //different case on 0002
         assertThat(filter.test(row), is(false));
     }
 
@@ -221,45 +221,45 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        datasetRowFromValues.set("0001", "6"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "6"); //gt
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "5"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5"); //eq
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "4"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
 
-        datasetRowFromValues.set("0001", "toto"); //nan
+        datasetRowFromValues = datasetRowFromValues.set("0001", "toto"); //nan
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", ""); //nan
+        datasetRowFromValues = datasetRowFromValues.set("0001", ""); //nan
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", null); //null
-        assertThat(filter.test(datasetRowFromValues), is(false));
-
-        datasetRowFromValues.set("0001", "4.5"); //lt
-        assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "4,5"); //lt
-        assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", ",5"); //lt
-        assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", ".5"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", null); //null
         assertThat(filter.test(datasetRowFromValues), is(false));
 
-        datasetRowFromValues.set("0001", "5.0"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4.5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "5,00"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4,5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "05.0"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", ",5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "0 005"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", ".5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
 
-        datasetRowFromValues.set("0001", "5.5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5.0"); //eq
+        assertThat(filter.test(datasetRowFromValues), is(false));
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5,00"); //eq
+        assertThat(filter.test(datasetRowFromValues), is(false));
+        datasetRowFromValues = datasetRowFromValues.set("0001", "05.0"); //eq
+        assertThat(filter.test(datasetRowFromValues), is(false));
+        datasetRowFromValues = datasetRowFromValues.set("0001", "0 005"); //eq
+        assertThat(filter.test(datasetRowFromValues), is(false));
+
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5.5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "5,5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5,5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "1.000,5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "1.000,5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "1 000.5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "1 000.5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(true));
     }
 
@@ -276,12 +276,12 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.set("0001", "6"); //gt
-        row.set("0002", "7"); //gt
+        row = row.set("0001", "6"); //gt
+        row = row.set("0002", "7"); //gt
         assertThat(filter.test(row), is(true));
-        row.set("0001", "4"); // lt
+        row = row.set("0001", "4"); // lt
         assertThat(filter.test(row), is(true));
-        row.set("0002", "4"); // lt
+        row = row.set("0002", "4"); // lt
         assertThat(filter.test(row), is(false));
     }
 
@@ -299,45 +299,45 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        datasetRowFromValues.set("0001", "6"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "6"); //gt
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "5"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "4"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4"); //lt
         assertThat(filter.test(datasetRowFromValues), is(false));
 
-        datasetRowFromValues.set("0001", "toto"); //nan
+        datasetRowFromValues = datasetRowFromValues.set("0001", "toto"); //nan
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", ""); //nan
+        datasetRowFromValues = datasetRowFromValues.set("0001", ""); //nan
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", null); //null
-        assertThat(filter.test(datasetRowFromValues), is(false));
-
-        datasetRowFromValues.set("0001", "4.5"); //lt
-        assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "4,5"); //lt
-        assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", ",5"); //lt
-        assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", ".5"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", null); //null
         assertThat(filter.test(datasetRowFromValues), is(false));
 
-        datasetRowFromValues.set("0001", "5.0"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4.5"); //lt
+        assertThat(filter.test(datasetRowFromValues), is(false));
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4,5"); //lt
+        assertThat(filter.test(datasetRowFromValues), is(false));
+        datasetRowFromValues = datasetRowFromValues.set("0001", ",5"); //lt
+        assertThat(filter.test(datasetRowFromValues), is(false));
+        datasetRowFromValues = datasetRowFromValues.set("0001", ".5"); //lt
+        assertThat(filter.test(datasetRowFromValues), is(false));
+
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5.0"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "5,00"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5,00"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "05.0"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "05.0"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "0 005"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "0 005"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
 
-        datasetRowFromValues.set("0001", "5.5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5.5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "5,5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5,5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "1.000,5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "1.000,5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "1 000.5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "1 000.5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(true));
     }
 
@@ -354,12 +354,12 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.set("0001", "5"); //gt
-        row.set("0002", "6"); //gt
+        row = row.set("0001", "5"); //gt
+        row = row.set("0002", "6"); //gt
         assertThat(filter.test(row), is(true));
-        row.set("0001", "4"); // lt
+        row = row.set("0001", "4"); // lt
         assertThat(filter.test(row), is(true));
-        row.set("0002", "4"); //lt
+        row = row.set("0002", "4"); //lt
         assertThat(filter.test(row), is(false));
     }
 
@@ -377,45 +377,45 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        datasetRowFromValues.set("0001", "6"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "6"); //gt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "5"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5"); //eq
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "4"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4"); //lt
         assertThat(filter.test(datasetRowFromValues), is(true));
 
-        datasetRowFromValues.set("0001", "toto"); //nan
+        datasetRowFromValues = datasetRowFromValues.set("0001", "toto"); //nan
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", ""); //nan
+        datasetRowFromValues = datasetRowFromValues.set("0001", ""); //nan
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", null); //null
-        assertThat(filter.test(datasetRowFromValues), is(false));
-
-        datasetRowFromValues.set("0001", "4.5"); //lt
-        assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "4,5"); //lt
-        assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", ",5"); //lt
-        assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", ".5"); //lt
-        assertThat(filter.test(datasetRowFromValues), is(true));
-
-        datasetRowFromValues.set("0001", "5.0"); //eq
-        assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "5,00"); //eq
-        assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "05.0"); //eq
-        assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "0 005"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", null); //null
         assertThat(filter.test(datasetRowFromValues), is(false));
 
-        datasetRowFromValues.set("0001", "5.5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4.5"); //lt
+        assertThat(filter.test(datasetRowFromValues), is(true));
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4,5"); //lt
+        assertThat(filter.test(datasetRowFromValues), is(true));
+        datasetRowFromValues = datasetRowFromValues.set("0001", ",5"); //lt
+        assertThat(filter.test(datasetRowFromValues), is(true));
+        datasetRowFromValues = datasetRowFromValues.set("0001", ".5"); //lt
+        assertThat(filter.test(datasetRowFromValues), is(true));
+
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5.0"); //eq
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "5,5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5,00"); //eq
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "1.000,5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "05.0"); //eq
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "1 000.5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "0 005"); //eq
+        assertThat(filter.test(datasetRowFromValues), is(false));
+
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5.5"); //gt
+        assertThat(filter.test(datasetRowFromValues), is(false));
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5,5"); //gt
+        assertThat(filter.test(datasetRowFromValues), is(false));
+        datasetRowFromValues = datasetRowFromValues.set("0001", "1.000,5"); //gt
+        assertThat(filter.test(datasetRowFromValues), is(false));
+        datasetRowFromValues = datasetRowFromValues.set("0001", "1 000.5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(false));
     }
 
@@ -432,12 +432,12 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.set("0001", "6"); //gt
-        row.set("0002", "6"); //gt
+        row = row.set("0001", "6"); //gt
+        row = row.set("0002", "6"); //gt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "4"); // lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4"); // lt
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0002", "4"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0002", "4"); //lt
         assertThat(filter.test(datasetRowFromValues), is(true));
     }
 
@@ -456,45 +456,45 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        datasetRowFromValues.set("0001", "6"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "6"); //gt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "5"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5"); //eq
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "4"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4"); //lt
         assertThat(filter.test(datasetRowFromValues), is(true));
 
-        datasetRowFromValues.set("0001", "toto"); //nan
+        datasetRowFromValues = datasetRowFromValues.set("0001", "toto"); //nan
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", ""); //nan
+        datasetRowFromValues = datasetRowFromValues.set("0001", ""); //nan
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", null); //null
+        datasetRowFromValues = datasetRowFromValues.set("0001", null); //null
         assertThat(filter.test(datasetRowFromValues), is(false));
 
-        datasetRowFromValues.set("0001", "4.5"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4.5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "4,5"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "4,5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", ",5"); //lt
+        datasetRowFromValues = datasetRowFromValues.set("0001", ",5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", ".5"); //lt
-        assertThat(filter.test(datasetRowFromValues), is(true));
-
-        datasetRowFromValues.set("0001", "5.0"); //eq
-        assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "5,00"); //eq
-        assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "05.0"); //eq
-        assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "0 005"); //eq
+        datasetRowFromValues = datasetRowFromValues.set("0001", ".5"); //lt
         assertThat(filter.test(datasetRowFromValues), is(true));
 
-        datasetRowFromValues.set("0001", "5.5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5.0"); //eq
+        assertThat(filter.test(datasetRowFromValues), is(true));
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5,00"); //eq
+        assertThat(filter.test(datasetRowFromValues), is(true));
+        datasetRowFromValues = datasetRowFromValues.set("0001", "05.0"); //eq
+        assertThat(filter.test(datasetRowFromValues), is(true));
+        datasetRowFromValues = datasetRowFromValues.set("0001", "0 005"); //eq
+        assertThat(filter.test(datasetRowFromValues), is(true));
+
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5.5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "5,5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "5,5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "1.000,5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "1.000,5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "1 000.5"); //gt
+        datasetRowFromValues = datasetRowFromValues.set("0001", "1 000.5"); //gt
         assertThat(filter.test(datasetRowFromValues), is(false));
     }
 
@@ -511,12 +511,12 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.set("0001", "6"); //gt
-        row.set("0002", "6"); //gt
+        row = row.set("0001", "6"); //gt
+        row = row.set("0002", "6"); //gt
         assertThat(filter.test(row), is(false));
-        row.set("0001", "5"); //eq
+        row = row.set("0001", "5"); //eq
         assertThat(filter.test(row), is(true));
-        row.set("0002", "5"); //lt
+        row = row.set("0002", "5"); //lt
         assertThat(filter.test(row), is(true));
     }
 
@@ -534,13 +534,13 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        datasetRowFromValues.set("0001", "toto"); //equals
+        datasetRowFromValues = datasetRowFromValues.set("0001", "toto"); //equals
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "Toto"); //different case
+        datasetRowFromValues = datasetRowFromValues.set("0001", "Toto"); //different case
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "tatatoto"); //contains but different
+        datasetRowFromValues = datasetRowFromValues.set("0001", "tatatoto"); //contains but different
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "tagada"); // not contains
+        datasetRowFromValues = datasetRowFromValues.set("0001", "tagada"); // not contains
         assertThat(filter.test(datasetRowFromValues), is(false));
     }
 
@@ -557,16 +557,16 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.set("0001", "toto"); //equals
-        row.set("0002", "toto"); //equals
+        row = row.set("0001", "toto"); //equals
+        row = row.set("0002", "toto"); //equals
         assertThat(filter.test(row), is(true));
-        row.set("0001", "Toto"); //different case
+        row = row.set("0001", "Toto"); //different case
         assertThat(filter.test(row), is(true));
-        row.set("0001", "tatatoto"); //contains but different
+        row = row.set("0001", "tatatoto"); //contains but different
         assertThat(filter.test(row), is(true));
-        row.set("0001", "tagada"); // not contains
+        row = row.set("0001", "tagada"); // not contains
         assertThat(filter.test(row), is(true));
-        row.set("0002", "tagada"); // not contains
+        row = row.set("0002", "tagada"); // not contains
         assertThat(filter.test(row), is(false));
     }
 
@@ -584,16 +584,16 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        datasetRowFromValues.set("0001", "toto"); // different pattern
+        datasetRowFromValues = datasetRowFromValues.set("0001", "toto"); // different pattern
         assertThat(filter.test(datasetRowFromValues), is(false));
 
-        datasetRowFromValues.set("0001", "To5-"); // same pattern
+        datasetRowFromValues = datasetRowFromValues.set("0001", "To5-"); // same pattern
         assertThat(filter.test(datasetRowFromValues), is(true));
 
-        datasetRowFromValues.set("0001", "To5--"); // different length
+        datasetRowFromValues = datasetRowFromValues.set("0001", "To5--"); // different length
         assertThat(filter.test(datasetRowFromValues), is(false));
 
-        datasetRowFromValues.set("0001", ""); // empty value
+        datasetRowFromValues = datasetRowFromValues.set("0001", ""); // empty value
         assertThat(filter.test(datasetRowFromValues), is(false));
     }
 
@@ -611,10 +611,10 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        datasetRowFromValues.set("0001", ""); // empty value
+        datasetRowFromValues = datasetRowFromValues.set("0001", ""); // empty value
         assertThat(filter.test(datasetRowFromValues), is(true));
 
-        datasetRowFromValues.set("0001", "tagada"); // not empty value
+        datasetRowFromValues = datasetRowFromValues.set("0001", "tagada"); // not empty value
         assertThat(filter.test(datasetRowFromValues), is(false));
     }
 
@@ -631,14 +631,14 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.set("0001", "toto"); // different pattern
-        row.set("0002", "toto"); // different pattern
+        row = row.set("0001", "toto"); // different pattern
+        row = row.set("0002", "toto"); // different pattern
         assertThat(filter.test(row), is(false));
 
-        row.set("0001", "To5-"); // same pattern
+        row = row.set("0001", "To5-"); // same pattern
         assertThat(filter.test(row), is(true));
 
-        row.set("0002", "To5-"); // different length
+        row = row.set("0002", "To5-"); // different length
         assertThat(filter.test(row), is(true));
     }
 
@@ -656,9 +656,9 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.setInvalid("0001"); //value in invalid array in column metadata
+        row = row.setInvalid("0001"); //value in invalid array in column metadata
         assertThat(filter.test(row), is(true));
-        row.unsetInvalid("0001");
+        row = row.unsetInvalid("0001");
         assertThat(filter.test(row), is(false));
         assertThat(filter.test(row), is(false));
     }
@@ -675,10 +675,10 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.setInvalid("0001"); // value in invalid array in column metadata
-        row.setInvalid("0002"); // value in invalid array in column metadata
+        row = row.setInvalid("0001"); // value in invalid array in column metadata
+        row = row.setInvalid("0002"); // value in invalid array in column metadata
         assertThat(filter.test(row), is(true));
-        row.unsetInvalid("0002");
+        row = row.unsetInvalid("0002");
         assertThat(filter.test(row), is(true));
         assertThat(filter.test(row), is(true));
     }
@@ -696,15 +696,15 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.setInvalid("0001"); // value is marked as invalid
+        row = row.setInvalid("0001"); // value is marked as invalid
         assertThat(filter.test(row), is(false));
 
-        row.unsetInvalid("0001"); // value is marked as valid
-        row.set("0001", ""); //empty
+        row = row.unsetInvalid("0001"); // value is marked as valid
+        row = row.set("0001", ""); //empty
         assertThat(filter.test(row), is(false));
 
-        row.unsetInvalid("0001"); // value is marked as valid
-        row.set("0001", "toto"); // correct value
+        row = row.unsetInvalid("0001"); // value is marked as valid
+        row = row.set("0001", "toto"); // correct value
         assertThat(filter.test(row), is(true));
     }
 
@@ -720,13 +720,13 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.set("0001", "toto");
-        row.set("0002", "toto");
+        row = row.set("0001", "toto");
+        row = row.set("0002", "toto");
 
-        row.setInvalid("0001"); // value is marked as invalid
+        row = row.setInvalid("0001"); // value is marked as invalid
         assertThat(filter.test(row), is(true));
 
-        row.setInvalid("0002"); // value is marked as invalid
+        row = row.setInvalid("0002"); // value is marked as invalid
         assertThat(filter.test(row), is(false));
     }
 
@@ -743,9 +743,9 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.set("0001", ""); //empty
+        row = row.set("0001", ""); //empty
         assertThat(filter.test(row), is(true));
-        row.set("0001", "toto"); //not empty value
+        row = row.set("0001", "toto"); //not empty value
         assertThat(filter.test(row), is(false));
     }
 
@@ -761,10 +761,10 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.set("0001", "toto"); // not empty
-        row.set("0002", "toto"); // not empty
+        row = row.set("0001", "toto"); // not empty
+        row = row.set("0002", "toto"); // not empty
         assertThat(filter.test(row), is(false));
-        row.set("0001", ""); //not empty value
+        row = row.set("0001", ""); //not empty value
         assertThat(filter.test(row), is(true));
     }
 
@@ -784,51 +784,51 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
 
         //then
         row.getRowMetadata().getById("0001").setType("integer");
-        row.set("0001", "a"); //invalid number
+        row = row.set("0001", "a"); //invalid number
         assertThat(filter.test(row), is(false));
-        row.set("0001", "4"); //lt min
+        row = row.set("0001", "4"); //lt min
         assertThat(filter.test(row), is(false));
-        row.set("0001", "5"); //eq min
+        row = row.set("0001", "5"); //eq min
         assertThat(filter.test(row), is(true));
-        row.set("0001", "8"); //in range
+        row = row.set("0001", "8"); //in range
         assertThat(filter.test(row), is(true));
-        row.set("0001", "10"); //eq max
+        row = row.set("0001", "10"); //eq max
         assertThat(filter.test(row), is(false));
-        row.set("0001", "20"); //gt max
+        row = row.set("0001", "20"); //gt max
         assertThat(filter.test(row), is(false));
 
-        row.set("0001", "toto"); //nan
+        row = row.set("0001", "toto"); //nan
         assertThat(filter.test(row), is(false));
-        row.set("0001", ""); //nan
+        row = row.set("0001", ""); //nan
         assertThat(filter.test(row), is(false));
-        row.set("0001", null); //null
-        assertThat(filter.test(row), is(false));
-
-        row.set("0001", "4.5"); //lt
-        assertThat(filter.test(row), is(false));
-        row.set("0001", "4,5"); //lt
-        assertThat(filter.test(row), is(false));
-        row.set("0001", ",5"); //lt
-        assertThat(filter.test(row), is(false));
-        row.set("0001", ".5"); //lt
+        row = row.set("0001", null); //null
         assertThat(filter.test(row), is(false));
 
-        row.set("0001", "5.0"); //eq
+        row = row.set("0001", "4.5"); //lt
+        assertThat(filter.test(row), is(false));
+        row = row.set("0001", "4,5"); //lt
+        assertThat(filter.test(row), is(false));
+        row = row.set("0001", ",5"); //lt
+        assertThat(filter.test(row), is(false));
+        row = row.set("0001", ".5"); //lt
+        assertThat(filter.test(row), is(false));
+
+        row = row.set("0001", "5.0"); //eq
         assertThat(filter.test(row), is(true));
-        row.set("0001", "5,00"); //eq
+        row = row.set("0001", "5,00"); //eq
         assertThat(filter.test(row), is(true));
-        row.set("0001", "05.0"); //eq
+        row = row.set("0001", "05.0"); //eq
         assertThat(filter.test(row), is(true));
-        row.set("0001", "0 005"); //eq
+        row = row.set("0001", "0 005"); //eq
         assertThat(filter.test(row), is(true));
 
-        row.set("0001", "5.5"); //gt
+        row = row.set("0001", "5.5"); //gt
         assertThat(filter.test(row), is(true));
-        row.set("0001", "5,5"); //gt
+        row = row.set("0001", "5,5"); //gt
         assertThat(filter.test(row), is(true));
-        row.set("0001", "1.000,5"); //gt
+        row = row.set("0001", "1.000,5"); //gt
         assertThat(filter.test(row), is(false));
-        row.set("0001", "1 000.5"); //gt
+        row = row.set("0001", "1 000.5"); //gt
         assertThat(filter.test(row), is(false));
     }
 
@@ -846,11 +846,11 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.set("0001", "4");
-        row.set("0002", "3");
+        row = row.set("0001", "4");
+        row = row.set("0002", "3");
         assertThat(filter.test(row), is(false));
 
-        row.set("0001", "6"); //lt min
+        row = row.set("0001", "6"); //lt min
         assertThat(filter.test(row), is(true));
     }
 
@@ -880,17 +880,17 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        row.set("0001", "a"); //invalid number
+        row = row.set("0001", "a"); //invalid number
         assertThat(filter.test(row), is(false));
-        row.set("0001", "1960-01-01"); //lt min
+        row = row.set("0001", "1960-01-01"); //lt min
         assertThat(filter.test(row), is(false));
-        row.set("0001", "1970-01-01"); //eq min
+        row = row.set("0001", "1970-01-01"); //eq min
         assertThat(filter.test(row), is(true));
-        row.set("0001", "1980-01-01"); //in range
+        row = row.set("0001", "1980-01-01"); //in range
         assertThat(filter.test(row), is(true));
-        row.set("0001", "1990-01-01"); //eq max
+        row = row.set("0001", "1990-01-01"); //eq max
         assertThat(filter.test(row), is(false));
-        row.set("0001", "2000-01-01"); //gt max
+        row = row.set("0001", "2000-01-01"); //gt max
         assertThat(filter.test(row), is(false));
     }
 
@@ -917,14 +917,14 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        datasetRowFromValues.set("0001", ""); //empty
-        datasetRowFromValues.set("0002", "toto"); //eq value
+        datasetRowFromValues = datasetRowFromValues.set("0001", ""); //empty
+        datasetRowFromValues = datasetRowFromValues.set("0002", "toto"); //eq value
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "tata"); //not empty
-        datasetRowFromValues.set("0002", "toto"); //eq value
+        datasetRowFromValues = datasetRowFromValues.set("0001", "tata"); //not empty
+        datasetRowFromValues = datasetRowFromValues.set("0002", "toto"); //eq value
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", ""); //empty
-        datasetRowFromValues.set("0002", "tata"); //neq value
+        datasetRowFromValues = datasetRowFromValues.set("0001", ""); //empty
+        datasetRowFromValues = datasetRowFromValues.set("0002", "tata"); //neq value
         assertThat(filter.test(datasetRowFromValues), is(false));
     }
 
@@ -951,17 +951,17 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        datasetRowFromValues.set("0001", ""); //empty
-        datasetRowFromValues.set("0002", "toto"); //eq value
+        datasetRowFromValues = datasetRowFromValues.set("0001", ""); //empty
+        datasetRowFromValues = datasetRowFromValues.set("0002", "toto"); //eq value
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "tata"); //not empty
-        datasetRowFromValues.set("0002", "toto"); //eq value
+        datasetRowFromValues = datasetRowFromValues.set("0001", "tata"); //not empty
+        datasetRowFromValues = datasetRowFromValues.set("0002", "toto"); //eq value
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", ""); //empty
-        datasetRowFromValues.set("0002", "tata"); //neq value
+        datasetRowFromValues = datasetRowFromValues.set("0001", ""); //empty
+        datasetRowFromValues = datasetRowFromValues.set("0002", "tata"); //neq value
         assertThat(filter.test(datasetRowFromValues), is(true));
-        datasetRowFromValues.set("0001", "tata"); //not empty
-        datasetRowFromValues.set("0002", "tata"); //neq value
+        datasetRowFromValues = datasetRowFromValues.set("0001", "tata"); //not empty
+        datasetRowFromValues = datasetRowFromValues.set("0002", "tata"); //neq value
         assertThat(filter.test(datasetRowFromValues), is(false));
     }
 
@@ -981,9 +981,9 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
 
         //then
-        datasetRowFromValues.set("0001", ""); //empty
+        datasetRowFromValues = datasetRowFromValues.set("0001", ""); //empty
         assertThat(filter.test(datasetRowFromValues), is(false));
-        datasetRowFromValues.set("0001", "toto"); //not empty
+        datasetRowFromValues = datasetRowFromValues.set("0001", "toto"); //not empty
         assertThat(filter.test(datasetRowFromValues), is(true));
     }
 

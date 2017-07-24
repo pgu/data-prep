@@ -20,8 +20,6 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.ResolverStyle;
 import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
@@ -46,11 +44,7 @@ public class DateParser {
     private final AnalyzerService analyzerService;
 
     public DateParser() {
-        this(Providers.get(AnalyzerService.class));
-    }
-
-    public DateParser(AnalyzerService analyzerService) {
-        this.analyzerService = analyzerService;
+        this.analyzerService = Providers.get(AnalyzerService.class);
     }
 
     /**

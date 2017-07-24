@@ -23,13 +23,11 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.dataprep.api.dataset.json.ColumnContextDeserializer;
 import org.talend.dataprep.api.dataset.row.Flag;
-import org.talend.dataprep.api.dataset.row.RowMetadataUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -303,7 +301,4 @@ public class RowMetadata implements Serializable {
         return clone;
     }
 
-    public Schema toSchema() {
-        return RowMetadataUtils.toSchema(this);
-    }
 }
