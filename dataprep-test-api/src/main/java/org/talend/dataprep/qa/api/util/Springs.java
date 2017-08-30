@@ -9,23 +9,22 @@ import org.springframework.core.io.Resource;
  * Spring configuration class.
  */
 public class Springs {
-    public static AnnotationConfigApplicationContext createContextFromClassPath(String resource) {
-        return createContext(new ClassPathResource(resource));
-    }
+//    public static AnnotationConfigApplicationContext createContextFromClassPath(String resource) {
+//        return createContext(new ClassPathResource(resource));
+//    }
+//
+//    public static AnnotationConfigApplicationContext createContext(Resource... resources) {
+//        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+//        XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(applicationContext);
+//        xmlReader.loadBeanDefinitions(resources);
+//        applicationContext.refresh();
+//        return applicationContext;
+//    }
 
-    public static AnnotationConfigApplicationContext createContext(Resource...resources) {
-        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
-        XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(applicationContext);
-        xmlReader.loadBeanDefinitions(resources);
-        applicationContext.refresh();
+    public static AnnotationConfigApplicationContext createAnnotatedContextFromBasePackages(String basePackage) {
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(basePackage);
+//        applicationContext.scan(basePackages);
+//        applicationContext.refresh();
         return applicationContext;
     }
-
-    public static AnnotationConfigApplicationContext createAnnotatedContextFromBasePackages(String...basePackages) {
-        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
-        applicationContext.scan(basePackages);
-        applicationContext.refresh();
-        return applicationContext;
-    }
-
 }

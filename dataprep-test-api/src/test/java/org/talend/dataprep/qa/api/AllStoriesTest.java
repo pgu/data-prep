@@ -34,7 +34,6 @@ import static org.jbehave.core.reporters.Format.HTML_TEMPLATE;
 public class AllStoriesTest extends JUnitStories {
 
     public AllStoriesTest() {
-        System.out.println("### - AllStoriesTest");
         configuredEmbedder()//
                 .embedderControls()//
                 .doGenerateViewAfterStories(true)//
@@ -46,7 +45,6 @@ public class AllStoriesTest extends JUnitStories {
 
     @Override
     public Configuration configuration() {
-        System.out.println("### - configuration");
         Class<? extends Embeddable> embeddableClass = this.getClass();
         URL codeLocation = codeLocationFromClass(embeddableClass);
         StoryReporterBuilder storyReporter = //
@@ -66,14 +64,12 @@ public class AllStoriesTest extends JUnitStories {
 
     @Override
     public InjectableStepsFactory stepsFactory() {
-        System.out.println("### - stepsFactory");
         return new SpringStepsFactory(configuration(),
                 Springs.createAnnotatedContextFromBasePackages("org.talend.dataprep.qa.api"));
     }
 
     @Override
     protected List<String> storyPaths() {
-        System.out.println("### - storyPaths");
         List<String> storiesToRun;
         StoryFinder sf = new StoryFinder();
         URL baseUrl = codeLocationFromClass(this.getClass());
@@ -90,5 +86,4 @@ public class AllStoriesTest extends JUnitStories {
         }
         return storiesToRun;
     }
-
 }
