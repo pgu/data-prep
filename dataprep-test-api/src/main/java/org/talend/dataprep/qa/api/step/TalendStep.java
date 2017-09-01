@@ -1,19 +1,17 @@
-package org.talend.dataprep.qa.api.features;
+package org.talend.dataprep.qa.api.step;
 
 import io.restassured.specification.RequestSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 
-/**
- * TODO comment !!
- */
-public class TalendFeature {
+public class TalendStep {
 
     @Autowired
-    ApplicationContext applicationContext;
+    protected Environment environment;
 
     public RequestSpecification given() {
         return io.restassured.RestAssured.given();
     }
+
 
 }
