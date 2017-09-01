@@ -9,5 +9,5 @@ I want to  export the created preparation
 So that I can achieve a integration test
 
 Scenario: scenario description
-When I upload the dataset simpleCSV.csv with name simpleCSV
+When I upload the dataset org/talend/dataprep/qa/api/data/simpleCSV.csv with name simpleCSV
 
