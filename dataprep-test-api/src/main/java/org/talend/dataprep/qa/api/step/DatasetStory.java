@@ -10,7 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.DataPrepAPIHelper;
+import org.talend.dataprep.helper.DataPrepAPIHelper;
+
 import java.time.LocalDateTime;
 
 import static org.hamcrest.CoreMatchers.hasItems;
@@ -38,7 +39,7 @@ public class DatasetStory extends TalendStory {
     @When("I upload the dataset $filename with name $name")
     public void uploadDataset(String filename, String name) throws java.io.IOException {
         String datasetName = name + "_" + LocalDateTime.now();
-        Response response = dpah.uploadDataset(filename, datasetName);
+        Response response = dpah.uploadDataset(filename, datasetName, environment.getProperty("run.environment.url"));
         response.then().statusCode(200);
         String datasetId = IOUtils.toString(response.getBody().asInputStream(), true);
         context().getDatasetById().put(STORY_DATASET_UPLOADED_ID, datasetId);
@@ -47,7 +48,7 @@ public class DatasetStory extends TalendStory {
 
     @Then("The uploaded dataset is present in datasets list")
     public void getDataSets() {
-        dpah.getDatasetList()
+        dpah.getDatasetList(environment.getProperty("run.environment.url"))
                 .then().statusCode(200)
                 .body("id", hasItems(context().getDatasetById().get(STORY_DATASET_UPLOADED_ID)));
     }
@@ -58,6 +59,6 @@ public class DatasetStory extends TalendStory {
      * @param dataSetId the dataset to delete.
      */
     public void deleteDataSet(String dataSetId) {
-        dpah.deleteDataSet(dataSetId).then().statusCode(200);
+        dpah.deleteDataSet(dataSetId, environment.getProperty("run.environment.url")).then().statusCode(200);
     }
 }
