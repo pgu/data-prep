@@ -9,6 +9,9 @@ import java.util.Map;
  */
 public class StepContext {
 
+    protected static final String STORY_DATASET_UPLOADED_ID = "story.dataset.uploaded.id";
+    protected static final String STORY_DATASET_UPLOADED_NAME = "story.dataset.uploaded.name";
+
     /**
      * Our local access to {@link ThreadLocal}.
      */

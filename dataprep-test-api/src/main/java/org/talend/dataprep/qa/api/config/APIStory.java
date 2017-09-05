@@ -53,7 +53,14 @@ public abstract class APIStory extends JUnitStory {
     }
 
     private EmbedderControls embedderControls() {
-        return new EmbedderControls().doIgnoreFailureInView(true);
+        return new EmbedderControls()
+//                .doGenerateViewAfterStories(true)
+//                .doIgnoreFailureInStories(false)
+                .doIgnoreFailureInView(true)
+                .doVerboseFailures(true)
+//                .useThreads(2)
+//                .useStoryTimeouts("120")
+                ;
     }
 
     private ParameterControls parameterControls() {
@@ -71,8 +78,11 @@ public abstract class APIStory extends JUnitStory {
     private StoryReporterBuilder storyReporterBuilder() {
         return new StoryReporterBuilder() //
                 .withCodeLocation(CodeLocations.codeLocationFromClass(this.getClass())) //
-                .withPathResolver(new FilePrintStreamFactory.ResolveToPackagedName()) //
+                .withDefaultFormats()
+//                .withFormats(Format.CONSOLE, Format.HTML_TEMPLATE)
                 .withFailureTrace(true) //
-                .withDefaultFormats();
+//                .withFailureTraceCompression(true)
+                .withPathResolver(new FilePrintStreamFactory.ResolveToPackagedName()) //
+                ;
     }
 }

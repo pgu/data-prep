@@ -15,17 +15,13 @@ import org.talend.dataprep.qa.api.feature.Dataset;
 
 import java.time.LocalDateTime;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItems;
 
 
 @Component
 public class DatasetStep extends TalendStep {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetStep.class);
-    /**
-     * Key for {@link DatasetStep} step.
-     */
-    private static final String STORY_DATASET_UPLOADED = "story.dataset.uploaded";
     /**
      * TODO : choose if we separate Step declaration and Step implementation like in TDS (in this case we should use the {@link Dataset} feature.
      */
@@ -58,7 +54,8 @@ public class DatasetStep extends TalendStep {
                 statusCode(200);
 
         String id = IOUtils.toString(response.getBody().asInputStream(), true);
-        context().getDatasetById().put(STORY_DATASET_UPLOADED, id);
+        context().getDatasetById().put(STORY_DATASET_UPLOADED_ID, id);
+        context().getDatasetById().put(STORY_DATASET_UPLOADED_NAME, datasetName);
     }
 
     @Then("The uploaded dataset is present in datasets list")
@@ -68,7 +65,7 @@ public class DatasetStep extends TalendStep {
                 get(environment.getProperty("run.environment.url") + "/api/datasets/").
                 then().
                 statusCode(200).
-                body("id", equalTo(context().getDatasetById().get(STORY_DATASET_UPLOADED)));
+                body("id", hasItems(context().getDatasetById().get(STORY_DATASET_UPLOADED_ID)));
     }
 
     /**
