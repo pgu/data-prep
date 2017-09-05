@@ -15,7 +15,6 @@ public class Main {
 
         for (APIStory story : stories.values()) {
             try {
-                System.out.println("**************" + story.getClass().getName() + "**************");
                 story.run();
             } catch (Throwable throwable) {
                 throwable.printStackTrace();

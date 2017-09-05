@@ -15,7 +15,6 @@ import org.jbehave.core.steps.spring.SpringStepsFactory;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
@@ -24,8 +23,10 @@ import java.util.Arrays;
 @AcceptanceTest
 public abstract class APIStory extends JUnitStory {
 
-    @Autowired
-    protected Environment environment;
+// not used
+//    @Autowired
+//    protected Environment environment;
+
     @Autowired
     private ConfigurableApplicationContext applicationContext;
 
