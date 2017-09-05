@@ -7,7 +7,7 @@ import java.util.Map;
  * Used to store data within the same JBehave execution Thread.
  * This can be an issue
  */
-public class StepContext {
+public class StoryContext {
 
     protected static final String STORY_DATASET_UPLOADED_ID = "story.dataset.uploaded.id";
     protected static final String STORY_DATASET_UPLOADED_NAME = "story.dataset.uploaded.name";
@@ -15,8 +15,8 @@ public class StepContext {
     /**
      * Our local access to {@link ThreadLocal}.
      */
-    private static ThreadLocal<StepContext> threadContext =
-            new ThreadLocal<StepContext>();
+    private static ThreadLocal<StoryContext> threadContext =
+            new ThreadLocal<StoryContext>();
 
     /**
      * Dictionary of created dataset within the local thread.
@@ -24,19 +24,19 @@ public class StepContext {
     private Map<String, String> datasetById = new HashMap<>();
 
     /** */
-    public static StepContext context() {
+    public static StoryContext context() {
         return threadContext.get();
     }
 
     /**
-     * Store a new {@link StepContext} for the local thread.
+     * Store a new {@link StoryContext} for the local thread.
      */
     public static void initialize() {
-        threadContext.set(new StepContext());
+        threadContext.set(new StoryContext());
     }
 
     /**
-     * Remove the current {@link StepContext} from the local thread.
+     * Remove the current {@link StoryContext} from the local thread.
      */
     public static void dispose() {
         threadContext.remove();

@@ -1,14 +1,15 @@
-package org.talend.dataprep.qa.api.feature;
+package org.talend.dataprep;
 
 import io.restassured.RestAssured;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import org.jbehave.core.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.qa.api.step.DatasetStep;
+
+import java.nio.charset.Charset;
 
 @Component
 public class DataPrepAPIHelper {
@@ -32,7 +33,7 @@ public class DataPrepAPIHelper {
         Response response =
                 given().header(new Header("Content-Type", "text/plain"))
                         // FIXME : this way of sending datasets through Strings limits the dataset size to the JVM available memory
-                        .body(IOUtils.toString(DatasetStep.class.getResourceAsStream(filename), true))
+                        .body(IOUtils.toString(DataPrepAPIHelper.class.getResourceAsStream(filename), Charset.defaultCharset()))
                         .when()
                         .post(environment.getProperty("run.environment.url") + "/api/datasets?name=" + datasetName);
         return response;

@@ -10,17 +10,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.qa.api.feature.DataPrepAPIHelper;
-
+import org.talend.dataprep.DataPrepAPIHelper;
 import java.time.LocalDateTime;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 
 
 @Component
-public class DatasetStep extends TalendStep {
+public class DatasetStory extends TalendStory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatasetStep.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatasetStory.class);
 
     @Autowired
     private DataPrepAPIHelper dpah;
