@@ -75,7 +75,7 @@ public class DataSetGet extends GenericCommand<InputStream> {
 
     private void configureLimitedDataset(final String dataSetId) {
         execute(() -> {
-            final String url = datasetServiceUrl + "/datasets/" + dataSetId + "/content?metadata=true&includeInternalContent=" + includeInternalContent;
+            final String url = datasetServiceUrl + "/datasets/" + dataSetId + "/content?metadata=" + fullContent + "&includeInternalContent=" + includeInternalContent;
             return new HttpGet(url);
         });
     }

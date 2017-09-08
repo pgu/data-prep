@@ -204,11 +204,11 @@ export default function DatasetRestService($rootScope, $upload, $http, RestURLs)
      * @methodOf data-prep.services.dataset.service:DatasetRestService
      * @description Get the dataset content
      * @param {string} datasetId The dataset id
-     * @param {boolean} metadata If false, the metadata will not be returned
+     * @param {boolean} fullContent If false, the metadata will not be returned
      * @returns {Promise} The GET promise
      */
-	function getContent(datasetId, metadata) {
-		const url = RestURLs.datasetUrl + '/' + datasetId + '?metadata=' + metadata + '&includeTechnicalProperties=true';
+	function getContent(datasetId, fullContent) {
+		const url = RestURLs.datasetUrl + '/' + datasetId + '?fullContent=' + fullContent + '&includeTechnicalProperties=true';
 		return $http.get(url).then(response => response.data);
 	}
 
