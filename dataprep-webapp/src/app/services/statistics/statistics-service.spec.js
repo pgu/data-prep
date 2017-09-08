@@ -2034,7 +2034,7 @@ describe('Statistics service', () => {
                     expect(_StateService.setStatisticsHistogramActiveLimits).toHaveBeenCalledWith(null);
                 });
 
-                it('should set the range data frequency when column type is "date" with filters', (done) => {
+                xit('should set the range data frequency when column type is "date" with filters', (done) => {
                     //given
                     stateMock.playground.grid.selectedColumns = [barChartDateCol];
                     stateMock.playground.filter.gridFilters = [{}];
