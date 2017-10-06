@@ -15,11 +15,7 @@ package org.talend.dataprep.configuration;
 
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.HeaderElement;
-import org.apache.http.HeaderElementIterator;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.ProtocolException;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
@@ -39,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -48,6 +45,7 @@ import org.springframework.stereotype.Component;
  * Http client bean name.
  */
 @Configuration
+@ConditionalOnProperty(name = "live.dataset.location", havingValue = "tac", matchIfMissing = true)
 @SuppressWarnings("InsufficientBranchCoverage")
 public class HttpClient {
 
@@ -115,7 +113,7 @@ public class HttpClient {
     /**
      * @return the http request configuration to use.
      */
-    private RequestConfig getRequestConfig() {
+    protected RequestConfig getRequestConfig() {
         return RequestConfig.custom() //
                 .setContentCompressionEnabled(true)
                 .setConnectionRequestTimeout(connectionRequestTimeout)
@@ -125,7 +123,7 @@ public class HttpClient {
     /**
      * @return The connection keep alive strategy.
      */
-    private ConnectionKeepAliveStrategy getKeepAliveStrategy() {
+    protected ConnectionKeepAliveStrategy getKeepAliveStrategy() {
 
         return (response, context) -> {
             // Honor 'keep-alive' header
