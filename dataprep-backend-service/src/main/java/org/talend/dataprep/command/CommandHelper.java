@@ -46,8 +46,16 @@ public class CommandHelper {
     }
 
     public static StreamingResponseBody toStreaming(final HystrixCommand<InputStream> command) {
+        final Observable<InputStream> stream = command.toObservable();
+        return toStreaming(stream, command.getClass().getName());
+    }
+
+    public static StreamingResponseBody toStreaming(Observable<InputStream> stream) {
+        return toStreaming(stream, "unknown");
+    }
+
+    public static StreamingResponseBody toStreaming(Observable<InputStream> stream, String commandClassName) {
         return outputStream -> {
-            final Observable<InputStream> stream = command.toObservable();
             stream.toBlocking().subscribe(inputStream -> {
                 try {
                     IOUtils.copyLarge(inputStream, outputStream);
@@ -58,7 +66,7 @@ public class CommandHelper {
                     } catch (IOException closingException) {
                         LOGGER.warn("could not close command result, a http connection may be leaked !", closingException);
                     }
-                    LOGGER.error("Unable to fully copy command result '{}'.", command.getClass(), e);
+                    LOGGER.error("Unable to fully copy command result '{}'.", commandClassName, e);
                 }
             }, TDPException::rethrowOrWrap);
         };
@@ -80,6 +88,11 @@ public class CommandHelper {
 
     public static ResponseEntity<StreamingResponseBody> toStreaming(final GenericCommand<InputStream> command) {
         final Observable<InputStream> stream = command.toObservable();
+        return toStreaming(stream, command);
+    }
+
+    public static ResponseEntity<StreamingResponseBody> toStreaming(Observable<InputStream> stream,
+                                                                    GenericCommand<InputStream> command) {
         return stream.map(is -> {
             // Content for the response entity
             final StreamingResponseBody body = outputStream -> {
@@ -117,9 +130,12 @@ public class CommandHelper {
      */
     public static <T> Publisher<T> toPublisher(final Class<T> clazz, final ObjectMapper mapper,
             final HystrixCommand<InputStream> command) {
+        return toPublisher(clazz, mapper, command.toObservable());
+    }
+
+    public static <T> Publisher<T> toPublisher(Class<T> clazz, ObjectMapper mapper, Observable<InputStream> observable) {
         AtomicInteger count = new AtomicInteger(0);
         return Flux.create(sink -> {
-            final Observable<InputStream> observable = command.toObservable();
             observable.map(i -> {
                 try {
                     return mapper.readerFor(clazz).<T> readValues(i);
@@ -127,7 +143,7 @@ public class CommandHelper {
                     throw new TDPException(CommonErrorCodes.UNEXPECTED_EXCEPTION, e);
                 }
             }) //
-            .doOnCompleted(() -> LOGGER.debug("Completed command '{}' (emits '{}') with '{}' records.", command.getClass().getName(), clazz.getName(), count.get())) //
+            .doOnCompleted(() -> LOGGER.debug("Completed command '{}' (emits '{}') with '{}' records.", observable.getClass().getName(), clazz.getName(), count.get())) //
             .toBlocking() //
             .forEach(s -> {
                 while (s.hasNext()) {
@@ -141,5 +157,26 @@ public class CommandHelper {
 
     public static <T> Stream<T> toStream(Class<T> clazz, ObjectMapper mapper, HystrixCommand<InputStream> command) {
         return Flux.from(toPublisher(clazz, mapper, command)).toStream(1);
+    }
+
+    public static <T> Stream<T> toStream(Class<T> clazz, ObjectMapper mapper, Observable<InputStream> command) {
+        return Flux.from(toPublisher(clazz, mapper, command)).toStream(1);
+    }
+
+    /**
+     * Wrap a {@link GenericCommand} into a {@link Observable} following javanica recommandation at:
+     * https://github.com/Netflix/Hystrix/tree/master/hystrix-contrib/hystrix-javanica#reactive-execution
+     */
+    public static <T> Observable<T> toObservable(GenericCommand<T> command) {
+        return Observable.create(observer -> {
+            try {
+                if (!observer.isUnsubscribed()) {
+                    observer.onNext(command.run());
+                    observer.onCompleted();
+                }
+            } catch (Exception e) {
+                observer.onError(e);
+            }
+        });
     }
 }

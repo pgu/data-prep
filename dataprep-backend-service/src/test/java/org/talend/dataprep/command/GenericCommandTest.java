@@ -267,7 +267,7 @@ public class GenericCommandTest extends ServiceBaseTest {
         protected TestCommand(String url, Function<Exception, RuntimeException> errorHandling) {
             super(HystrixCommandGroupKey.Factory.asKey("dataset"));
             execute(() -> new HttpGet(url));
-            onError(errorHandling);
+            onErrorThrow(errorHandling);
             on(HttpStatus.OK).then(asString());
         }
     }
