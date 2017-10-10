@@ -41,22 +41,22 @@ public class GenericCommand<T> extends HystrixCommand<T> {
     protected static final String DATASET_GROUP_KEY = "dataset";
 
     /** Hystrix group used for dataset related commands. */
-    protected static final HystrixCommandGroupKey DATASET_GROUP = HystrixCommandGroupKey.Factory.asKey(DATASET_GROUP_KEY);
+    public static final HystrixCommandGroupKey DATASET_GROUP = HystrixCommandGroupKey.Factory.asKey(DATASET_GROUP_KEY);
 
     protected static final String PREPARATION_GROUP_KEY = "preparation";
 
     /** Hystrix group used for preparation related commands. */
-    protected static final HystrixCommandGroupKey PREPARATION_GROUP = HystrixCommandGroupKey.Factory.asKey(PREPARATION_GROUP_KEY);
+    public static final HystrixCommandGroupKey PREPARATION_GROUP = HystrixCommandGroupKey.Factory.asKey(PREPARATION_GROUP_KEY);
 
     protected static final String TRANSFORM_GROUP_KEY = "transform";
 
     /** Hystrix group used for transformation related commands. */
-    protected static final HystrixCommandGroupKey TRANSFORM_GROUP = HystrixCommandGroupKey.Factory.asKey(TRANSFORM_GROUP_KEY);
+    public static final HystrixCommandGroupKey TRANSFORM_GROUP = HystrixCommandGroupKey.Factory.asKey(TRANSFORM_GROUP_KEY);
 
     protected static final String FULLRUN_GROUP_KEY = "fullrun";
 
     /** Hystrix group used for transformation related commands. */
-    protected static final HystrixCommandGroupKey FULLRUN_GROUP = HystrixCommandGroupKey.Factory.asKey(FULLRUN_GROUP_KEY);
+    public static final HystrixCommandGroupKey FULLRUN_GROUP = HystrixCommandGroupKey.Factory.asKey(FULLRUN_GROUP_KEY);
 
     public static final String VERSION_GROUP_KEY = "version";
 
@@ -117,7 +117,7 @@ public class GenericCommand<T> extends HystrixCommand<T> {
     protected DataprepHttpClientDelegate dataprepHttpClientDelegate;
 
     // config render the class stateful but it can be easily refactored with IDE tools (#inline)
-    private final HttpCallConfiguration<T> configuration = new HttpCallConfiguration<>();
+    protected final HttpCallConfiguration<T> configuration = new HttpCallConfiguration<>();
 
     // this (and config) is what render commands stateful. If we could stop using it it would be so great!
     private DataprepHttpClientDelegate.HttpCallResult<T> callResult;
@@ -157,7 +157,7 @@ public class GenericCommand<T> extends HystrixCommand<T> {
      * <ul>
      * <li>Gets the HTTP command to execute (see {@link #execute(Supplier)}.</li>
      * <li>Gets the behavior to adopt based on returned HTTP code (see {@link #on(HttpStatus...)}).</li>
-     * <li>If no behavior was defined for returned code, returns an error as defined in {@link #onErrorThrow(Function)}</li>
+     * <li>If no behavior was defined for returned code, returns an error as defined in {@link #onError(Function)}</li>
      * <li>If a behavior was defined, invokes defined behavior.</li>
      * </ul>
      *
@@ -166,12 +166,8 @@ public class GenericCommand<T> extends HystrixCommand<T> {
      */
     @Override
     protected T run() {
-        try{
-            callResult = dataprepHttpClientDelegate.run(configuration);
-            return callResult.getResult();
-        } catch (Exception e) {
-            throw decomposeException(e);
-        }
+        callResult = dataprepHttpClientDelegate.run(configuration);
+        return callResult.getResult();
     }
 
     /**
@@ -191,24 +187,26 @@ public class GenericCommand<T> extends HystrixCommand<T> {
     }
 
     /**
-     * Declares what exception should be thrown in case of error. Will replace any {@link #onError(Function)} set.
+     * Declares what exception should be thrown in case of error. Will replace any {@link #onErrorReturn(Function)} set.
      *
      * @param onError A {@link Function function} that returns a {@link RuntimeException}.
      * @see TDPException
      */
-    protected void onErrorThrow(Function<Exception, RuntimeException> onError) {
+    // TODO: should be renamed "onErrorThrow" once merged
+    protected void onError(Function<Exception, RuntimeException> onError) {
         configuration.onError(e -> {
             throw onError.apply(e);
         });
     }
 
     /**
-     * Declares what value should be returned in case of error. Will replace any {@link #onErrorThrow(Function)} set.
+     * Declares what value should be returned in case of error. Will replace any {@link #onError(Function)} set.
      *
      * @param onError A {@link Function function} that returns the type searched.
-     * @see #onErrorThrow(Function)
+     * @see #onError(Function)
      */
-    protected void onError(Function<Exception, T> onError) {
+    // TODO: should be renamed "onError" once merged for coherence with other "on" methods
+    protected void onErrorReturn(Function<Exception, T> onError) {
         configuration.onError(onError);
     }
 

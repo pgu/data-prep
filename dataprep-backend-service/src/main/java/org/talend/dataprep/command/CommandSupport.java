@@ -47,13 +47,13 @@ public class CommandSupport extends GenericCommand {
 
     @Override
     @Deprecated
-    protected void onErrorThrow(Function onError) {
+    protected void onError(Function onError) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @Deprecated
-    protected void onError(Function onError) {
+    protected void onErrorReturn(Function onError) {
         throw new UnsupportedOperationException();
     }
 

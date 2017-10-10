@@ -17,6 +17,7 @@ import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static org.talend.daikon.exception.ExceptionContext.withBuilder;
 import static org.talend.dataprep.api.export.ExportParameters.SourceType.HEAD;
+import static org.talend.dataprep.api.service.command.preparation.ActionsSerializer.serializeActions;
 import static org.talend.dataprep.command.Defaults.pipeStream;
 import static org.talend.dataprep.exception.error.PreparationErrorCodes.UNABLE_TO_READ_PREPARATION;
 
@@ -92,8 +93,8 @@ public class DiffMetadata extends ChainedCommand<InputStream, InputStream> {
                         diffActions.add(singleActionToAdd);
 
                         return new PreviewParameters( //
-                                serializeActions(baseActions), //
-                                serializeActions(diffActions), //
+                                serializeActions(objectMapper, baseActions), //
+                                serializeActions(objectMapper, diffActions), //
                                 dataSetId, //
                                 null, //
                                 null, //

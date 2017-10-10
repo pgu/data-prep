@@ -75,7 +75,7 @@ public class DataprepHttpClientDelegate {
 
         // update request header with security token
         String authenticationToken = security.getAuthenticationToken();
-        if (StringUtils.isNotBlank(authenticationToken)) {
+        if (StringUtils.isNotBlank(authenticationToken) && request.getHeaders(AUTHORIZATION).length == 0) {
             request.addHeader(AUTHORIZATION, authenticationToken);
         } else {
             // Intentionally left as debug to prevent log flood in open source edition.

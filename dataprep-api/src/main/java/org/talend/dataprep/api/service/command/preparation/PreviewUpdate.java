@@ -53,7 +53,7 @@ public class PreviewUpdate extends PreviewAbstract {
      * @see PreviewAbstract#run()
      */
     @Override
-    protected InputStream run() throws Exception {
+    protected InputStream run() {
 
         final String dataSetId = preparation.getDataSetId();
 
