@@ -19,12 +19,10 @@ import static org.talend.dataprep.command.Defaults.pipeStream;
 import java.io.InputStream;
 
 import org.apache.http.client.methods.HttpGet;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.talend.daikon.exception.ExceptionContext;
-import org.talend.dataprep.command.CommandSupport;
 import org.talend.dataprep.command.GenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
@@ -35,10 +33,7 @@ import com.netflix.hystrix.HystrixCommandGroupKey;
 @Scope("prototype")
 public class VersionCommand extends GenericCommand<InputStream> {
 
-    @Autowired
-    private CommandSupport commandSupport;
-
-    public static final HystrixCommandGroupKey VERSION_GROUP = HystrixCommandGroupKey.Factory.asKey(VERSION_GROUP_KEY);
+    private static final HystrixCommandGroupKey VERSION_GROUP = HystrixCommandGroupKey.Factory.asKey(VERSION_GROUP_KEY);
 
     private VersionCommand(String serviceUrl) {
         super(VERSION_GROUP);

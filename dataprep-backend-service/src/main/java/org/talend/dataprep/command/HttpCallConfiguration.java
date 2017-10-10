@@ -11,15 +11,12 @@
 
 package org.talend.dataprep.command;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.springframework.http.HttpStatus;
@@ -35,8 +32,6 @@ public class HttpCallConfiguration<T> {
     private Map<HttpStatus, BiFunction<HttpRequestBase, HttpResponse, T>> behavior = new EnumMap<>(HttpStatus.class);
 
     private Function<Exception, T> onError = e -> {throw Defaults.passthrough().apply(e);};
-
-    private List<Header> headersToAdd = new ArrayList<>();
 
     /**
      * Supply a {@link HttpRequestBase} through a java 8 {@link Supplier}. The request creation will be done when the task is executed.
@@ -66,18 +61,6 @@ public class HttpCallConfiguration<T> {
     }
 
     /**
-     * Allow to add custom headers to the request.
-     *
-     * @param header the header to add
-     * @return the configuration
-     * @see org.apache.http.message.AbstractHttpMessage#addHeader(Header)
-     */
-    public HttpCallConfiguration<T> addHeader(Header header) {
-        headersToAdd.add(header);
-        return this;
-    }
-
-    /**
      * Starts declaration of behavior(s) to adopt when HTTP response has status code <code>status</code>.
      *
      * @param status One of more HTTP {@link HttpStatus status(es)}.
@@ -98,10 +81,6 @@ public class HttpCallConfiguration<T> {
 
     public Function<Exception, T> getOnError() {
         return onError;
-    }
-
-    public List<Header> getHeadersToAdd() {
-        return headersToAdd;
     }
 
     public static final class BehaviorBuilder<T> {
