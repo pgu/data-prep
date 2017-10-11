@@ -75,8 +75,20 @@ public class HttpCallConfiguration<T> {
         return httpRequestBase.get();
     }
 
+    /**
+     * The Map of all behaviors. Never null.
+     */
     public Map<HttpStatus, BiFunction<HttpRequestBase, HttpResponse, T>> getBehavior() {
         return behavior;
+    }
+
+    /**
+     * Directly get the behavior matching this status.
+     *
+     * @see #getBehavior()
+     */
+    public BiFunction<HttpRequestBase, HttpResponse, T> getBehaviorForStatus(HttpStatus status) {
+        return behavior.get(status);
     }
 
     public Function<Exception, T> getOnError() {

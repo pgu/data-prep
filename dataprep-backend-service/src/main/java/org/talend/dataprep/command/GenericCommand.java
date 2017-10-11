@@ -60,10 +60,6 @@ public class GenericCommand<T> extends HystrixCommand<T> {
 
     public static final String VERSION_GROUP_KEY = "version";
 
-    protected static final String ERRORS_GROUP_KEY = "errors";
-
-    private static final HystrixCommandGroupKey DEFAULT_GROUP = HystrixCommandGroupKey.Factory.asKey("default");
-
     private static final HttpStatus[] SUCCESS_STATUS = Stream.of(HttpStatus.values()) //
             .filter(HttpStatus::is2xxSuccessful) //
             .collect(Collectors.toList()) //
@@ -89,6 +85,8 @@ public class GenericCommand<T> extends HystrixCommand<T> {
             .collect(Collectors.toList()) //
             .toArray(new HttpStatus[0]);
 
+    // --- convenience autowires ---
+
     /** Jackson object mapper to handle json. */
     @Autowired
     protected ObjectMapper objectMapper;
@@ -96,6 +94,8 @@ public class GenericCommand<T> extends HystrixCommand<T> {
     /** Spring application context. */
     @Autowired
     protected ApplicationContext context;
+
+    // --- convenience access for other services addresses ---
 
     /** Transformation service URL. */
     @Value("${transformation.service.url:}")
@@ -113,19 +113,18 @@ public class GenericCommand<T> extends HystrixCommand<T> {
     @Value("${preparation.service.url:}")
     protected String preparationServiceUrl;
 
+    // --- the real HTTP client that would be usable outside Hystrix context ---
+
     @Autowired
-    protected DataprepHttpClientDelegate dataprepHttpClientDelegate;
+    private DataprepHttpClientDelegate dataprepHttpClientDelegate;
+
+    // --- stateful Hystrix command fields ---
 
     // config render the class stateful but it can be easily refactored with IDE tools (#inline)
     protected final HttpCallConfiguration<T> configuration = new HttpCallConfiguration<>();
 
     // this (and config) is what render commands stateful. If we could stop using it it would be so great!
     private DataprepHttpClientDelegate.HttpCallResult<T> callResult;
-
-    /** For commands migrated to AOP that do not need group in constructor. */
-    protected GenericCommand() {
-        super(DEFAULT_GROUP);
-    }
 
     /**
      * Protected constructor.
@@ -166,9 +165,11 @@ public class GenericCommand<T> extends HystrixCommand<T> {
      */
     @Override
     protected T run() {
-        callResult = dataprepHttpClientDelegate.run(configuration);
+        callResult = dataprepHttpClientDelegate.execute(configuration);
         return callResult.getResult();
     }
+
+    // --- State access methods ---
 
     /**
      * Headers of the response received by the command. Set in the run command.
@@ -185,6 +186,8 @@ public class GenericCommand<T> extends HystrixCommand<T> {
     public HttpStatus getStatus() {
         return callResult.getHttpStatus();
     }
+
+    // --- Configuration methods ---
 
     /**
      * Declares what exception should be thrown in case of error. Will replace any {@link #onErrorReturn(Function)} set.
