@@ -73,7 +73,7 @@ public class DataprepHttpClientDelegate {
     public <T> HttpCallResult<T> execute(HttpCallConfiguration<T> configuration) {
         final HttpRequestBase request = configuration.getHttpRequestBase();
         // update request header with security token if needed
-        addSecurityToken(configuration, request);
+        addSecurityToken(request);
 
         final HttpResponse response;
         try {
@@ -96,18 +96,18 @@ public class DataprepHttpClientDelegate {
         return new HttpCallResult<>(result, status, commandResponseHeaders);
     }
 
-    private <T> void addSecurityToken(HttpCallConfiguration<T> configuration, HttpRequest request) {
+    private <T> void addSecurityToken(HttpRequest request) {
         String authenticationToken = security.getAuthenticationToken();
         if (request.getHeaders(AUTHORIZATION).length == 0) {
             if (StringUtils.isNotBlank(authenticationToken)) {
                 request.addHeader(AUTHORIZATION, authenticationToken);
             } else {
                 // Intentionally left as debug to prevent log flood in open source edition.
-                LOGGER.debug("No current authentication token for {}.", configuration.getHttpRequestBase());
+                LOGGER.debug("No current authentication token for {}.", request);
             }
         } else {
             // Intentionally left as debug to prevent log flood in open source edition.
-            LOGGER.debug("Authentication token already present for {}.", configuration.getHttpRequestBase());
+            LOGGER.debug("Authentication token already present for {}.", request);
         }
     }
 
@@ -145,15 +145,11 @@ public class DataprepHttpClientDelegate {
 
     private <T> HttpCallResult<T> handleUnexpectedError(HttpCallConfiguration<T> configuration, HttpStatus status,
                                                         Header[] commandResponseHeaders, Exception e) {
-        if (e instanceof TDPException) {
-            throw (TDPException) e;
+        Function<Exception, T> onError = configuration.getOnError();
+        if (onError != null) {
+            return new HttpCallResult<>(onError.apply(e), status, commandResponseHeaders);
         } else {
-            Function<Exception, T> onError = configuration.getOnError();
-            if (onError != null) {
-                return new HttpCallResult<>(onError.apply(e), status, commandResponseHeaders);
-            } else {
-                throw new TDPException(CommonErrorCodes.UNEXPECTED_EXCEPTION, e);
-            }
+            throw new TDPException(CommonErrorCodes.UNEXPECTED_EXCEPTION, e);
         }
     }
 
