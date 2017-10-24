@@ -12,16 +12,23 @@
 
 package org.talend.dataprep.api.filter;
 
+import static java.time.Month.JANUARY;
+import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.function.Predicate;
 
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.talend.dataprep.api.dataset.ColumnMetadata;
 import org.talend.dataprep.api.dataset.row.DataSetRow;
+import org.talend.dataprep.transformation.actions.date.DateParser;
 
 public class TQLFilterServiceTest extends FilterServiceTest {
 
-    private TQLFilterService tqlFilterService = new TQLFilterService();
+    private TQLFilterService tqlFilterService = new TQLFilterService(predicateFilterProvider);
 
     @Test
     public void testValueEquals() throws Exception {
@@ -39,12 +46,6 @@ public class TQLFilterServiceTest extends FilterServiceTest {
         row.set("0001", "true");
         assertThatConditionIsTrue("0001 = true");
         assertThatConditionIsFalse("0001 = false");
-        row.set("0001", "TRUE");
-        assertThatConditionIsTrue("0001 = true");
-        assertThatConditionIsFalse("0001 = false");
-        row.set("0001", "FALSE");
-        assertThatConditionIsTrue("0001 = false");
-        assertThatConditionIsFalse("0001 = true");
 
         // decimal
         row.set("0001", "12.3");
@@ -91,12 +92,6 @@ public class TQLFilterServiceTest extends FilterServiceTest {
         row.set("0001", "true");
         assertThatConditionIsTrue("0001 != false");
         assertThatConditionIsFalse("0001 != true");
-        row.set("0001", "TRUE");
-        assertThatConditionIsTrue("0001 != false");
-        assertThatConditionIsFalse("0001 != true");
-        row.set("0001", "FALSE");
-        assertThatConditionIsTrue("0001 != true");
-        assertThatConditionIsFalse("0001 != false");
 
         // decimal
         row.set("0001", "12.3");
@@ -239,6 +234,17 @@ public class TQLFilterServiceTest extends FilterServiceTest {
     }
 
     @Test
+    public void testValueComplies() throws Exception {
+        row.set("0001", "data2@prep.com");
+        assertThatConditionIsTrue("0001 complies 'aaaa9@aaaa.aaa'");
+        assertThatConditionIsFalse("0001 complies 'Aaaa9@aaaa.aaa'");
+        assertThatConditionIsFalse("0001 complies 'aaaa9@aaaaa.aaa'");
+
+        row.set("0001", "");
+        assertThatConditionIsTrue("0001 complies ''");
+    }
+
+    @Test
     public void testValueIn() throws Exception {
         row.set("0001", "Vincent");
         assertThatConditionIsTrue("0001 in ['Vincent', 'François', 'Paul']");
@@ -270,4 +276,41 @@ public class TQLFilterServiceTest extends FilterServiceTest {
         row.set("0001", "Vincent");
         assertThatConditionIsFalse("not (0001 in ['Vincent', 'François', 'Paul'])");
     }
+
+    @Test
+    public void testNumberIsBetween() throws Exception {
+        row.set("0001", "234");
+        assertThatConditionIsTrue("0001 between [100, 500]");
+        assertThatConditionIsTrue("0001 between [234, 500]");
+        assertThatConditionIsFalse("0001 between [12, 100]");
+        assertThatConditionIsFalse("0001 between [300, 500]");
+    }
+
+    @Test
+    public void testDateIsBetween() throws Exception {
+        final ColumnMetadata column = row.getRowMetadata().getById("0001");
+        column.setType("date");
+        final DateParser dateParser = Mockito.mock(DateParser.class);
+        when(dateParser.parse("1980-01-01", column)).thenReturn(LocalDateTime.of(1980, JANUARY, 1, 0, 0));
+        setDateParserForTestPurpose(dateParser);
+        row.set("0001", "1980-01-01");
+
+        long secondsFrom_1990_01_01_UTC = (LocalDateTime.of(1990, JANUARY, 1, 0, 0).toEpochSecond(UTC) * 1000);
+        long secondsFrom_1980_01_01_UTC = (LocalDateTime.of(1980, JANUARY, 1, 0, 0).toEpochSecond(UTC) * 1000);
+        long secondsFrom_1970_01_01_UTC = 0;
+        long secondsFrom_1960_01_01_UTC = (LocalDateTime.of(1960, JANUARY, 1, 0, 0).toEpochSecond(UTC) * 1000);
+
+        assertThatConditionIsTrue(buildTqlConditionForDateRange("0001", secondsFrom_1970_01_01_UTC, secondsFrom_1990_01_01_UTC));
+        assertThatConditionIsTrue(buildTqlConditionForDateRange("0001", secondsFrom_1980_01_01_UTC, secondsFrom_1990_01_01_UTC));
+        assertThatConditionIsFalse(buildTqlConditionForDateRange("0001", secondsFrom_1970_01_01_UTC, secondsFrom_1980_01_01_UTC));
+        assertThatConditionIsFalse(buildTqlConditionForDateRange("0001", secondsFrom_1960_01_01_UTC, secondsFrom_1970_01_01_UTC));
+
+        setDateParserForTestPurpose(null);
+
+    }
+
+    private String buildTqlConditionForDateRange(String columnId, long startInSeconds, long endInSeconds) {
+        return columnId + " between [" + startInSeconds + "," + endInSeconds + "]";
+    }
+
 }

@@ -25,9 +25,11 @@ import org.talend.dataprep.api.dataset.row.DataSetRow;
  */
 public class PolyglotFilterService implements FilterService {
 
-    private final SimpleFilterService jsonFilterService = new SimpleFilterService();
+    private static final PredicateFilterProvider predicateFilterProvider = new PredicateFilterProvider();
 
-    private final TQLFilterService tqlFilterService = new TQLFilterService();
+    private final SimpleFilterService jsonFilterService = new SimpleFilterService(predicateFilterProvider);
+
+    private final TQLFilterService tqlFilterService = new TQLFilterService(predicateFilterProvider);
 
     @Override
     public Predicate<DataSetRow> build(String filterAsString, RowMetadata rowMetadata) {

@@ -32,7 +32,7 @@ import org.talend.dataprep.transformation.actions.date.DateParser;
 
 public class SimpleFilterServiceTest extends FilterServiceTest {
 
-    private final SimpleFilterService service = new SimpleFilterService();
+    private final SimpleFilterService service = new SimpleFilterService(predicateFilterProvider);
 
     @Test
     public void should_create_TRUE_predicate_on_empty_filter() throws Exception {
@@ -874,7 +874,8 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         when(dateParser.parse("1980-01-01", column)).thenReturn(LocalDateTime.of(1980, JANUARY, 1, 0, 0));
         when(dateParser.parse("1990-01-01", column)).thenReturn(LocalDateTime.of(1990, JANUARY, 1, 0, 0));
         when(dateParser.parse("2000-01-01", column)).thenReturn(LocalDateTime.of(2000, JANUARY, 1, 0, 0));
-        service.setDateParser(dateParser);
+
+        setDateParserForTestPurpose(dateParser);
 
         //when
         final Predicate<DataSetRow> filter = service.build(filtersDefinition, rowMetadata);
@@ -892,6 +893,9 @@ public class SimpleFilterServiceTest extends FilterServiceTest {
         assertThat(filter.test(row), is(false));
         row.set("0001", "2000-01-01"); //gt max
         assertThat(filter.test(row), is(false));
+
+        // tear down
+        setDateParserForTestPurpose(null);
     }
 
     @Test

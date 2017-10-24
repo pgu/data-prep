@@ -12,8 +12,6 @@
 
 package org.talend.dataprep.api.filter;
 
-import static org.talend.daikon.number.BigDecimalParser.toBigDecimal;
-
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -21,7 +19,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.lang.StringUtils;
 import org.talend.dataprep.api.dataset.RowMetadata;
 import org.talend.dataprep.api.dataset.row.DataSetRow;
 import org.talend.tql.model.*;
@@ -33,13 +30,30 @@ import org.talend.tql.visitor.IASTVisitor;
  */
 public class TQLFilterService implements FilterService {
 
+    private PredicateFilterProvider predicateFilterProvider;
+
+    public TQLFilterService(PredicateFilterProvider predicateFilterProvider) {
+        super();
+        this.predicateFilterProvider = predicateFilterProvider;
+    }
+
     @Override
     public Predicate<DataSetRow> build(String filterAsString, RowMetadata rowMetadata) {
         final TqlElement parsedPredicate = Tql.parse(filterAsString);
-        return (Predicate<DataSetRow>) parsedPredicate.accept(new DataSetPredicateVisitor());
+        return (Predicate<DataSetRow>) parsedPredicate.accept(new DataSetPredicateVisitor(predicateFilterProvider, rowMetadata));
     }
 
     private static class DataSetPredicateVisitor implements IASTVisitor {
+
+        private PredicateFilterProvider predicateFilterProvider;
+
+        private RowMetadata rowMetadata;
+
+        DataSetPredicateVisitor(PredicateFilterProvider predicateFilterProvider, RowMetadata rowMetadata) {
+            super();
+            this.predicateFilterProvider = predicateFilterProvider;
+            this.rowMetadata = rowMetadata;
+        }
 
         @Override
         public Object visit(TqlElement tqlElement) {
@@ -100,69 +114,71 @@ public class TQLFilterService implements FilterService {
 
             switch (operator) {
             case EQ:
-                return row -> StringUtils.equals(row.get(columnName), value);
+                return predicateFilterProvider.createEqualsPredicate(columnName, value);
             case LT:
-                return row -> toBigDecimal(row.get(columnName)).compareTo(toBigDecimal(value)) < 0;
+                return predicateFilterProvider.createLowerThanPredicate(columnName, value);
             case GT:
-                return row -> toBigDecimal(row.get(columnName)).compareTo(toBigDecimal(value)) > 0;
+                return predicateFilterProvider.createGreaterThanPredicate(columnName, value);
             case NEQ:
-                return row -> !StringUtils.equals(row.get(columnName), value);
+                return predicateFilterProvider.createEqualsPredicate(columnName, value).negate();
             case LET:
-                return row -> toBigDecimal(row.get(columnName)).compareTo(toBigDecimal(value)) <= 0;
+                return predicateFilterProvider.createLowerOrEqualsPredicate(columnName, value);
             case GET:
-                return row -> toBigDecimal(row.get(columnName)).compareTo(toBigDecimal(value)) >= 0;
+                return predicateFilterProvider.createGreaterOrEqualsPredicate(columnName, value);
             }
             return null;
         }
 
         @Override
         public Predicate<DataSetRow> visit(FieldInExpression fieldInExpression) {
-            final String fieldName = fieldInExpression.getFieldName();
+            final String columnName = fieldInExpression.getFieldName();
             final List<String> collect = Stream.of(fieldInExpression.getValues()).map(LiteralValue::getValue).collect(Collectors.toList());
 
-            return row -> collect.contains(row.get(fieldName));
+            return row -> collect.contains(row.get(columnName));
         }
 
         @Override
         public Predicate<DataSetRow> visit(FieldIsEmptyExpression fieldIsEmptyExpression) {
-            final String fieldName = fieldIsEmptyExpression.getFieldName();
-            return row -> StringUtils.isBlank(row.get(fieldName));
+            final String columnName = fieldIsEmptyExpression.getFieldName();
+            return predicateFilterProvider.createEmptyPredicate(columnName);
         }
 
         @Override
         public Predicate<DataSetRow> visit(FieldIsValidExpression fieldIsValidExpression) {
-            final String fieldName = fieldIsValidExpression.getFieldName();
-            return row -> !row.isInvalid(fieldName);
+            final String columnName = fieldIsValidExpression.getFieldName();
+            return predicateFilterProvider.createValidPredicate(columnName);
         }
 
         @Override
         public Predicate<DataSetRow> visit(FieldIsInvalidExpression fieldIsInvalidExpression) {
-            final String fieldName = fieldIsInvalidExpression.getFieldName();
-            return row -> row.isInvalid(fieldName);
+            final String columnName = fieldIsInvalidExpression.getFieldName();
+            return predicateFilterProvider.createInvalidPredicate(columnName);
         }
 
         @Override
         public Predicate<DataSetRow> visit(FieldMatchesRegex fieldMatchesRegex) {
-            final String fieldName = fieldMatchesRegex.getFieldName();
+            final String columnName = fieldMatchesRegex.getFieldName();
             final String regex = fieldMatchesRegex.getRegex();
             final Pattern pattern = Pattern.compile(regex);
 
-            return row -> pattern.matcher(row.get(fieldName)).matches();
+            return row -> pattern.matcher(row.get(columnName)).matches();
         }
 
         @Override
         public Object visit(FieldCompliesPattern fieldCompliesPattern) {
-            throw new NotImplementedException();
+            final String columnName = fieldCompliesPattern.getFieldName();
+            final String pattern = fieldCompliesPattern.getPattern();
+
+            return predicateFilterProvider.createCompliesPredicate(columnName, pattern);
         }
 
         @Override
         public Predicate<DataSetRow> visit(FieldBetweenExpression fieldBetweenExpression) {
-            final String fieldName = fieldBetweenExpression.getFieldName();
+            final String columnName = fieldBetweenExpression.getFieldName();
             final String low = fieldBetweenExpression.getLeft().getValue();
             final String high = fieldBetweenExpression.getRight().getValue();
 
-            return row -> toBigDecimal(row.get(fieldName)).compareTo(toBigDecimal(low)) < 0
-                    && toBigDecimal(row.get(fieldName)).compareTo(toBigDecimal(high)) > 0;
+            return predicateFilterProvider.createRangePredicate(columnName, low, high, rowMetadata);
         }
 
         @Override
@@ -172,10 +188,10 @@ public class TQLFilterService implements FilterService {
 
         @Override
         public Predicate<DataSetRow> visit(FieldContainsExpression fieldContainsExpression) {
-            final String fieldName = fieldContainsExpression.getFieldName();
+            final String columnName = fieldContainsExpression.getFieldName();
             final String value = fieldContainsExpression.getValue();
 
-            return row -> StringUtils.contains(row.get(fieldName), value);
+            return predicateFilterProvider.createContainsPredicate(columnName, value);
         }
     }
 }
