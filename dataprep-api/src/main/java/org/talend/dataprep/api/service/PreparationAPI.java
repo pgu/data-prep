@@ -275,14 +275,14 @@ public class PreparationAPI extends APIService {
             @PathVariable(value = "id") @ApiParam(name = "id", value = "Preparation id.") String preparationId, //
             @RequestParam(value = "version", defaultValue = "head") @ApiParam(name = "version", value = "Version of the preparation (can be 'origin', 'head' or the version id). Defaults to 'head'.") String version,
             @RequestParam(value = "from", defaultValue = "HEAD") @ApiParam(name = "from", value = "Where to get the data from") ExportParameters.SourceType from,
-            @RequestParam(value = "query", required = false) @ApiParam(name = "query", value = "A query to filter the content") String query) {
+            @RequestParam(value = "filter", required = false) @ApiParam(name = "filter", value = "A filter apply on the content") String filter) {
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Retrieving preparation content for {}/{} (pool: {} )...", preparationId, version, getConnectionStats());
         }
 
         try {
-            HystrixCommand<InputStream> command = getCommand(PreparationGetContent.class, preparationId, version, from, query);
+            HystrixCommand<InputStream> command = getCommand(PreparationGetContent.class, preparationId, version, from, filter);
             HttpResponseContext.contentType(APPLICATION_JSON_VALUE);
             return CommandHelper.toStreaming(command);
         } finally {
