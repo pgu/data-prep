@@ -759,6 +759,22 @@ public class PreparationAPITest extends ApiServiceTestBase {
     }
 
     @Test
+    public void testPreparationFilteredInitialContent() throws Exception {
+        // given
+        final String preparationId = testClient.createPreparationFromFile("dataset/dataset.csv", "testPreparationContentGet",
+                home.getId());
+
+        final InputStream expected = PreparationAPITest.class
+                .getResourceAsStream("dataset/expected_filtered_dataset_with_columns.json");
+
+        // when
+        final String content = when().get("/api/preparations/{id}/content?query=0001 = 'John'", preparationId).asString();
+
+        // then
+        assertThat(content, sameJSONAsFile(expected));
+    }
+
+    @Test
     public void testPreparationInitialMetadata() throws Exception {
         // given
         final String preparationName = "testPreparationContentGet";
