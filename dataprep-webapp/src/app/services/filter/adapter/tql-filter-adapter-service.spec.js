@@ -253,7 +253,7 @@ describe('TQL Filter Adapter Service', () => {
                 const tql = filter.toTQL();
 
                 // then
-                expect(tql).toEqual("(0001 complies to 'Aa9')");
+                expect(tql).toEqual("(0001 complies 'Aa9')");
             }));
 
             it('should handle empty value when operator has an operand', inject((TqlFilterAdapterService) => {

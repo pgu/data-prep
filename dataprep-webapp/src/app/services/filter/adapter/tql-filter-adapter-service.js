@@ -36,7 +36,7 @@ const OPERATORS = {
 		value: 'contains',
 	},
 	COMPLIES_TO: {
-		value: 'complies to',
+		value: 'complies',
 	},
 	GREATER_THAN: {
 		value: '>=',
