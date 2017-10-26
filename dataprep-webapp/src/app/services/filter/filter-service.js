@@ -317,7 +317,7 @@ export default class FilterService {
 			}
 
 			createFilter = () => {
-				return this.this.TqlFilterAdapterService.createFilter(type, colId, colName, false, args, removeFilterFn);
+				return this.TqlFilterAdapterService.createFilter(type, colId, colName, false, args, removeFilterFn);
 			};
 
 			getFilterValue = () => {
