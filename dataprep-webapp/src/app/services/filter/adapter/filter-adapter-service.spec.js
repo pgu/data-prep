@@ -11,6 +11,17 @@
 
   ============================================================================*/
 
+import {
+    CONTAINS,
+    EXACT,
+    INVALID_RECORDS,
+    VALID_RECORDS,
+    EMPTY_RECORDS,
+    INSIDE_RANGE,
+    MATCHES,
+    QUALITY,
+} from './filter-adapter-service';
+
 describe('Filter Adapter Service', () => {
 
     const columns = [
@@ -23,19 +34,28 @@ describe('Filter Adapter Service', () => {
 
     beforeEach(angular.mock.module('data-prep.services.filter-adapter'));
 
+    beforeEach(angular.mock.module('pascalprecht.translate', ($translateProvider) => {
+        $translateProvider.translations('en', {
+            "INVALID_RECORDS_LABEL": "rows with invalid values",
+            "VALID_RECORDS_LABEL": "rows with valid values",
+            "INVALID_EMPTY_RECORDS_LABEL": "rows with invalid or empty values",
+            "EMPTY_RECORDS_LABEL": "rows with empty values",
+        });
+        $translateProvider.preferredLanguage('en');
+    }));
+
     describe('create filter', () => {
         it('should create filter', inject((FilterAdapterService) => {
             //given
-            const type = 'contains';
+            const type = CONTAINS;
             const colId = '0001';
             const colName = 'firstname';
             const editable = true;
             const args = {};
-            const filterFn = jasmine.createSpy('filterFn');
             const removeFilterFn = jasmine.createSpy('removeFilterFn');
 
             //when
-            const filter = FilterAdapterService.createFilter(type, colId, colName, editable, args, filterFn, removeFilterFn);
+            const filter = FilterAdapterService.createFilter(type, colId, colName, editable, args, removeFilterFn);
 
             //then
             expect(filter.type).toBe(type);
@@ -43,14 +63,13 @@ describe('Filter Adapter Service', () => {
             expect(filter.colName).toBe(colName);
             expect(filter.editable).toBe(editable);
             expect(filter.args).toBe(args);
-            expect(filter.filterFn).toBe(filterFn);
             expect(filter.removeFilterFn).toBe(removeFilterFn);
         }));
 
         describe('get value', () => {
             it('should return value on CONTAINS filter', inject((FilterAdapterService) => {
                 //given
-                const type = 'contains';
+                const type = CONTAINS;
                 const args = {
                     phrase: [
                         {
@@ -60,7 +79,7 @@ describe('Filter Adapter Service', () => {
                 };
 
                 //when
-                const filter = FilterAdapterService.createFilter(type, null, null, null, args, null, null);
+                const filter = FilterAdapterService.createFilter(type, null, null, null, args, null);
 
                 //then
                 expect(filter.value).toEqual([
@@ -72,7 +91,7 @@ describe('Filter Adapter Service', () => {
 
             it('should return value on EXACT filter', inject((FilterAdapterService) => {
                 //given
-                const type = 'exact';
+                const type = EXACT;
                 const args = {
                     phrase: [
                         {
@@ -82,7 +101,7 @@ describe('Filter Adapter Service', () => {
                 };
 
                 //when
-                const filter = FilterAdapterService.createFilter(type, null, null, null, args, null, null);
+                const filter = FilterAdapterService.createFilter(type, null, null, null, args, null);
 
                 //then
                 expect(filter.value).toEqual([
@@ -94,10 +113,10 @@ describe('Filter Adapter Service', () => {
 
             it('should return value on INVALID_RECORDS filter', inject((FilterAdapterService) => {
                 //given
-                const type = 'invalid_records';
+                const type = INVALID_RECORDS;
 
                 //when
-                const filter = FilterAdapterService.createFilter(type, null, null, null, null, null, null);
+                const filter = FilterAdapterService.createFilter(type, null, null, null, null, null);
 
                 //then
                 expect(filter.value).toEqual([
@@ -109,10 +128,10 @@ describe('Filter Adapter Service', () => {
 
             it('should return value on QUALITY filter', inject((FilterAdapterService) => {
                 //given
-                const type = 'quality';
+                const type = QUALITY;
 
                 //when
-                const filter = FilterAdapterService.createFilter(type, null, null, null, { invalid: true, empty: true }, null, null);
+                const filter = FilterAdapterService.createFilter(type, null, null, null, { invalid: true, empty: true }, null);
 
                 //then
                 expect(filter.value).toEqual([
@@ -124,10 +143,10 @@ describe('Filter Adapter Service', () => {
 
             it('should return value on EMPTY_RECORDS filter', inject((FilterAdapterService) => {
                 //given
-                const type = 'empty_records';
+                const type = EMPTY_RECORDS;
 
                 //when
-                const filter = FilterAdapterService.createFilter(type, null, null, null, null, null, null);
+                const filter = FilterAdapterService.createFilter(type, null, null, null, null, null);
 
                 //then
                 expect(filter.value).toEqual([
@@ -140,10 +159,10 @@ describe('Filter Adapter Service', () => {
 
             it('should return value on VALID_RECORDS filter', inject((FilterAdapterService) => {
                 //given
-                const type = 'valid_records';
+                const type = VALID_RECORDS;
 
                 //when
-                const filter = FilterAdapterService.createFilter(type, null, null, null, null, null, null);
+                const filter = FilterAdapterService.createFilter(type, null, null, null, null, null);
 
                 //then
                 expect(filter.value).toEqual([
@@ -167,7 +186,7 @@ describe('Filter Adapter Service', () => {
                 };
 
                 //when
-                const filter = FilterAdapterService.createFilter(type, null, null, null, args, null, null);
+                const filter = FilterAdapterService.createFilter(type, null, null, null, args, null);
 
                 //then
                 expect(filter.value).toEqual([
@@ -180,7 +199,7 @@ describe('Filter Adapter Service', () => {
 
             it('should return value on MATCHES filter', inject((FilterAdapterService) => {
                 //given
-                const type = 'matches';
+                const type = MATCHES;
                 const args = {
                     patterns: [
                         {
@@ -190,7 +209,7 @@ describe('Filter Adapter Service', () => {
                 };
 
                 //when
-                const filter = FilterAdapterService.createFilter(type, null, null, null, args, null, null);
+                const filter = FilterAdapterService.createFilter(type, null, null, null, args, null);
 
                 //then
                 expect(filter.value).toEqual([
@@ -200,409 +219,6 @@ describe('Filter Adapter Service', () => {
                 ]);
             }));
         });
-
-        describe('to tree', () => {
-            it('should return tree corresponding to CONTAINS filter', inject((FilterAdapterService) => {
-                //given
-                const type = 'contains';
-                const colId = '0001';
-                const args = {
-                    phrase: [
-                        {
-                            value: 'Jimmy',
-                        },
-                    ],
-                };
-
-                const filter = FilterAdapterService.createFilter(type, colId, null, null, args, null, null);
-
-                //when
-                const tree = filter.toTree();
-
-                //then
-                expect(tree).toEqual({
-                    contains: {
-                        field: '0001',
-                        value: 'Jimmy',
-                    },
-                });
-            }));
-
-            it('should return tree corresponding to EXACT filter', inject((FilterAdapterService) => {
-                //given
-                const type = 'exact';
-                const colId = '0001';
-                const args = {
-                    phrase: [
-                        {
-                            value: 'Jimmy',
-                        },
-                    ],
-                };
-
-                const filter = FilterAdapterService.createFilter(type, colId, null, null, args, null, null);
-
-                //when
-                const tree = filter.toTree();
-
-                //then
-                expect(tree).toEqual({
-                    eq: {
-                        field: '0001',
-                        value: 'Jimmy',
-                    },
-                });
-            }));
-
-            it('should return tree corresponding to EXACT multi-valued filter', inject((FilterAdapterService) => {
-                //given
-                const type = 'exact';
-                const colId = '0001';
-                const args = {
-                    phrase: [
-                        {
-                            value: 'Jimmy',
-                        },
-                        {
-                            value: 'François',
-                        },
-                        {
-                            value: 'Vincent',
-                        },
-                    ],
-                };
-
-                const filter = FilterAdapterService.createFilter(type, colId, null, null, args, null, null);
-
-                //when
-                const tree = filter.toTree();
-
-                //then
-                expect(tree).toEqual({
-                    or: [
-                        {
-                            or: [
-                                {
-                                    eq: {
-                                        field: '0001',
-                                        value: 'Jimmy',
-                                    },
-                                },
-                                {
-                                    eq: {
-                                        field: '0001',
-                                        value: 'François',
-                                    },
-                                },
-                            ],
-                        },
-                        {
-                            eq: {
-                                field: '0001',
-                                value: 'Vincent',
-                            },
-                        },
-                    ],
-                });
-            }));
-
-            it('should return tree corresponding to QUALITY filter', inject((FilterAdapterService) => {
-                //given
-                const type = 'quality';
-
-                const filter = FilterAdapterService.createFilter(type, null, null, null, { invalid: true, empty: true }, null, null);
-
-                //when
-                const tree = filter.toTree();
-
-                //then
-                expect(tree).toEqual({
-                    or: [{
-                        invalid: {
-                            field: null,
-                        },
-                    }, {
-                        empty: {
-                            field: null,
-                        },
-                    }],
-                });
-            }));
-
-            it('should return tree corresponding to INVALID_RECORDS filter', inject((FilterAdapterService) => {
-                //given
-                const type = 'invalid_records';
-                const colId = '0001';
-
-                const filter = FilterAdapterService.createFilter(type, colId, null, null, null, null, null);
-
-                //when
-                const tree = filter.toTree();
-
-                //then
-                expect(tree).toEqual({
-                    invalid: {
-                        field: '0001',
-                    },
-                });
-            }));
-
-            it('should return tree corresponding to EMPTY_RECORDS filter', inject((FilterAdapterService) => {
-                //given
-                const type = 'empty_records';
-                const colId = '0001';
-
-                const filter = FilterAdapterService.createFilter(type, colId, null, null, null, null, null);
-
-                //when
-                const tree = filter.toTree();
-
-                //then
-                expect(tree).toEqual({
-                    empty: {
-                        field: '0001',
-                    },
-                });
-            }));
-
-            it('should return tree corresponding to VALID_RECORDS filter', inject((FilterAdapterService) => {
-                //given
-                const type = 'valid_records';
-                const colId = '0001';
-
-                const filter = FilterAdapterService.createFilter(type, colId, null, null, null, null, null);
-
-                //when
-                const tree = filter.toTree();
-
-                //then
-                expect(tree).toEqual({
-                    valid: {
-                        field: '0001',
-                    },
-                });
-            }));
-
-            it('should return tree corresponding to INSIDE_RANGE filter', inject((FilterAdapterService) => {
-                //given
-                const type = 'inside_range';
-                const colId = '0001';
-                const args = {
-                    intervals: [
-                        {
-                            label: '[1000 .. 2000[',
-                            value: [1000, 2000],
-                        },
-                    ],
-                    type: 'integer',
-                };
-
-                const filter = FilterAdapterService.createFilter(type, colId, null, null, args, null, null);
-
-                //when
-                const tree = filter.toTree();
-
-                //then
-                expect(tree).toEqual({
-                    range: {
-                        field: '0001',
-                        start: 1000,
-                        end: 2000,
-                        type: 'integer',
-                        label: '[1000 .. 2000[',
-                    },
-                });
-            }));
-
-            it('should return tree corresponding to MATCHES filter', inject((FilterAdapterService) => {
-                //given
-                const type = 'matches';
-                const colId = '0001';
-                const args = {
-                    patterns: [
-                        {
-                            value: 'Aa9',
-                        },
-                    ],
-                };
-
-                const filter = FilterAdapterService.createFilter(type, colId, null, null, args, null, null);
-
-                //when
-                const tree = filter.toTree();
-
-                //then
-                expect(tree).toEqual({
-                    matches: {
-                        field: '0001',
-                        value: 'Aa9',
-                    },
-                });
-            }));
-        });
-    });
-
-    describe('adaptation to tree', () => {
-        it('should return empty object when there is no filter', inject((FilterAdapterService) => {
-            //when
-            const tree = FilterAdapterService.toTree([]);
-
-            //then
-            expect(tree).toEqual({});
-        }));
-
-        it('should create single filter tree', inject((FilterAdapterService) => {
-            //given
-            const type = 'inside_range';
-            const colId = '0001';
-            const args = {
-                intervals: [
-                    {
-                        label: '[1,000 .. 2,000[',
-                        value: [1000, 2000],
-                    },
-                ],
-                type: 'integer',
-            };
-
-            const filter = FilterAdapterService.createFilter(type, colId, null, null, args, null, null);
-
-            //when
-            const tree = FilterAdapterService.toTree([filter]);
-
-            //then
-            expect(tree).toEqual({
-                filter: {
-                    range: {
-                        field: '0001',
-                        start: 1000,
-                        end: 2000,
-                        type: 'integer',
-                        label: '[1,000 .. 2,000[',
-                    },
-                },
-            });
-        }));
-
-        it('should create multiple filters tree', inject((FilterAdapterService) => {
-            //given
-            const rangeArgs = {
-                intervals: [
-                    {
-                        label: '[1,000 .. 2,000[',
-                        value: [1000, 2000],
-                    },
-                ],
-                type: 'integer',
-            };
-            const containsArgs = {
-                phrase: [
-                    {
-                        value: 'Jimmy',
-                    },
-                ],
-            };
-            const exactArgs = {
-                phrase: [
-                    {
-                        value: 'Jimmy',
-                    },
-                    {
-                        value: 'François',
-                    },
-                    {
-                        value: 'Vincent',
-                    },
-                ],
-            };
-            const dateRangeOffset = new Date(-631152000000).getTimezoneOffset() * 60 * 1000;
-            const dateRangeArgs = {
-                intervals: [
-                    {
-                        label: '[1950, 1960[',
-                        value: [
-                            -631152000000 + dateRangeOffset,
-                            -315619200000 + dateRangeOffset,
-                        ],
-                    },
-                ],
-                type: 'date',
-            };
-
-            const rangeFilter = FilterAdapterService.createFilter('inside_range', '0001', null, null, rangeArgs, null, null);
-            const containsFilter = FilterAdapterService.createFilter('contains', '0002', null, null, containsArgs, null, null);
-            const exactFilter = FilterAdapterService.createFilter('exact', '0003', null, null, exactArgs, null, null);
-            const dateRangeFilter = FilterAdapterService.createFilter('inside_range', '0004', null, null, dateRangeArgs, null, null);
-
-            //when
-            const tree = FilterAdapterService.toTree([rangeFilter, containsFilter, exactFilter, dateRangeFilter]);
-
-            //then
-            expect(tree).toEqual({
-                filter: {
-                    and: [
-                        {
-                            and: [
-                                {
-                                    and: [
-                                        {
-                                            range: {
-                                                field: '0001',
-                                                start: 1000,
-                                                end: 2000,
-                                                type: 'integer',
-                                                label: '[1,000 .. 2,000[',
-                                            },
-                                        },
-                                        {
-                                            contains: {
-                                                field: '0002',
-                                                value: 'Jimmy',
-                                            },
-                                        },
-                                    ],
-                                },
-                                {
-                                    or: [
-                                        {
-                                            or: [
-                                                {
-                                                    eq: {
-                                                        field: '0003',
-                                                        value: 'Jimmy',
-                                                    },
-                                                },
-                                                {
-                                                    eq: {
-                                                        field: '0003',
-                                                        value: 'François',
-                                                    },
-                                                },
-                                            ],
-                                        },
-                                        {
-                                            eq: {
-                                                field: '0003',
-                                                value: 'Vincent',
-                                            },
-                                        },
-                                    ],
-                                },
-                            ],
-                        },
-                        {
-                            range: {
-                                field: '0004',
-                                start: -631152000000, //timestamp without timezone offset to have UTC date
-                                end: -315619200000,  //timestamp without timezone offset to have UTC date
-                                type: 'date',
-                                label: '[1950, 1960[',
-                            },
-                        },
-                    ],
-                },
-            });
-        }));
     });
 
     describe('adaptation from tree', () => {
@@ -630,7 +246,7 @@ describe('Filter Adapter Service', () => {
             expect(filters.length).toBe(1);
 
             const singleFilter = filters[0];
-            expect(singleFilter.type).toBe('contains');
+            expect(singleFilter.type).toBe(CONTAINS);
             expect(singleFilter.colId).toBe('0001');
             expect(singleFilter.colName).toBe('lastname');
             expect(singleFilter.editable).toBe(false);
@@ -659,7 +275,7 @@ describe('Filter Adapter Service', () => {
             expect(filters.length).toBe(1);
 
             const singleFilter = filters[0];
-            expect(singleFilter.type).toBe('exact');
+            expect(singleFilter.type).toBe(EXACT);
             expect(singleFilter.colId).toBe('0001');
             expect(singleFilter.colName).toBe('lastname');
             expect(singleFilter.editable).toBe(false);
@@ -763,7 +379,7 @@ describe('Filter Adapter Service', () => {
             expect(filters.length).toBe(1);
 
             const singleFilter = filters[0];
-            expect(singleFilter.type).toBe('quality');
+            expect(singleFilter.type).toBe(QUALITY);
             expect(singleFilter.colId).toBe(undefined);
             expect(singleFilter.colName).toBe(undefined);
             expect(singleFilter.editable).toBe(false);
@@ -785,7 +401,7 @@ describe('Filter Adapter Service', () => {
             expect(filters.length).toBe(1);
 
             const singleFilter = filters[0];
-            expect(singleFilter.type).toBe('invalid_records');
+            expect(singleFilter.type).toBe(INVALID_RECORDS);
             expect(singleFilter.colId).toBe('0001');
             expect(singleFilter.colName).toBe('lastname');
             expect(singleFilter.editable).toBe(false);
@@ -807,7 +423,7 @@ describe('Filter Adapter Service', () => {
             expect(filters.length).toBe(1);
 
             const singleFilter = filters[0];
-            expect(singleFilter.type).toBe('empty_records');
+            expect(singleFilter.type).toBe(EMPTY_RECORDS);
             expect(singleFilter.colId).toBe('0001');
             expect(singleFilter.colName).toBe('lastname');
             expect(singleFilter.editable).toBe(false);
@@ -829,7 +445,7 @@ describe('Filter Adapter Service', () => {
             expect(filters.length).toBe(1);
 
             const singleFilter = filters[0];
-            expect(singleFilter.type).toBe('valid_records');
+            expect(singleFilter.type).toBe(VALID_RECORDS);
             expect(singleFilter.colId).toBe('0001');
             expect(singleFilter.colName).toBe('lastname');
             expect(singleFilter.editable).toBe(false);
@@ -852,7 +468,7 @@ describe('Filter Adapter Service', () => {
             expect(filters.length).toBe(1);
 
             const singleFilter = filters[0];
-            expect(singleFilter.type).toBe('matches');
+            expect(singleFilter.type).toBe(MATCHES);
             expect(singleFilter.colId).toBe('0001');
             expect(singleFilter.colName).toBe('lastname');
             expect(singleFilter.editable).toBe(false);
@@ -929,7 +545,7 @@ describe('Filter Adapter Service', () => {
             });
 
             const containsFilter = filters[1];
-            expect(containsFilter.type).toBe('contains');
+            expect(containsFilter.type).toBe(CONTAINS);
             expect(containsFilter.colId).toBe('0002');
             expect(containsFilter.colName).toBe('birthdate');
             expect(containsFilter.editable).toBe(false);
@@ -942,7 +558,7 @@ describe('Filter Adapter Service', () => {
             });
 
             const exactFilter = filters[2];
-            expect(exactFilter.type).toBe('exact');
+            expect(exactFilter.type).toBe(EXACT);
             expect(exactFilter.colId).toBe('0003');
             expect(exactFilter.colName).toBe('address');
             expect(exactFilter.editable).toBe(false);
@@ -955,7 +571,7 @@ describe('Filter Adapter Service', () => {
             });
 
             const matchesFilter = filters[3];
-            expect(matchesFilter.type).toBe('matches');
+            expect(matchesFilter.type).toBe(MATCHES);
             expect(matchesFilter.colId).toBe('0004');
             expect(matchesFilter.colName).toBe('gender');
             expect(matchesFilter.editable).toBe(false);

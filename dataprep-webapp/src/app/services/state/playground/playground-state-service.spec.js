@@ -32,7 +32,6 @@ describe('Playground state service', () => {
 
     beforeEach(inject((GridStateService, RecipeStateService, FilterStateService, LookupStateService, SuggestionsStateService, ParametersStateService) => {
         spyOn(GridStateService, 'setData').and.returnValue();
-        spyOn(GridStateService, 'setFilter').and.returnValue();
         spyOn(GridStateService, 'reset').and.returnValue();
         spyOn(FilterStateService, 'addGridFilter').and.returnValue();
         spyOn(FilterStateService, 'updateGridFilter').and.returnValue();
@@ -259,36 +258,6 @@ describe('Playground state service', () => {
             //then
             expect(GridStateService.setData).toHaveBeenCalledWith(data);
         }));
-
-        it('should set filters again on data change in grid to refresh statefull filters (ex: invalid filters)', inject((playgroundState, PlaygroundStateService, GridStateService) => {
-            //given
-            expect(GridStateService.setData).not.toHaveBeenCalled();
-            const data = { records: [] };
-            const filters = [{}, {}];
-            filterStateMock.gridFilters = filters;
-            filterStateMock.enabled = true;
-
-            //when
-            PlaygroundStateService.setData(data);
-
-            //then
-            expect(GridStateService.setFilter).toHaveBeenCalledWith(filters, data);
-        }));
-
-        it('should set data with disabled filter', inject((playgroundState, PlaygroundStateService, GridStateService) => {
-            //given
-            expect(GridStateService.setData).not.toHaveBeenCalled();
-            const data = { records: [] };
-            const filters = [{}, {}];
-            filterStateMock.gridFilters = filters;
-            filterStateMock.enabled = false;
-
-            //when
-            PlaygroundStateService.setData(data);
-
-            //then
-            expect(GridStateService.setFilter).toHaveBeenCalledWith([], data);
-        }));
     });
 
     describe('column statistics', () => {
@@ -426,7 +395,7 @@ describe('Playground state service', () => {
                 expect(FilterStateService.addGridFilter).toHaveBeenCalledWith(filter);
             }));
 
-            it('should apply filters in grid', inject((playgroundState, PlaygroundStateService, GridStateService, FilterStateService) => {
+            it('should apply filters in grid', inject((playgroundState, PlaygroundStateService, FilterStateService) => {
                 //given
                 const filter = { column: '0001' };
                 const filters = [{}, {}];
@@ -438,7 +407,6 @@ describe('Playground state service', () => {
                 PlaygroundStateService.addGridFilter(filter);
 
                 //then
-                expect(GridStateService.setFilter).toHaveBeenCalledWith(filters, data);
                 expect(FilterStateService.enableFilters).toHaveBeenCalledWith();
             }));
         });
@@ -456,7 +424,7 @@ describe('Playground state service', () => {
                 expect(FilterStateService.updateGridFilter).toHaveBeenCalledWith(oldFilter, newFilter);
             }));
 
-            it('should apply filters in grid', inject((playgroundState, PlaygroundStateService, GridStateService, FilterStateService) => {
+            it('should apply filters in grid', inject((playgroundState, PlaygroundStateService, FilterStateService) => {
                 //given
                 const oldFilter = { column: '0001' };
                 const newFilter = { column: '0002' };
@@ -469,7 +437,6 @@ describe('Playground state service', () => {
                 PlaygroundStateService.updateGridFilter(oldFilter, newFilter);
 
                 //then
-                expect(GridStateService.setFilter).toHaveBeenCalledWith(filters, data);
                 expect(FilterStateService.enableFilters).toHaveBeenCalledWith();
             }));
         });
@@ -486,21 +453,6 @@ describe('Playground state service', () => {
                 expect(FilterStateService.removeGridFilter).toHaveBeenCalledWith(filter);
             }));
 
-            it('should apply filters in grid on single remove', inject((playgroundState, PlaygroundStateService, GridStateService) => {
-                //given
-                const filter = { column: '0001' };
-                const filters = [{}, {}];
-                const data = { records: [] };
-                filterStateMock.gridFilters = filters;
-                playgroundState.data = data;
-
-                //when
-                PlaygroundStateService.removeGridFilter(filter);
-
-                //then
-                expect(GridStateService.setFilter).toHaveBeenCalledWith(filters, data);
-            }));
-
             it('should remove all filters from filter list', inject((PlaygroundStateService, FilterStateService) => {
                 //when
                 PlaygroundStateService.removeAllGridFilters();
@@ -508,24 +460,10 @@ describe('Playground state service', () => {
                 //then
                 expect(FilterStateService.removeAllGridFilters).toHaveBeenCalled();
             }));
-
-            it('should apply filters in grid on remove all', inject((playgroundState, PlaygroundStateService, GridStateService) => {
-                //given
-                const filters = [{}, {}];
-                const data = { records: [] };
-                filterStateMock.gridFilters = filters;
-                playgroundState.data = data;
-
-                //when
-                PlaygroundStateService.removeAllGridFilters();
-
-                //then
-                expect(GridStateService.setFilter).toHaveBeenCalledWith(filters, data);
-            }));
         });
 
         describe('toogle', () => {
-            it('should enable filters', inject((playgroundState, PlaygroundStateService, FilterStateService, GridStateService) => {
+            it('should enable filters', inject((playgroundState, PlaygroundStateService, FilterStateService) => {
                 //given
                 const filters = [{}, {}];
                 const data = { records: [] };
@@ -536,10 +474,9 @@ describe('Playground state service', () => {
                 PlaygroundStateService.enableFilters();
                 //then
                 expect(FilterStateService.enableFilters).toHaveBeenCalled();
-                expect(GridStateService.setFilter).toHaveBeenCalledWith(filterStateMock.gridFilters, playgroundState.data);
             }));
 
-            it('should disable filters', inject((playgroundState, PlaygroundStateService, FilterStateService, GridStateService) => {
+            it('should disable filters', inject((playgroundState, PlaygroundStateService, FilterStateService) => {
                 //given
                 const filters = [{}, {}];
                 const data = { records: [] };
@@ -551,7 +488,6 @@ describe('Playground state service', () => {
 
                 //then
                 expect(FilterStateService.disableFilters).toHaveBeenCalledWith();
-                expect(GridStateService.setFilter).toHaveBeenCalledWith([], playgroundState.data);
             }));
         });
     });

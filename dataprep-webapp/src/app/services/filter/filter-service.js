@@ -13,19 +13,10 @@
 
 import { chain, find, isEqual, remove, some } from 'lodash';
 
-import { EMPTY_RECORDS_LABEL } from './adapter/tql-filter-adapter-service';
-
 export const RANGE_SEPARATOR = ' .. ';
 export const INTERVAL_SEPARATOR = ',';
-export const VALUES_SEPARATOR = '|';
 export const SHIFT_KEY_NAME = 'shift';
 export const CTRL_KEY_NAME = 'ctrl';
-
-const emptyFilterValue = {
-	label: EMPTY_RECORDS_LABEL,
-	value: '',
-	isEmpty: true,
-};
 
 /**
  * @ngdoc service
@@ -52,13 +43,6 @@ export default class FilterService {
 		this.TextFormatService = TextFormatService;
 		this.DateService = DateService;
 		this.StorageService = StorageService;
-
-		this.TQL_ENABLED = false;
-		const { playground } = state;
-		if (playground) {
-			const { filter } = playground;
-			this.TQL_ENABLED = filter && filter.isTQL;
-		}
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -114,12 +98,12 @@ export default class FilterService {
 			if (sameColEmptyFilter) {
 				this.removeFilter(sameColEmptyFilter);
 				if (keyName === CTRL_KEY_NAME) {
-					args.phrase = [emptyFilterValue].concat(args.phrase);
+					args.phrase = [this.TqlFilterAdapterService.EMPTY_RECORDS_VALUES].concat(args.phrase);
 				}
 			}
 
 			if (args.phrase.length === 1 && args.phrase[0].value === '') {
-				args.phrase = [emptyFilterValue];
+				args.phrase = [this.TqlFilterAdapterService.EMPTY_RECORDS_VALUES];
 			}
 
 			argsToDisplay = {
@@ -128,8 +112,7 @@ export default class FilterService {
 			};
 
 			createFilter = () => {
-				filterFn = this._createContainFilterFn(colId, args.phrase);
-				return this.FilterAdapterService.createFilter(type, colId, colName, true, argsToDisplay, filterFn, removeFilterFn);
+				return this.TqlFilterAdapterService.createFilter(type, colId, colName, true, argsToDisplay, removeFilterFn);
 			};
 
 			getFilterValue = () => {
@@ -163,12 +146,12 @@ export default class FilterService {
 			if (sameColEmptyFilter) {
 				this.removeFilter(sameColEmptyFilter);
 				if (keyName === CTRL_KEY_NAME) {
-					args.phrase = [emptyFilterValue].concat(args.phrase);
+					args.phrase = [this.TqlFilterAdapterService.EMPTY_RECORDS_VALUES].concat(args.phrase);
 				}
 			}
 
 			if (args.phrase.length === 1 && args.phrase[0].value === '') {
-				args.phrase = [emptyFilterValue];
+				args.phrase = [this.TqlFilterAdapterService.EMPTY_RECORDS_VALUES];
 			}
 
 			argsToDisplay = {
@@ -177,16 +160,7 @@ export default class FilterService {
 			};
 
 			createFilter = () => {
-				let filterAdaptaterService;
-				if (this.TQL_ENABLED) {
-					filterFn = () => {};
-					filterAdaptaterService = this.TqlFilterAdapterService;
-				}
-				else {
-					filterFn = this._createExactFilterFn(colId, args.phrase, args.caseSensitive);
-					filterAdaptaterService = this.FilterAdapterService;
-				}
-				return filterAdaptaterService.createFilter(type, colId, colName, true, argsToDisplay, filterFn, removeFilterFn);
+				return this.TqlFilterAdapterService.createFilter(type, colId, colName, true, argsToDisplay, filterFn, removeFilterFn);
 			};
 
 			getFilterValue = () => {
@@ -218,8 +192,7 @@ export default class FilterService {
 				if (qualityFilters.length) {
 					this._removeQualityFilters(qualityFilters);
 				}
-				filterFn = this._createQualityFilterFn(colId, args);
-				return this.FilterAdapterService.createFilter(type, colId, colName, false, args, filterFn, removeFilterFn);
+				return this.TqlFilterAdapterService.createFilter(type, colId, colName, false, args, removeFilterFn);
 			};
 
 			filterExists = () => {
@@ -234,8 +207,7 @@ export default class FilterService {
 				if (qualityFilters.length) {
 					this._removeQualityFilters(qualityFilters);
 				}
-				filterFn = this._createInvalidFilterFn(colId);
-				return this.FilterAdapterService.createFilter(type, colId, colName, false, args, filterFn, removeFilterFn);
+				return this.TqlFilterAdapterService.createFilter(type, colId, colName, false, args, removeFilterFn);
 			};
 
 			filterExists = () => {
@@ -278,8 +250,7 @@ export default class FilterService {
 					this._removeQualityFilters(qualityFilters);
 				}
 
-				filterFn = this._createEmptyFilterFn(colId);
-				return this.FilterAdapterService.createFilter(type, colId, colName, false, args, filterFn, removeFilterFn);
+				return this.TqlFilterAdapterService.createFilter(type, colId, colName, false, args, removeFilterFn);
 			};
 
 			filterExists = () => {
@@ -295,8 +266,7 @@ export default class FilterService {
 					this._removeQualityFilters(qualityFilters);
 				}
 
-				filterFn = this._createValidFilterFn(colId);
-				return this.FilterAdapterService.createFilter(type, colId, colName, false, args, filterFn, removeFilterFn);
+				return this.TqlFilterAdapterService.createFilter(type, colId, colName, false, args, removeFilterFn);
 			};
 
 			filterExists = () => {
@@ -307,10 +277,7 @@ export default class FilterService {
 		}
 		case 'inside_range': {
 			createFilter = () => {
-				filterFn = args.type === 'date' ?
-					this._createDateRangeFilterFn(colId, args.intervals) :
-					this._createRangeFilterFn(colId, args.intervals);
-				return this.FilterAdapterService.createFilter(type, colId, colName, false, args, filterFn, removeFilterFn);
+				return this.TqlFilterAdapterService.createFilter(type, colId, colName, false, args, removeFilterFn);
 			};
 
 			getFilterValue = () => args.intervals;
@@ -341,17 +308,16 @@ export default class FilterService {
 			if (sameColEmptyFilter) {
 				this.removeFilter(sameColEmptyFilter);
 				if (keyName === CTRL_KEY_NAME) {
-					args.patterns = [emptyFilterValue].concat(args.patterns);
+					args.patterns = [this.TqlFilterAdapterService.EMPTY_RECORDS_VALUES].concat(args.patterns);
 				}
 			}
 
 			if (args.patterns.length === 1 && args.patterns[0].value === '') {
-				args.patterns = [emptyFilterValue];
+				args.patterns = [this.TqlFilterAdapterService.EMPTY_RECORDS_VALUES];
 			}
 
 			createFilter = () => {
-				filterFn = this.createMatchFilterFn(colId, args.patterns);
-				return this.FilterAdapterService.createFilter(type, colId, colName, false, args, filterFn, removeFilterFn);
+				return this.this.TqlFilterAdapterService.createFilter(type, colId, colName, false, args, removeFilterFn);
 			};
 
 			getFilterValue = () => {
@@ -414,7 +380,6 @@ export default class FilterService {
 	 * @description Updates an existing filter
 	 */
 	updateFilter(oldFilter, newValue, keyName) {
-		let newFilterFn;
 		let newArgs;
 		let editableFilter;
 
@@ -435,7 +400,6 @@ export default class FilterService {
 			newArgs = {
 				phrase: newComputedValue,
 			};
-			newFilterFn = this._createContainFilterFn(oldFilter.colId, newValue);
 			editableFilter = true;
 			break;
 		}
@@ -451,13 +415,6 @@ export default class FilterService {
 				phrase: newComputedValue,
 				caseSensitive: oldFilter.args.caseSensitive,
 			};
-
-			if (this.TQL_ENABLED) {
-				newFilterFn = () => {};
-			}
-			else {
-				newFilterFn = this._createExactFilterFn(oldFilter.colId, newComputedValue, oldFilter.args.caseSensitive);
-			}
 			editableFilter = true;
 			break;
 		}
@@ -487,9 +444,6 @@ export default class FilterService {
 			}
 
 			editableFilter = false;
-			newFilterFn = newArgs.type === 'date' ?
-				this._createDateRangeFilterFn(oldFilter.colId, newComputedRange) :
-				this._createRangeFilterFn(oldFilter.colId, newComputedRange);
 			break;
 		}
 		case 'matches': {
@@ -504,22 +458,12 @@ export default class FilterService {
 			newArgs = {
 				patterns: newComputedPattern,
 			};
-			newFilterFn = this.createMatchFilterFn(oldFilter.colId, newComputedPattern);
 			editableFilter = false;
 			break;
 		}
 		}
 
-		let filterAdapterService;
-		if (this.TQL_ENABLED) {
-			filterAdapterService = this.TqlFilterAdapterService;
-		}
-		else {
-			filterAdapterService = this.FilterAdapterService;
-		}
-
-		const newFilter = filterAdapterService.createFilter(oldFilter.type, oldFilter.colId, oldFilter.colName, editableFilter, newArgs, newFilterFn, oldFilter.removeFilterFn);
-
+		const newFilter = this.TqlFilterAdapterService.createFilter(oldFilter.type, oldFilter.colId, oldFilter.colName, editableFilter, newArgs, oldFilter.removeFilterFn);
 		this.StateService.updateGridFilter(oldFilter, newFilter);
 	}
 
@@ -663,248 +607,6 @@ export default class FilterService {
 		}
 	}
 
-	//--------------------------------------------------------------------------------------------------------------
-	// ---------------------------------------------------FILTER FNs-------------------------------------------------
-	//--------------------------------------------------------------------------------------------------------------
-	// To add a new filter function, you must follow this steps.
-	// A filter function has 2 levels of functions : (data) => (item) => {predicate}
-	// * the first level is the initialization level. It takes the data {columns: [], records: []} as parameter. The goal is to initialize the values for the closure it returns.
-	// * the second level is the predicate that is applied on every record item. It returns 'true' if it matches the predicate, 'false' otherwise.
-	//
-	// Example :
-	//    return function(data) {                                                       // first level: it init the list of invalid values, based on the current data. It returns the predicate that use this list.
-	//        var column = find(data.metadata.columns, {id: '0001'});
-	//        var invalidValues = column.quality.invalidValues;
-	//        return function (item) {                                                  // second level : returns true if the item is not in the invalid values list
-	//            return item['0001'] && invalidValues.indexOf(item['0001']) === -1;
-	//        };
-	//    };
-	//--------------------------------------------------------------------------------------------------------------
-
-	/**
-	 * @ngdoc method
-	 * @name _createRangeFilterFn
-	 * @methodOf data-prep.services.filter.service:FilterService
-	 * @param {string} colId The column id
-	 * @param {Array} intervals The filter interval
-	 * @description Create a 'range' filter function
-	 * @returns {function} The predicate function
-	 * @private
-	 */
-	_createRangeFilterFn(colId, intervals) {
-		return () => (item) => {
-			if (!this.ConverterService.isNumber(item[colId])) {
-				return false;
-			}
-
-			const numberValue = this.ConverterService.adaptValue('numeric', item[colId]);
-			return intervals
-				.map((interval) => {
-					const values = interval.value;
-					const pairMin = values[0];
-					const pairMax = values[1];
-					return interval.isMaxReached ?
-						(numberValue === pairMin) || (numberValue > pairMin && numberValue <= pairMax) :
-						(numberValue === pairMin) || (numberValue > pairMin && numberValue < pairMax);
-				})
-				.reduce((oldResult, newResult) => oldResult || newResult);
-		};
-	}
-
-	/**
-	 * @ngdoc method
-	 * @name _createDateRangeFilterFn
-	 * @methodOf data-prep.services.filter.service:FilterService
-	 * @param {string} colId The column id
-	 * @param {Array} values The filter interval
-	 * @description Create a 'range' filter function
-	 * @returns {function} The predicate function
-	 * @private
-	 */
-	_createDateRangeFilterFn(colId, values) {
-		const column = this.state.playground.grid.columns.find(col => col.id === colId);
-		const patterns = chain(column.statistics.patternFrequencyTable)
-			.map('pattern')
-			.map(this.TextFormatService.convertJavaDateFormatToMomentDateFormat)
-			.value();
-		const getValueInDateLimitsFn = (value) => {
-			const minTimestamp = value[0];
-			const maxTimestamp = value[1];
-			return this.DateService.isInDateLimits(minTimestamp, maxTimestamp, patterns);
-		};
-
-		const valueInDateLimitsFn = item => values
-			.map(dateRange => getValueInDateLimitsFn(dateRange.value)(item))
-			.reduce((oldResult, newResult) => oldResult || newResult);
-		return () => item => valueInDateLimitsFn(item[colId]);
-	}
-
-	/**
-	 * @ngdoc method
-	 * @name createMatchFilterFn
-	 * @methodOf data-prep.services.filter.service:FilterService
-	 * @param {string} colId The column id
-	 * @param {Array} patterns The filter patterns
-	 * @description Create a 'match' filter function
-	 * @returns {function} The predicate function
-	 * @private
-	 */
-	createMatchFilterFn(colId, patterns) {
-		const hasEmptyRecords = patterns
-			.filter(patternValue => patternValue.isEmpty)
-			.length;
-		const patternValues = patterns
-			.map(patternValue => patternValue.value);
-		const valueMatchPatternFns = item => patternValues
-			.map(pattern => this.TextFormatService.valueMatchPatternFn(pattern)(item))
-			.reduce((oldResult, newResult) => oldResult || newResult);
-		return () => (item) => {
-			return hasEmptyRecords ? (!item[colId] || valueMatchPatternFns(item[colId])) : valueMatchPatternFns(item[colId]);
-		};
-	}
-
-	/**
-	 * @ngdoc method
-	 * @name _createExactFilterFn
-	 * @methodOf data-prep.services.filter.service:FilterService
-	 * @param {string} colId The column id
-	 * @param {string} filterValues The phrase that the item must be exactly equal to
-	 * @param {boolean} caseSensitive Determine if the filter is case sensitive
-	 * @description [PRIVATE] Create a filter function that test exact equality
-	 * @returns {function} The predicate function
-	 * @private
-	 */
-	_createExactFilterFn(colId, filterValues, caseSensitive) {
-		const hasEmptyRecords = filterValues
-			.filter(filterValue => filterValue.isEmpty)
-			.length;
-		const flattenFiltersValues = filterValues
-			.filter(filterValue => !filterValue.isEmpty)
-			.map(filterValue => this.TextFormatService.escapeRegexpExceptStar(filterValue.value))
-			.join(VALUES_SEPARATOR);
-		const regExpPatternToMatch = `^(${flattenFiltersValues})$`;
-		const regExpToMatch = caseSensitive ? new RegExp(regExpPatternToMatch) : new RegExp(regExpPatternToMatch, 'i');
-		return () => (item) => {
-			// col could be removed by a step
-			const currentItem = item[colId];
-			if (hasEmptyRecords) {
-				return !currentItem || currentItem.match(regExpToMatch);
-			}
-
-			if (currentItem) {
-				return currentItem.match(regExpToMatch) !== null;
-			}
-			return false;
-		};
-	}
-
-	/**
-	 * @ngdoc method
-	 * @name _createContainFilterFn
-	 * @methodOf data-prep.services.filter.service:FilterService
-	 * @param {string} colId The column id
-	 * @param {string} phrase The phrase that the item must contain
-	 * @description [PRIVATE] Create a 'contains' filter function
-	 * @returns {function} The predicate function
-	 * @private
-	 */
-	_createContainFilterFn(colId, phrase) {
-		const regexps = phrase
-			.map((phraseValue) => {
-				const lowerCasePhrase = phraseValue.value.toLowerCase();
-				return new RegExp(this.TextFormatService.escapeRegexpExceptStar(lowerCasePhrase));
-			});
-		const fns = item => regexps
-			.map(regexp => item.toLowerCase().match(regexp))
-			.reduce((newResult, oldResult) => newResult || oldResult);
-		return () => (item) => {
-			// col could be removed by a step
-			const currentItem = item[colId];
-			if (currentItem) {
-				return fns(currentItem);
-			}
-			return false;
-		};
-	}
-
-	/**
-	 * @ngdoc method
-	 * @name _createInvalidFilterFn
-	 * @methodOf data-prep.services.filter.service:FilterService
-	 * @param {string} colId The column id
-	 * @description Create a filter function that test if the value is one of the invalid values
-	 * @returns {function} The predicate function
-	 * @private
-	 */
-	_createInvalidFilterFn(colId) {
-		return () => {
-			return colId ?
-				item => item.__tdpInvalid && item.__tdpInvalid.indexOf(colId) > -1 :
-				item => item.__tdpInvalid && item.__tdpInvalid.length;
-		};
-	}
-
-	/**
-	 * @ngdoc method
-	 * @name _createValidFilterFn
-	 * @methodOf data-prep.services.filter.service:FilterService
-	 * @param {string} colId The column id
-	 * @description Create a 'valid' filter function
-	 * @returns {function} The predicate function
-	 * @private
-	 */
-	_createValidFilterFn(colId) {
-		const invalidPredicate = this._createInvalidFilterFn(colId);
-		const emptyPredicate = this._createEmptyFilterFn(colId);
-
-		return (data) => {
-			const invalidConfiguredPredicate = invalidPredicate(data);
-			const emptyConfiguredPredicate = emptyPredicate(data);
-			return item => !emptyConfiguredPredicate(item) && !invalidConfiguredPredicate(item);
-		};
-	}
-
-	/**
-	 * @ngdoc method
-	 * @name _createEmptyFilterFn
-	 * @methodOf data-prep.services.filter.service:FilterService
-	 * @param {string} colId The column id
-	 * @description Create an 'empty' filter function
-	 * @returns {function} The predicate function
-	 * @private
-	 */
-	_createEmptyFilterFn(colId) {
-		return (data) => {
-			return colId ?
-				item => !item[colId] :
-				item => find(data.metadata.columns, col => !item[col.id]);
-		};
-	}
-
-	/**
-	 * @ngdoc method
-	 * @name _createQualityFilterFn
-	 * @methodOf data-prep.services.filter.service:FilterService
-	 * @param {string} colId The column id
-	 * @param {object} args The filter arguments { invalid: boolean, empty: boolean, valid: boolean }
-	 * @description Create a filter function that test if the value is one of the invalid/empty/valid values
-	 * @returns {function} The predicate function
-	 * @private
-	 */
-	_createQualityFilterFn(colId, args) {
-		const noOpPredicate = () => () => false;
-		const invalidPredicate = args.invalid ? this._createInvalidFilterFn(colId) : noOpPredicate;
-		const emptyPredicate = args.empty ? this._createEmptyFilterFn(colId) : noOpPredicate;
-		const validPredicate = args.valid ? this._createValidFilterFn(colId) : noOpPredicate;
-
-		return (data) => {
-			const invalidConfiguredPredicate = invalidPredicate(data);
-			const emptyConfiguredPredicate = emptyPredicate(data);
-			const validConfiguredPredicate = validPredicate(data);
-			return item => invalidConfiguredPredicate(item) || emptyConfiguredPredicate(item) || validConfiguredPredicate(item);
-		};
-	}
-
 	/**
 	 * @ngdoc method
 	 * @name _getValuesToDisplay
@@ -1041,17 +743,18 @@ export default class FilterService {
 		return splittedLabel;
 	}
 
+	//Frontend can send only TQL to backend
 	stringify(filters) {
-		if (this.TQL_ENABLED) {
-			return this.TqlFilterAdapterService.toTQL(filters);
-		}
-		return this.FilterAdapterService.toTree(filters);
+		return this.TqlFilterAdapterService.toTQL(filters);
 	}
 
+	//Frontend can receive TQL or JSON from backend for the old version
 	parse(str) {
-		if (this.TQL_ENABLED) {
+		if (str.startsWith("{")) {
+			return this.FilterAdapterService.fromTree(str);
+
+		} else {
 			return this.TqlFilterAdapterService.fromTQL(str);
 		}
-		return this.FilterAdapterService.fromTree(str);
 	}
 }

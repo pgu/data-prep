@@ -20,7 +20,6 @@ import {
     INSIDE_RANGE,
     MATCHES,
     QUALITY,
-    EMPTY,
 } from './tql-filter-adapter-service';
 
 describe('TQL Filter Adapter Service', () => {
@@ -31,8 +30,10 @@ describe('TQL Filter Adapter Service', () => {
 
 	beforeEach(angular.mock.module('pascalprecht.translate', ($translateProvider) => {
 		$translateProvider.translations('en', {
-			INVALID_RECORDS_LABEL: 'invalid records label',
-			VALID_RECORDS_LABEL: 'valid records label',
+            "INVALID_RECORDS_LABEL": "rows with invalid values",
+            "VALID_RECORDS_LABEL": "rows with valid values",
+            "INVALID_EMPTY_RECORDS_LABEL": "rows with invalid or empty values",
+            "EMPTY_RECORDS_LABEL": "rows with empty values",
 		});
 		$translateProvider.preferredLanguage('en');
 	}));
@@ -43,11 +44,10 @@ describe('TQL Filter Adapter Service', () => {
             const colName = 'firstname';
             const editable = true;
             const args = {};
-            const filterFn = jasmine.createSpy('filterFn');
             const removeFilterFn = jasmine.createSpy('removeFilterFn');
 
             // when
-            const filter = TqlFilterAdapterService.createFilter(CONTAINS, COL_ID, colName, editable, args, filterFn, removeFilterFn);
+            const filter = TqlFilterAdapterService.createFilter(CONTAINS, COL_ID, colName, editable, args, removeFilterFn);
 
             // then
             expect(filter.type).toBe(CONTAINS);
@@ -55,7 +55,6 @@ describe('TQL Filter Adapter Service', () => {
             expect(filter.colName).toBe(colName);
             expect(filter.editable).toBe(editable);
             expect(filter.args).toBe(args);
-            expect(filter.filterFn).toBe(filterFn);
             expect(filter.removeFilterFn).toBe(removeFilterFn);
         }));
 

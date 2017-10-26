@@ -27,7 +27,6 @@ export const EMPTY_RECORDS = 'empty_records';
 export const INSIDE_RANGE = 'inside_range';
 export const MATCHES = 'matches';
 export const QUALITY = 'quality';
-export const EMPTY = 'empty';
 
 const OPERATORS = {
 	EQUAL: {
@@ -68,8 +67,9 @@ export default function TqlFilterAdapterService($translate) {
 		[INVALID_RECORDS]: field => buildQuery(field, OPERATORS.IS_INVALID),
 		[VALID_RECORDS]: field => buildQuery(field, OPERATORS.IS_VALID),
 		[MATCHES]: (field, value) => buildQuery(field, OPERATORS.COMPLIES_TO, value),
-		[EMPTY]: field => buildQuery(field, OPERATORS.IS_EMPTY),
+		[EMPTY_RECORDS]: field => buildQuery(field, OPERATORS.IS_EMPTY),
 		[INSIDE_RANGE]: convertRangeFilterToTQL,
+		//TODO [QUALITY]: convertRangeFilterToTQL,
 	};
 
 
@@ -88,11 +88,15 @@ export default function TqlFilterAdapterService($translate) {
 	const EMPTY_RECORDS_VALUES = [{
 		label: $translate.instant('EMPTY_RECORDS_LABEL'),
 		isEmpty: true,
+		value: '',
 	}];
 
 	return {
+		EMPTY_RECORDS_VALUES,
+
 		createFilter,
 		toTQL,
+		fromTQL,
 	};
 
 	//--------------------------------------------------------------------------------------------------------------
@@ -104,7 +108,6 @@ export default function TqlFilterAdapterService($translate) {
 		colName,
 		editable,
 		args,
-		filterFn,
 		removeFilterFn
 	) {
 		const filter = {
@@ -113,7 +116,6 @@ export default function TqlFilterAdapterService($translate) {
 			colName,
 			editable,
 			args,
-			filterFn,
 			removeFilterFn,
 		};
 
@@ -266,5 +268,11 @@ export default function TqlFilterAdapterService($translate) {
 		}
 
 		return (accu && item) ? `${accu} and ${item}` : item;
+	}
+	//--------------------------------------------------------------------------------------------------------------
+	// ---------------------------------------------------CONVERTION-------------------------------------------------
+	// -------------------------------------------------TQL ==> FILTER----------------------------------------------
+	//--------------------------------------------------------------------------------------------------------------
+	function fromTQL(tql) {
 	}
 }

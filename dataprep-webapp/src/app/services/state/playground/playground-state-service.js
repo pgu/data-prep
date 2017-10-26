@@ -141,13 +141,6 @@ export function PlaygroundStateService(RecipeStateService, recipeState,
 	function setData(data) {
 		playgroundState.data = data;
 		GridStateService.setData(data);
-
-		if (filterState.enabled) {
-			GridStateService.setFilter(filterState.gridFilters, playgroundState.data);
-		}
-		else {
-			GridStateService.setFilter([], playgroundState.data);
-		}
 	}
 
 	function setPreparation(preparation) {
@@ -234,34 +227,28 @@ export function PlaygroundStateService(RecipeStateService, recipeState,
     //--------------------------------------------------------------------------------------------------------------
 	function addGridFilter(filter) {
 		FilterStateService.addGridFilter(filter);
-		GridStateService.setFilter(filterState.gridFilters, playgroundState.data);
 		FilterStateService.enableFilters();
 	}
 
 	function updateGridFilter(oldFilter, newFilter) {
 		FilterStateService.updateGridFilter(oldFilter, newFilter);
-		GridStateService.setFilter(filterState.gridFilters, playgroundState.data);
 		FilterStateService.enableFilters();
 	}
 
 	function removeGridFilter(filter) {
 		FilterStateService.removeGridFilter(filter);
-		GridStateService.setFilter(filterState.gridFilters, playgroundState.data);
 	}
 
 	function removeAllGridFilters() {
 		FilterStateService.removeAllGridFilters();
-		GridStateService.setFilter(filterState.gridFilters, playgroundState.data);
 	}
 
 	function enableFilters() {
 		FilterStateService.enableFilters();
-		GridStateService.setFilter(filterState.gridFilters, playgroundState.data);
 	}
 
 	function disableFilters() {
 		FilterStateService.disableFilters();
-		GridStateService.setFilter([], playgroundState.data);
 	}
 
 	function reset() {

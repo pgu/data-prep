@@ -58,7 +58,7 @@ export default function PlaygroundService(
 	DatagridService,
 	StorageService,
 	FilterService,
-	FilterAdapterService,
+	TqlFilterAdapterService,
 	PreparationService,
 	PreviewService,
 	RecipeService,
@@ -243,7 +243,7 @@ export default function PlaygroundService(
 	 * @returns {Promise} The process promise
 	 */
 	function loadPreparation(preparation, sampleType = 'HEAD') {
-		startLoader();
+		startLoader()
 		return PreparationService.getContent(preparation.id, 'head', sampleType)
 			.then(data => reset.call(
 				this,
@@ -447,11 +447,10 @@ export default function PlaygroundService(
 	 * @methodOf data-prep.services.playground.service:PlaygroundService
 	 * @param {string} preparationId The preparation id
 	 * @param {string} headId The head id to set
-	 * @param {string} columnToFocus The column id to focus
 	 * @description Move the preparation head to the specified step
 	 * @returns {promise} The process promise
 	 */
-	function setPreparationHead(preparationId, headId, columnToFocus) {
+	function setPreparationHead(preparationId, headId) {
 		startLoader();
 
 		let promise = PreparationService.setHead(preparationId, headId);
@@ -475,7 +474,7 @@ export default function PlaygroundService(
 		// load the recipe and grid head in parallel
 		else {
 			promise = promise.then(() => {
-				return $q.all([this.updatePreparationDetails(), updatePreparationDatagrid(columnToFocus)]);
+				return $q.all([this.updatePreparationDetails(), updatePreparationDatagrid()]);
 			});
 		}
 
@@ -770,10 +769,10 @@ export default function PlaygroundService(
 				lineParameters.row_id = line && line.tdpId;
 
 				if (state.playground.filter.applyTransformationOnFilters) {
-					const stepFilters = FilterAdapterService.toTree(
+					const stepFilters = TqlFilterAdapterService.toTQL(
 							state.playground.filter.gridFilters
 						);
-					lineParameters = { ...lineParameters, ...stepFilters };
+					lineParameters = { ...lineParameters, filter: stepFilters };
 				}
 				actions = [
 						{ action: action.name, parameters: lineParameters },
@@ -793,10 +792,10 @@ export default function PlaygroundService(
 								state.playground.filter
 									.applyTransformationOnFilters
 							) {
-								const stepFilters = FilterAdapterService.toTree(
+								const stepFilters = TqlFilterAdapterService.toTQL(
 									state.playground.filter.gridFilters
 								);
-								parameters = { ...parameters, ...stepFilters };
+								parameters = { ...parameters, filter: stepFilters };
 							}
 							return { action: action.name, parameters };
 						}
@@ -917,21 +916,32 @@ export default function PlaygroundService(
 	 * @description Perform an datagrid refresh with the preparation head
 	 */
 	function updatePreparationDatagrid() {
+
+		const tql =
+			state.playground.filter.enabled &&
+			FilterService.stringify(state.playground.filter.gridFilters);
+
 		return PreparationService.getContent(
 			state.playground.preparation.id,
 			'head',
-			state.playground.sampleType
+			state.playground.sampleType,
+			tql
 		).then((response) => {
 			DatagridService.updateData(response);
 			PreviewService.reset(false);
 		});
 	}
 
-	function updateDatasetDatagrid(tql) {
-		const { dataset } = state.playground;
+	function updateDatasetDatagrid() {
+
+		const { dataset, filter } = state.playground;
 		if (!dataset) {
 			return;
 		}
+		const tql =
+			filter.enabled &&
+			FilterService.stringify(filter.gridFilters);
+
 		return DatasetService.getContent(
 			dataset.id,
 			true,
@@ -943,15 +953,10 @@ export default function PlaygroundService(
 	}
 
 	function updateDatagrid() {
-		const { filter, preparation } = state.playground;
-		if (preparation && preparation.id) {
+		if (state.playground.preparation && state.playground.preparation.id) {
 			return updatePreparationDatagrid();
 		}
-		const tql =
-			filter.enabled &&
-			filter.isTQL &&
-			FilterService.stringify(filter.gridFilters);
-		return updateDatasetDatagrid(tql);
+		return updateDatasetDatagrid();
 	}
 
 	// TODO : temporary fix because asked to.
