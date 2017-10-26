@@ -12,21 +12,14 @@
 
 package org.talend.dataprep.api.filter;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.HashMap;
 
 import org.junit.Before;
 import org.talend.dataprep.api.dataset.ColumnMetadata;
 import org.talend.dataprep.api.dataset.RowMetadata;
 import org.talend.dataprep.api.dataset.row.DataSetRow;
-import org.talend.dataprep.transformation.actions.date.DateParser;
 
 public abstract class FilterServiceTest {
-
-    protected final PredicateFilterProvider predicateFilterProvider = new PredicateFilterProvider();
-
-    protected DataSetRow datasetRowFromValues;
 
     protected DataSetRow row;
 
@@ -34,8 +27,6 @@ public abstract class FilterServiceTest {
 
     @Before
     public void init() {
-        datasetRowFromValues = new DataSetRow(new HashMap<>());
-
         final ColumnMetadata firstColumn = new ColumnMetadata();
         firstColumn.setId("0001");
         final ColumnMetadata secondColumn = new ColumnMetadata();
@@ -43,13 +34,6 @@ public abstract class FilterServiceTest {
         rowMetadata = new RowMetadata();
         rowMetadata.setColumns(Arrays.asList(firstColumn, secondColumn));
         row = new DataSetRow(rowMetadata);
-    }
-
-    protected void setDateParserForTestPurpose(DateParser dateParser) throws Exception {
-        final Field dateParserField = PredicateFilterProvider.class.getDeclaredField("dateParser");
-        dateParserField.setAccessible(true);
-        dateParserField.set(predicateFilterProvider, dateParser);
-        dateParserField.setAccessible(false);
     }
 
 }
