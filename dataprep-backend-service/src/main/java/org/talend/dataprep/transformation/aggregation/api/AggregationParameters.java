@@ -20,8 +20,6 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.talend.dataprep.validation.OneNotBlank;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
@@ -47,7 +45,6 @@ public class AggregationParameters {
     @NotEmpty
     private List<AggregationOperation> operations;
 
-    @JsonProperty("filter")
     private Object filter;
 
     /** Optional sample size (null for the whole thing). */
@@ -130,7 +127,6 @@ public class AggregationParameters {
      * @return The filter (as raw JSON) for the aggregation.
      * @see org.talend.dataprep.api.filter.FilterService
      */
-    @JsonRawValue
     public String getFilter() {
         return filter == null ? null : filter.toString();
     }
