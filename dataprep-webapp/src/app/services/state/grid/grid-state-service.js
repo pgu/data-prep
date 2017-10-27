@@ -54,8 +54,8 @@ export function GridStateService() {
 	 * @description Update the number of lines statistics
 	 */
 	function updateLinesCount(data) {
-		gridState.nbLines = gridState.dataView.getLength();
-		gridState.nbTotalLines = data.records.length;
+		gridState.nbLines = data.records.length;
+		gridState.nbTotalLines = data.metadata.records;
 		gridState.displayLinesPercentage = ((gridState.nbLines * 100) / gridState.nbTotalLines).toFixed(0);
 	}
 
