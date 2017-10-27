@@ -48,7 +48,6 @@ public class AggregationParameters {
     private List<AggregationOperation> operations;
 
     @JsonProperty("filter")
-    @JsonRawValue
     private Object filter;
 
     /** Optional sample size (null for the whole thing). */
@@ -120,7 +119,7 @@ public class AggregationParameters {
 
     /**
      * Add the given group by.
-     * 
+     *
      * @param groupBy the group by to add.
      */
     public void addGroupBy(String groupBy) {
@@ -157,7 +156,7 @@ public class AggregationParameters {
 
     /**
      * Add the given operation to the parameters.
-     * 
+     *
      * @param operation the operatio to add.
      */
     public void addOperation(AggregationOperation operation) {
