@@ -12,6 +12,7 @@
  ============================================================================*/
 
 import { Parser } from '@talend/daikon-tql-client';
+import { parse } from '@talend/tql/index';
 
 export const CONTAINS = 'contains';
 export const EXACT = 'exact';
@@ -170,5 +171,102 @@ export default function TqlFilterAdapterService($translate) {
 	// ---------------------------------------------------CONVERTION-------------------------------------------------
 	// -------------------------------------------------TQL ==> FILTER----------------------------------------------
 	//--------------------------------------------------------------------------------------------------------------
-	function fromTQL(tql) {}
+	function fromTQL(tql, columns) {
+		let type;
+		let args;
+		let field;
+		const editable = false;
+		const filters = [];
+
+		const createFilterFromTQL = (type, colId, editable, args, columns) => {
+			const filteredColumn = _.find(columns, { id: colId });
+			const colName = (filteredColumn && filteredColumn.name) || colId;
+			filters.push(createFilter(type, colId, colName, editable, args, null));
+		};
+
+		const onExactFilter = (ctx) => {
+			type = EXACT;
+			field = ctx.children[0].getText();
+			args = {
+				phrase: [
+					{
+						value: ctx.children[2].getText().replace(/'/g, ""),
+					},
+				],
+			};
+			return createFilterFromTQL(type, field, editable, args, columns);
+		};
+
+		const onContainsFilter = (ctx) => {
+			type = CONTAINS;
+			field = ctx.children[0].getText();
+			args = {
+				phrase: [
+					{
+						value: ctx.children[2].getText().replace(/'/g, ""),
+					},
+				],
+			};
+			return createFilterFromTQL(type, field, editable, args, columns);
+		};
+		const onCompliesFilter = (ctx) => {
+			type = MATCHES;
+			field = ctx.children[0].getText();
+			args = {
+				patterns: [
+					{
+						value: ctx.children[2].getText().replace(/'/g, ""),
+					},
+				],
+			};
+			return createFilterFromTQL(type, field, editable, args, columns);
+		};
+		const onBetweenFilter = (ctx) => {
+			type = INSIDE_RANGE;
+			field = ctx.children[0].getText();
+
+			//// on date we shift timestamp to fit UTC timezone
+			//let offset = 0;
+			//if (condition.type === 'date') {
+			//	const minDate = new Date(condition.start);
+			//	offset = minDate.getTimezoneOffset() * 60 * 1000;
+			//}
+			//
+			//args = {
+			//	intervals: [{
+			//		label: condition.label,
+			//		value: [condition.start + offset, condition.end + offset],
+			//	}],
+			//	type: condition.type,
+			//};
+			//return createFilterFromTQL(type, field, editable, args),
+		};
+		const onEmptyFilter = (ctx) => {
+			type = EMPTY_RECORDS;
+			field = ctx.children[0].getText();
+			return createFilterFromTQL(type, field, editable, args, columns);
+		};
+		const onValidFilter = (ctx) => {
+			type = VALID_RECORDS;
+			field = ctx.children[0].getText();
+			return createFilterFromTQL(type, field, editable, args, columns);
+		};
+		const onInvalidFilter = (ctx) => {
+			type = INVALID_RECORDS;
+			field = ctx.children[0].getText();
+			return createFilterFromTQL(type, field, editable, args, columns);
+		};
+
+		parse(
+			tql,
+			onExactFilter,
+			onContainsFilter,
+			onCompliesFilter,
+			onBetweenFilter,
+			onEmptyFilter,
+			onValidFilter,
+			onInvalidFilter);
+
+		return filters;
+	}
 }

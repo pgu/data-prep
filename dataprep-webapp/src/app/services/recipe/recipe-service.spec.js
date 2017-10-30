@@ -470,14 +470,14 @@ describe('Recipe service', function () {
         $provide.constant('state', stateMock);
     }));
 
-    beforeEach(inject(($q, StateService, ParametersService, TransformationService, FilterAdapterService) => {
+    beforeEach(inject(($q, StateService, ParametersService, TransformationService, TqlFilterAdapterService) => {
         spyOn(ParametersService, 'resetParamValue').and.returnValue();
         spyOn(ParametersService, 'initParamsValues').and.callThrough();
         spyOn(TransformationService, 'initDynamicParameters').and.callFake((transformation) => {
             transformation.cluster = initialCluster();
             return $q.when(transformation);
         });
-        spyOn(FilterAdapterService, 'fromTree').and.returnValue(filtersFromTree);
+        spyOn(TqlFilterAdapterService, 'fromTQL').and.returnValue(filtersFromTree);
         spyOn(StateService, 'setRecipeSteps').and.callFake((initialStep, steps) => {
             stateMock.playground.recipe.current.steps = steps;
         });
@@ -651,7 +651,7 @@ describe('Recipe service', function () {
             expect(ParametersService.initParamsValues).toHaveBeenCalledWith(steps[4].transformation, steps[4].actionParameters.parameters);
         }));
 
-        it('should init step filters from backend tree', inject(($rootScope, StateService, FilterAdapterService, RecipeService) => {
+        it('should init step filters from backend tree', inject(($rootScope, StateService, TqlFilterAdapterService, RecipeService) => {
             //given
             stateMock.playground.preparation = { id: '627766216e4b3c99ee5c8621f32ac42f4f87f1b4' };
 
@@ -663,7 +663,7 @@ describe('Recipe service', function () {
             expect(StateService.setRecipeSteps).toHaveBeenCalled();
             const args = StateService.setRecipeSteps.calls.argsFor(0);
             const steps = args[1];
-            expect(FilterAdapterService.fromTree).toHaveBeenCalledWith(
+            expect(TqlFilterAdapterService.fromTQL).toHaveBeenCalledWith(
                 steps[0].actionParameters.parameters.filter,
                 stateMock.playground.data.metadata.columns
             );

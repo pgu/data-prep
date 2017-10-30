@@ -20,9 +20,9 @@ import _ from 'lodash';
  * @requires data-prep.services.preparation.service:PreparationService
  * @requires data-prep.services.parameters.service:ParametersService
  * @requires data-prep.services.transformation.service:TransformationService
- * @requires data-prep.services.filters.service:FilterAdapterService
+ * @requires data-prep.services.filters.service:TqlFilterAdapterService
  */
-export default function RecipeService(state, StateService, StepUtilsService, PreparationService, ParametersService, TransformationService, FilterAdapterService) {
+export default function RecipeService(state, StateService, StepUtilsService, PreparationService, ParametersService, TransformationService, TqlFilterAdapterService) {
 	'ngInject';
 
 	return {
@@ -108,6 +108,8 @@ export default function RecipeService(state, StateService, StepUtilsService, Pre
 		const metadata = actionStep[2];
 		const diff = actionStep[3];
 
+
+
 		const item = {
 			column: {
 				id: actionValues.parameters.column_id,
@@ -126,7 +128,7 @@ export default function RecipeService(state, StateService, StepUtilsService, Pre
 			},
 			actionParameters: actionValues,
 			diff,
-			filters: FilterAdapterService.fromTree(
+			filters: TqlFilterAdapterService.fromTQL(
 				actionValues.parameters.filter,
 				state.playground.data.metadata.columns
 			),

@@ -30,6 +30,7 @@
     "@talend/icons": "0.104.0",
     "@talend/react-components": "0.104.0",
     "@talend/react-forms": "0.104.0",
+    "@talend/tql": "0.19.2-SNAPSHOT",
     "@talend/daikon-tql-client": "0.19.2-SNAPSHOT",
     "X-SlickGrid": "git+https://github.com/ddomingues/X-SlickGrid#2e7784a39c2625c3800ebfeb62e4b239e2eafacf",
     "angular": "1.5.9",

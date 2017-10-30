@@ -22,7 +22,7 @@ export const CTRL_KEY_NAME = 'ctrl';
  * @ngdoc service
  * @name data-prep.services.filter.service:FilterService
  * @description Filter service. This service provide the entry point to datagrid filters
- * @requires data-prep.services.filter.service:FilterAdapterService
+ * @requires data-prep.services.filter.service:TqlFilterAdapterService
  * @requires data-prep.services.state.constant:state
  * @requires data-prep.services.state.service:StateService
  * @requires data-prep.services.utils.service:ConverterService
@@ -32,12 +32,11 @@ export const CTRL_KEY_NAME = 'ctrl';
  */
 export default class FilterService {
 
-	constructor(state, StateService, FilterAdapterService, TqlFilterAdapterService, ConverterService, TextFormatService, DateService, StorageService) {
+	constructor(state, StateService, TqlFilterAdapterService, ConverterService, TextFormatService, DateService, StorageService) {
 		'ngInject';
 
 		this.state = state;
 		this.StateService = StateService;
-		this.FilterAdapterService = FilterAdapterService;
 		this.TqlFilterAdapterService = TqlFilterAdapterService;
 		this.ConverterService = ConverterService;
 		this.TextFormatService = TextFormatService;
@@ -746,15 +745,5 @@ export default class FilterService {
 	//Frontend can send only TQL to backend
 	stringify(filters) {
 		return this.TqlFilterAdapterService.toTQL(filters);
-	}
-
-	//Frontend can receive TQL or JSON from backend for the old version
-	parse(str) {
-		if (str.startsWith("{")) {
-			return this.FilterAdapterService.fromTree(str);
-
-		} else {
-			return this.TqlFilterAdapterService.fromTQL(str);
-		}
 	}
 }
