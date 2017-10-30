@@ -8,6 +8,14 @@
   dependencies:
     bootstrap-sass "3.3.7"
 
+"@talend/daikon-tql-client@0.19.2-SNAPSHOT":
+  version "0.19.2-SNAPSHOT"
+  resolved "https://registry.yarnpkg.com/@talend/daikon-tql-client/-/daikon-tql-client-0.19.2-SNAPSHOT.tgz#b256bb43f0f375a0c8d980981910b99d7375bfa5"
+  dependencies:
+    babel-polyfill "^6.26.0"
+    hoist-non-react-statics "^1.2.0"
+    mock-socket "^7.0.0"
+
 "@talend/icons@0.104.0":
   version "0.104.0"
   resolved "https://registry.yarnpkg.com/@talend/icons/-/icons-0.104.0.tgz#7d6c07f3e824953327c93face080e5f8829b829c"
@@ -835,6 +843,14 @@ babel-polyfill@6.23.0, babel-polyfill@^6.23.0:
     core-js "^2.4.0"
     regenerator-runtime "^0.10.0"
 
+babel-polyfill@^6.26.0:
+  version "6.26.0"
+  resolved "https://registry.yarnpkg.com/babel-polyfill/-/babel-polyfill-6.26.0.tgz#379937abc67d7895970adc621f284cd966cf2153"
+  dependencies:
+    babel-runtime "^6.26.0"
+    core-js "^2.5.0"
+    regenerator-runtime "^0.10.5"
+
 babel-preset-env@^1.1.11:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/babel-preset-env/-/babel-preset-env-1.2.1.tgz#659178f54df74a74765f796be4d290b5beeb3f5f"
@@ -908,7 +924,7 @@ babel-runtime@^6.11.6, babel-runtime@^6.20.0, babel-runtime@^6.9.0:
     core-js "^2.4.0"
     regenerator-runtime "^0.10.0"
 
-babel-runtime@^6.23.0:
+babel-runtime@^6.23.0, babel-runtime@^6.26.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
   dependencies:
@@ -1579,6 +1595,10 @@ core-js@^1.0.0:
 core-js@^2.2.0, core-js@^2.4.0:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.4.1.tgz#4de911e667b0eae9124e34254b53aea6fc618d3e"
+
+core-js@^2.5.0:
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.1.tgz#ae6874dc66937789b80754ff5428df66819ca50b"
 
 core-util-is@~1.0.0:
   version "1.0.2"
@@ -2966,6 +2986,10 @@ hoek@2.x.x:
   version "2.16.3"
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-2.16.3.tgz#20bb7403d3cea398e91dc4710a8ff1b8274a25ed"
 
+hoist-non-react-statics@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-1.2.0.tgz#aa448cf0986d55cc40773b17174b7dd066cb7cfb"
+
 home-or-tmp@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/home-or-tmp/-/home-or-tmp-2.0.0.tgz#e36c3f2d2cae7d746a857e38d18d5f32a7882db8"
@@ -4044,6 +4068,10 @@ mkdirp@0.5.1, mkdirp@0.5.x, "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdi
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.5.1.tgz#30057438eac6cf7f8c4767f38648d6697d75c903"
   dependencies:
     minimist "0.0.8"
+
+mock-socket@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/mock-socket/-/mock-socket-7.0.0.tgz#4ae80b9ff8b40625e4f491ef1d1043c1667bdb72"
 
 modernizr@^3.3.1:
   version "3.3.1"
@@ -5331,6 +5359,10 @@ regenerate@^1.2.1:
 regenerator-runtime@^0.10.0:
   version "0.10.1"
   resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.10.1.tgz#257f41961ce44558b18f7814af48c17559f9faeb"
+
+regenerator-runtime@^0.10.5:
+  version "0.10.5"
+  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.10.5.tgz#336c3efc1220adcedda2c9fab67b5a7955a33658"
 
 regenerator-runtime@^0.11.0:
   version "0.11.0"

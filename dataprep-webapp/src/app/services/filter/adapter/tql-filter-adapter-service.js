@@ -11,13 +11,7 @@
 
  ============================================================================*/
 
-import _ from 'lodash';
-
-
-const isString = v => typeof v === 'string';
-const wrap = (v) => {
-	return isString(v) ? `'${v}'` : v;
-};
+import { Parser } from '@talend/daikon-tql-client';
 
 export const CONTAINS = 'contains';
 export const EXACT = 'exact';
@@ -28,68 +22,32 @@ export const INSIDE_RANGE = 'inside_range';
 export const MATCHES = 'matches';
 export const QUALITY = 'quality';
 
-const OPERATORS = {
-	EQUAL: {
-		value: '=',
-	},
-	CONTAINS: {
-		value: 'contains',
-	},
-	COMPLIES_TO: {
-		value: 'complies',
-	},
-	GREATER_THAN: {
-		value: '>=',
-	},
-	LESS_THAN: {
-		value: '<=',
-	},
-	IS_VALID: {
-		value: 'is valid',
-		hasOperand: false,
-	},
-	IS_INVALID: {
-		value: 'is invalid',
-		hasOperand: false,
-	},
-	IS_EMPTY: {
-		value: 'is empty',
-		hasOperand: false,
-	},
-};
-
 export default function TqlFilterAdapterService($translate) {
-	'ngInject';
+	const INVALID_EMPTY_RECORDS_VALUES = [
+		{
+			label: $translate.instant('INVALID_EMPTY_RECORDS_LABEL'),
+		},
+	];
 
-	const CONVERTERS = {
-		[CONTAINS]: (field, value) => buildQuery(field, OPERATORS.CONTAINS, value),
-		[EXACT]: (field, value) => buildQuery(field, OPERATORS.EQUAL, value),
-		[INVALID_RECORDS]: field => buildQuery(field, OPERATORS.IS_INVALID),
-		[VALID_RECORDS]: field => buildQuery(field, OPERATORS.IS_VALID),
-		[MATCHES]: (field, value) => buildQuery(field, OPERATORS.COMPLIES_TO, value),
-		[EMPTY_RECORDS]: field => buildQuery(field, OPERATORS.IS_EMPTY),
-		[INSIDE_RANGE]: convertRangeFilterToTQL,
-		//TODO [QUALITY]: convertRangeFilterToTQL,
-	};
+	const INVALID_RECORDS_VALUES = [
+		{
+			label: $translate.instant('INVALID_RECORDS_LABEL'),
+		},
+	];
 
+	const VALID_RECORDS_VALUES = [
+		{
+			label: $translate.instant('VALID_RECORDS_LABEL'),
+		},
+	];
 
-	const INVALID_EMPTY_RECORDS_VALUES = [{
-		label: $translate.instant('INVALID_EMPTY_RECORDS_LABEL'),
-	}];
-
-	const INVALID_RECORDS_VALUES = [{
-		label: $translate.instant('INVALID_RECORDS_LABEL'),
-	}];
-
-	const VALID_RECORDS_VALUES = [{
-		label: $translate.instant('VALID_RECORDS_LABEL'),
-	}];
-
-	const EMPTY_RECORDS_VALUES = [{
-		label: $translate.instant('EMPTY_RECORDS_LABEL'),
-		isEmpty: true,
-		value: '',
-	}];
+	const EMPTY_RECORDS_VALUES = [
+		{
+			label: $translate.instant('EMPTY_RECORDS_LABEL'),
+			isEmpty: true,
+			value: '',
+		},
+	];
 
 	return {
 		EMPTY_RECORDS_VALUES,
@@ -121,8 +79,9 @@ export default function TqlFilterAdapterService($translate) {
 
 		filter.__defineGetter__('badgeClass', getBadgeClass.bind(filter)); // eslint-disable-line no-underscore-dangle
 		filter.__defineGetter__('value', getFilterValueGetter.bind(filter)); // eslint-disable-line no-underscore-dangle
-		filter.__defineSetter__('value', value => getFilterValueSetter.call(filter, value)); // eslint-disable-line no-underscore-dangle
-		filter.toTQL = getFilterTQL.bind(filter);
+		filter.__defineSetter__('value', value =>
+			getFilterValueSetter.call(filter, value)
+		); // eslint-disable-line no-underscore-dangle
 		return filter;
 	}
 
@@ -170,7 +129,9 @@ export default function TqlFilterAdapterService($translate) {
 				[INVALID_RECORDS]: !!this.args.invalid,
 			};
 
-			return Object.keys(classes).filter(n => classes[n]).join(' ');
+			return Object.keys(classes)
+				.filter(n => classes[n])
+				.join(' ');
 		}
 
 		return this.type;
@@ -197,82 +158,17 @@ export default function TqlFilterAdapterService($translate) {
 		}
 	}
 
-	/**
-	 * @ngdoc method
-	 * @name reduceOrFn
-	 * @methodOf data-prep.services.filter.service:FilterAdapterService
-	 * @param {Object} accu The filter tree accumulator
-	 * @param {Object} filterItem The filter definition
-	 * @description Reduce function for filters adaptation to tree
-	 * @returns {Object} The combined filter/accumulator tree
-	 */
-	function reduceOrFn(oldFilter, newFilter) {
-		if (oldFilter) {
-			newFilter = `(${oldFilter} or ${newFilter})`;
-		}
-		return newFilter;
-	}
-
-	/**
-	 * @ngdoc method
-	 * @name getFilterTQL
-	 * @methodOf data-prep.services.filter.service:FilterAdapterService
-	 * @description Adapt filter to single TQL string.
-	 * @returns {String} The filter TQL
-	 */
-	function getFilterTQL() {
-		const converter = CONVERTERS[this.type];
-		if (converter) {
-			return this.value
-				.map(filterValue => converter(this.colId, filterValue.value))
-				.reduce(reduceOrFn);
-		}
-	}
-
-	function buildQuery(fieldId, operator, value) {
-		if (operator.hasOperand !== false && value !== '') {
-			return `(${fieldId} ${operator.value} ${wrap(value)})`;
-		}
-		else if (operator.hasOperand === false) {
-			return `(${fieldId} ${operator.value})`;
-		}
-
-		return `(${fieldId} ${OPERATORS.IS_EMPTY.value})`;
-	}
-
-	function convertRangeFilterToTQL(fieldId, values) {
-		// FIXME [NC]:
-		if (!Array.isArray(values)) {
-			values = Array(2).fill(values);
-		}
-
-		return [OPERATORS.GREATER_THAN, OPERATORS.LESS_THAN]
-			.map((operator, i) => buildQuery(fieldId, operator, values[i]))
-			.reduce(reduceAndFn);
-	}
-
 	//--------------------------------------------------------------------------------------------------------------
 	// ---------------------------------------------------CONVERTION-------------------------------------------------
 	// -------------------------------------------------FILTER ==> TQL----------------------------------------------
 	//--------------------------------------------------------------------------------------------------------------
 	function toTQL(filters) {
-		if (filters.length === 1) {
-			return filters[0].toTQL();
-		}
-		return _.reduce(filters, reduceAndFn, '');
+		return Parser.parse(filters).serialize();
 	}
 
-	function reduceAndFn(accu, item) {
-		if (!isString(item)) {
-			item = item.toTQL();
-		}
-
-		return (accu && item) ? `${accu} and ${item}` : item;
-	}
 	//--------------------------------------------------------------------------------------------------------------
 	// ---------------------------------------------------CONVERTION-------------------------------------------------
 	// -------------------------------------------------TQL ==> FILTER----------------------------------------------
 	//--------------------------------------------------------------------------------------------------------------
-	function fromTQL(tql) {
-	}
+	function fromTQL(tql) {}
 }
