@@ -594,7 +594,6 @@ public class PreparationService {
         }
 
         final PreparationMessage details = beanConversionService.convert(preparation, PreparationMessage.class);
-        filterTranslator.translateFiltersToTQL(details);
         LOGGER.info("returning details for {} -> {}", id, details);
         return details;
     }

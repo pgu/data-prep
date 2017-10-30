@@ -13,15 +13,6 @@
 
 package org.talend.dataprep.api.filter;
 
-import static java.time.Month.JANUARY;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
-import java.lang.reflect.Field;
-import java.time.DateTimeException;
-import java.time.LocalDateTime;
-import java.util.function.Predicate;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -29,11 +20,17 @@ import org.talend.dataprep.api.dataset.ColumnMetadata;
 import org.talend.dataprep.api.dataset.row.DataSetRow;
 import org.talend.dataprep.transformation.actions.date.DateParser;
 
-public abstract class MonolingualAbstractFilterServiceTest extends FilterServiceTest {
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
+import java.util.function.Predicate;
 
-    private final PredicateFilterProvider predicateFilterProvider = new PredicateFilterProvider();
+import static java.time.Month.JANUARY;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
-    protected final FilterService service = getFilterService(predicateFilterProvider);
+public abstract class AbstractFilterServiceTest extends FilterServiceTest {
+
+    protected final FilterService service = getFilterService();
 
     protected Predicate<DataSetRow> filter;
 
@@ -45,17 +42,9 @@ public abstract class MonolingualAbstractFilterServiceTest extends FilterService
     /**
      * Return a FilterService.
      *
-     * @param predicateFilterProvider the provider of predicates for filters
      * @return an instance of FilterService
      */
-    protected abstract FilterService getFilterService(final PredicateFilterProvider predicateFilterProvider);
-
-    private void setDateParserForTestPurpose(DateParser dateParser) throws Exception {
-        final Field dateParserField = PredicateFilterProvider.class.getDeclaredField("dateParser");
-        dateParserField.setAccessible(true);
-        dateParserField.set(predicateFilterProvider, dateParser);
-        dateParserField.setAccessible(false);
-    }
+    protected abstract FilterService getFilterService();
 
     @Test
     public void testEqualsPredicateOnStringValue() throws Exception {
@@ -516,8 +505,6 @@ public abstract class MonolingualAbstractFilterServiceTest extends FilterService
         when(dateParser.parse("1990-01-01", column)).thenReturn(LocalDateTime.of(1990, JANUARY, 1, 0, 0));
         when(dateParser.parse("2000-01-01", column)).thenReturn(LocalDateTime.of(2000, JANUARY, 1, 0, 0));
 
-        setDateParserForTestPurpose(dateParser);
-
         // when
         filter = service.build(filtersDefinition, rowMetadata);
 
@@ -529,8 +516,6 @@ public abstract class MonolingualAbstractFilterServiceTest extends FilterService
         assertThatFilterExecutionReturnsFalseForRow("0001", "1990-01-01"); // eq max
         assertThatFilterExecutionReturnsFalseForRow("0001", "2000-01-01"); // gt max
 
-        // tear down
-        setDateParserForTestPurpose(null);
     }
 
     protected abstract String givenFilter_0001_between_timestampFor19700101_and_timestampFor19900101();

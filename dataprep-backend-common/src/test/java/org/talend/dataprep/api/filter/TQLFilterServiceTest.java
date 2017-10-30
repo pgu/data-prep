@@ -19,11 +19,11 @@ import java.time.LocalDateTime;
 
 import org.junit.Test;
 
-public class TQLFilterServiceTest extends MonolingualAbstractFilterServiceTest {
+public class TQLFilterServiceTest extends AbstractFilterServiceTest {
 
     @Override
-    protected FilterService getFilterService(final PredicateFilterProvider predicateFilterProvider) {
-        return new TQLFilterService(predicateFilterProvider);
+    protected FilterService getFilterService() {
+        return new TQLFilterService();
     }
 
     @Test

@@ -36,11 +36,17 @@ import java.util.function.Predicate;
 import static org.talend.daikon.number.BigDecimalParser.toBigDecimal;
 import static org.talend.dataprep.util.NumericHelper.isBigDecimal;
 
-public class PredicateFilterProvider {
+/**
+ * Common data set row filters.
+ */
+class DataSetRowFilters {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PredicateFilterProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSetRowFilters.class);
 
-    private DateParser dateParser;
+    private static DateParser dateParser;
+
+    private DataSetRowFilters() {
+    }
 
     /**
      * Create a predicate that checks if the var is equals to a value.
@@ -51,16 +57,10 @@ public class PredicateFilterProvider {
      * @param value The compared value
      * @return The eq predicate
      */
-    public Predicate<DataSetRow> createEqualsPredicate(final String columnId, final String value) {
-        return r -> {
-            if (StringUtils.equals(r.get(columnId), value)) {
-                return true;
-            } else {
-                return isBigDecimal(r.get(columnId)) //
-                        && isBigDecimal(value) //
-                        && toBigDecimal(r.get(columnId)).compareTo(toBigDecimal(value)) == 0;
-            }
-        };
+    static Predicate<DataSetRow> createEqualsPredicate(final String columnId, final String value) {
+        return r -> StringUtils.equals(r.get(columnId), value) || isBigDecimal(r.get(columnId)) //
+                && isBigDecimal(value) //
+                && toBigDecimal(r.get(columnId)).compareTo(toBigDecimal(value)) == 0;
     }
 
     /**
@@ -70,7 +70,7 @@ public class PredicateFilterProvider {
      * @param value The compared value
      * @return The gt predicate
      */
-    public Predicate<DataSetRow> createGreaterThanPredicate(final String columnId, final String value) {
+    static Predicate<DataSetRow> createGreaterThanPredicate(final String columnId, final String value) {
         return r -> isBigDecimal(r.get(columnId)) //
                 && isBigDecimal(value) //
                 && toBigDecimal(r.get(columnId)).compareTo(toBigDecimal(value)) > 0;
@@ -83,7 +83,7 @@ public class PredicateFilterProvider {
      * @param value The compared value
      * @return The lt predicate
      */
-    public Predicate<DataSetRow> createLowerThanPredicate(final String columnId, final String value) {
+    static Predicate<DataSetRow> createLowerThanPredicate(final String columnId, final String value) {
         return r -> isBigDecimal(r.get(columnId)) //
                 && isBigDecimal(value) //
                 && toBigDecimal(r.get(columnId)).compareTo(toBigDecimal(value)) < 0;
@@ -96,7 +96,7 @@ public class PredicateFilterProvider {
      * @param value The compared value
      * @return The gte predicate
      */
-    public Predicate<DataSetRow> createGreaterOrEqualsPredicate(final String columnId, final String value) {
+    static Predicate<DataSetRow> createGreaterOrEqualsPredicate(final String columnId, final String value) {
         return r -> isBigDecimal(r.get(columnId)) //
                 && isBigDecimal(value) //
                 && toBigDecimal(r.get(columnId)).compareTo(toBigDecimal(value)) >= 0;
@@ -109,7 +109,7 @@ public class PredicateFilterProvider {
      * @param value The compared value
      * @return The lte predicate
      */
-    public Predicate<DataSetRow> createLowerOrEqualsPredicate(final String columnId, final String value) {
+    static Predicate<DataSetRow> createLowerOrEqualsPredicate(final String columnId, final String value) {
         return r -> isBigDecimal(r.get(columnId)) //
                 && isBigDecimal(value) //
                 && toBigDecimal(r.get(columnId)).compareTo(toBigDecimal(value)) <= 0;
@@ -122,7 +122,7 @@ public class PredicateFilterProvider {
      * @param value The contained value
      * @return The contains predicate
      */
-    public Predicate<DataSetRow> createContainsPredicate(final String columnId, final String value) {
+    static Predicate<DataSetRow> createContainsPredicate(final String columnId, final String value) {
         return r -> StringUtils.containsIgnoreCase(r.get(columnId), value);
     }
 
@@ -133,7 +133,7 @@ public class PredicateFilterProvider {
      * @param value The value to comply to
      * @return The complies predicate
      */
-    public Predicate<DataSetRow> createCompliesPredicate(final String columnId, final String value) {
+    static Predicate<DataSetRow> createCompliesPredicate(final String columnId, final String value) {
         return r -> complies(r.get(columnId), value);
     }
 
@@ -144,7 +144,7 @@ public class PredicateFilterProvider {
      * @param pattern A pattern as returned in value analysis.
      * @return <code>true</code> if value complies, <code>false</code> otherwise.
      */
-    private boolean complies(String value, String pattern) {
+    private static boolean complies(String value, String pattern) {
         if (value == null && pattern == null) {
             return true;
         }
@@ -194,7 +194,7 @@ public class PredicateFilterProvider {
      * @param columnId The column id
      * @return The invalid value predicate
      */
-    public Predicate<DataSetRow> createInvalidPredicate(final String columnId) {
+    static Predicate<DataSetRow> createInvalidPredicate(final String columnId) {
         return r -> r.isInvalid(columnId);
     }
 
@@ -204,7 +204,7 @@ public class PredicateFilterProvider {
      * @param columnId The column id
      * @return The valid value predicate
      */
-    public Predicate<DataSetRow> createValidPredicate(final String columnId) {
+    static Predicate<DataSetRow> createValidPredicate(final String columnId) {
         return r -> !r.isInvalid(columnId) && StringUtils.isNotEmpty(r.get(columnId));
     }
 
@@ -214,7 +214,7 @@ public class PredicateFilterProvider {
      * @param columnId The column id
      * @return The empty value predicate
      */
-    public Predicate<DataSetRow> createEmptyPredicate(final String columnId) {
+    static Predicate<DataSetRow> createEmptyPredicate(final String columnId) {
         return r -> StringUtils.isEmpty(r.get(columnId));
     }
 
@@ -227,7 +227,7 @@ public class PredicateFilterProvider {
      * @param rowMetadata The row metadata
      * @return The range predicate
      */
-    public Predicate<DataSetRow> createRangePredicate(final String columnId, final String min, final String max,
+    static Predicate<DataSetRow> createRangePredicate(final String columnId, final String min, final String max,
             final RowMetadata rowMetadata) {
         return r -> {
             final String columnType = rowMetadata.getById(columnId).getType();
@@ -250,7 +250,7 @@ public class PredicateFilterProvider {
      * @param end The end value
      * @return The date range predicate
      */
-    private Predicate<DataSetRow> createDateRangePredicate(final String columnId, final String start, final String end,
+    private static Predicate<DataSetRow> createDateRangePredicate(final String columnId, final String start, final String end,
             final RowMetadata rowMetadata) {
         try {
             final long minTimestamp = Long.parseLong(start);
@@ -271,7 +271,7 @@ public class PredicateFilterProvider {
         }
     }
 
-    private Predicate<DataSetRow> safeDate(Predicate<DataSetRow> inner) {
+    private static Predicate<DataSetRow> safeDate(Predicate<DataSetRow> inner) {
         return r -> {
             try {
                 return inner.test(r);
@@ -282,7 +282,7 @@ public class PredicateFilterProvider {
         };
     }
 
-    private synchronized DateParser getDateParser() {
+    private static synchronized DateParser getDateParser() {
         if (dateParser == null) {
             dateParser = new DateParser(Providers.get(AnalyzerService.class));
         }
@@ -297,7 +297,7 @@ public class PredicateFilterProvider {
      * @param max The maximal value (excluded)
      * @return The number range predicate
      */
-    private Predicate<DataSetRow> createNumberRangePredicate(final String columnId, final String min, final String max) {
+    private static Predicate<DataSetRow> createNumberRangePredicate(final String columnId, final String min, final String max) {
         try {
             final BigDecimal low = toBigDecimal(min);
             final BigDecimal high = toBigDecimal(max);

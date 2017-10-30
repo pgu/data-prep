@@ -13,79 +13,106 @@
 
 package org.talend.dataprep.api.filter;
 
-import static org.talend.dataprep.api.filter.SimpleFilterService.EQ;
-import static org.talend.dataprep.transformation.actions.common.ImplicitParameters.FILTER;
-
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.talend.daikon.exception.TalendRuntimeException;
-import org.talend.dataprep.BaseErrorCodes;
-import org.talend.dataprep.api.preparation.Action;
-import org.talend.dataprep.api.preparation.PreparationMessage;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang.StringUtils;
+import org.talend.dataprep.api.dataset.RowMetadata;
 
-/** Translate legacy JSON filters to TQL filters. */
+import static org.talend.dataprep.api.filter.JSONFilterWalker.walk;
+
+/**
+ * Translate legacy JSON filters to TQL filters.
+ */
 public class FilterTranslator {
 
-    private final ObjectMapper mapper = new ObjectMapper();;
-
-    public void translateFiltersToTQL(final PreparationMessage preparation) {
-        final List<Action> actions = preparation.getActions();
-        if (CollectionUtils.isEmpty(actions)) {
-            return;
-        }
-        for (Action action : actions) {
-            final String filter = action.getParameters().get(FILTER.getKey());
-            action.getParameters().put(FILTER.getKey(), translateToTQL(filter));
-        }
-    }
-
-    private String translateToTQL(final String filter) {
+    /**
+     * Translates the JSON <code>filter</code> into TQL. If the <code>filter</code> is already a TQL query, this method
+     * is a no op.
+     *
+     * @param filter The filter to be translated to TQL.
+     * @return The <code>filter</code>
+     */
+    public String toTQL(final String filter) {
         if (StringUtils.isBlank(filter) || !filter.startsWith("{")) {
             return filter;
         }
-        try {
-            final JsonNode root = mapper.reader().readTree(filter);
-            final Iterator<JsonNode> children = root.elements();
-            final JsonNode filterContent = children.next();
-            final String columnId = extractColumnId(filterContent);
-            final String value = extractRawValue(filterContent);
-
-            final String operation = extractOperator(root);
-            final String tqlOperation;
-            switch (operation) {
-            case EQ:
-                tqlOperation = " = ";
-                break;
-            default:
-                return null;
-            }
-            return columnId + tqlOperation + value;
-        } catch (Exception e) {
-            throw new TalendRuntimeException(BaseErrorCodes.UNABLE_TO_PARSE_FILTER, e);
-        }
+        return walk(filter, new RowMetadata(), new ToTQLCallback());
     }
 
-    private String extractColumnId(JsonNode filterContent) {
-        return filterContent.has("field") ? filterContent.get("field").asText() : null;
-    }
+    private static class ToTQLCallback implements JSONFilterCallback<String> {
 
-    private String extractRawValue(JsonNode filterContent) {
-        return filterContent.has("value") ? filterContent.get("value").asText() : null;
-    }
-
-    private String extractOperator(JsonNode root) {
-        final Iterator<String> propertiesIterator = root.fieldNames();
-        if (!propertiesIterator.hasNext()) {
-            throw new UnsupportedOperationException("Unsupported query, empty filter definition: " + root.toString());
+        @Override
+        public String empty() {
+            return StringUtils.EMPTY;
         }
 
-        return propertiesIterator.next();
-    }
+        @Override
+        public String createEqualsPredicate(JsonNode currentNode, String columnId, String value) {
+            return columnId + " = '" + value + "'";
+        }
 
+        @Override
+        public String createGreaterThanPredicate(JsonNode currentNode, String columnId, String value) {
+            return columnId + " > '" + value + "'";
+        }
+
+        @Override
+        public String createLowerThanPredicate(JsonNode currentNode, String columnId, String value) {
+            return columnId + " < '" + value + "'";
+        }
+
+        @Override
+        public String createGreaterOrEqualsPredicate(JsonNode currentNode, String columnId, String value) {
+            return columnId + " >= '" + value + "'";
+        }
+
+        @Override
+        public String createLowerOrEqualsPredicate(JsonNode currentNode, String columnId, String value) {
+            return columnId + " <= '" + value + "'";
+        }
+
+        @Override
+        public String createContainsPredicate(JsonNode currentNode, String columnId, String value) {
+            return columnId + " contains " + value;
+        }
+
+        @Override
+        public String createMatchesPredicate(JsonNode currentNode, String columnId, String value) {
+            return columnId + " matches " + value;
+        }
+
+        @Override
+        public String createInvalidPredicate(String columnId) {
+            return columnId + " is invalid";
+        }
+
+        @Override
+        public String createValidPredicate(String columnId) {
+            return columnId + " is valid";
+        }
+
+        @Override
+        public String createEmptyPredicate(String columnId) {
+            return columnId + " is empty";
+        }
+
+        @Override
+        public String createRangePredicate(String columnId, JsonNode node, RowMetadata rowMetadata) {
+            return columnId + " in [" + node.get(0).asText() + ", " + node.get(1).asText() + "]";
+        }
+
+        @Override
+        public String or(String left, String right) {
+            return "(" + left + ") or (" + right + ")";
+        }
+
+        @Override
+        public String and(String left, String right) {
+            return "(" + left + ") and (" + right + ")";
+        }
+
+        @Override
+        public String not(String expression) {
+            return "!(" + expression + ")";
+        }
+    }
 }

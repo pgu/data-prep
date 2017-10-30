@@ -17,6 +17,7 @@ import static org.talend.dataprep.conversions.BeanConversionService.fromBean;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.action.ActionDefinition;
+import org.talend.dataprep.api.filter.FilterTranslator;
 import org.talend.dataprep.api.preparation.*;
 import org.talend.dataprep.api.share.Owner;
 import org.talend.dataprep.conversions.BeanConversionService;
@@ -33,6 +35,7 @@ import org.talend.dataprep.preparation.store.PersistentPreparation;
 import org.talend.dataprep.preparation.store.PreparationRepository;
 import org.talend.dataprep.processor.BeanConversionServiceWrapper;
 import org.talend.dataprep.security.Security;
+import org.talend.dataprep.transformation.actions.common.ImplicitParameters;
 import org.talend.dataprep.transformation.pipeline.ActionRegistry;
 
 /**
@@ -43,6 +46,8 @@ import org.talend.dataprep.transformation.pipeline.ActionRegistry;
 public class PreparationConversions extends BeanConversionServiceWrapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PreparationConversions.class);
+
+    private final FilterTranslator translator = new FilterTranslator();
 
     @Override
     public BeanConversionService doWith(BeanConversionService conversionService, String beanName,
@@ -114,6 +119,11 @@ public class PreparationConversions extends BeanConversionServiceWrapper {
                 final PreparationActions prepActions = preparationRepository.get(head.getContent(), PreparationActions.class);
                 if (prepActions != null) {
                     final List<Action> actions = prepActions.getActions();
+                    for (Action action : actions) {
+                        // Translate filter from JSON to TQL
+                        Map<String, String> parameters = action.getParameters();
+                        parameters.put(ImplicitParameters.FILTER.getKey(), translator.toTQL(parameters.get(ImplicitParameters.FILTER.getKey())));
+                    }
                     target.setActions(prepActions.getActions());
 
                     // Allow distributed run
