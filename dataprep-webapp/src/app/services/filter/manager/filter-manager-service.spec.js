@@ -43,7 +43,7 @@ describe('Filter Manager Service', () => {
 	}));
 
 	describe('Interval label', () => {
-	    it('should construct range label', inject((FilterManagerService) => {
+	    it('should construct range label', inject((FilterUtilsService) => {
 	        //given
 	        const intervals = [
 	            { input: { min: 0, max: 10, isMaxReached: false }, output: '[0 .. 10[' },
@@ -53,7 +53,7 @@ describe('Filter Manager Service', () => {
 	        ];
 
 	        //when
-	        const fn = FilterManagerService.getRangeLabelFor;
+	        const fn = FilterUtilsService.getRangeLabelFor;
 
 	        //then
 	        intervals.forEach(interval => expect(fn(interval.input)).toEqual(interval.output));
