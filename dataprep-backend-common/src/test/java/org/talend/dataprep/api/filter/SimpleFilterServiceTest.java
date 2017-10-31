@@ -69,11 +69,11 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test(expected = TalendRuntimeException.class)
     public void should_create_unknown_filter() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"bouh\": {" +
-                "       \"field\": \"0001\"," +
-                "       \"value\": \"toto\"" +
-                "   }" +
+        final String filtersDefinition = "{" + //
+                "   \"bouh\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"value\": \"toto\"" + //
+                "   }" + //
                 "}";
 
         //when
@@ -85,10 +85,10 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test
     public void should_create_EQ_predicate_on_all() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"eq\": {" +
-                "       \"value\": \"toto\"" +
-                "   }" +
+        final String filtersDefinition = "{" + //
+                "   \"eq\": {" + //
+                "       \"value\": \"toto\"" + //
+                "   }" + //
                 "}";
 
         //when
@@ -107,10 +107,10 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test
     public void should_create_GT_predicate_on_all() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"gt\": {" +
-                "       \"value\": 5" +
-                "   }" +
+        final String filtersDefinition = "{" + //
+                "   \"gt\": {" + //
+                "       \"value\": 5" + //
+                "   }" + //
                 "}";
 
         //when
@@ -129,10 +129,10 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test
     public void should_create_GTE_predicate_on_all() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"gte\": {" +
-                "       \"value\": 5" +
-                "   }" +
+        final String filtersDefinition = "{" + //
+                "   \"gte\": {" + //
+                "       \"value\": 5" + //
+                "   }" + //
                 "}";
 
         //when
@@ -151,10 +151,10 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test
     public void should_create_LT_predicate_on_all() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"lt\": {" +
-                "       \"value\": 5" +
-                "   }" +
+        final String filtersDefinition = "{" + //
+                "   \"lt\": {" + //
+                "       \"value\": 5" + //
+                "   }" + //
                 "}";
 
         //when
@@ -173,10 +173,10 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test
     public void should_create_LTE_predicate_on_all() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"lte\": {" +
-                "       \"value\": 5" +
-                "   }" +
+        final String filtersDefinition = "{" + //
+                "   \"lte\": {" + //
+                "       \"value\": 5" + //
+                "   }" + //
                 "}";
 
         //when
@@ -195,10 +195,10 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test
     public void should_create_CONTAINS_predicate_on_all() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"contains\": {" +
-                "       \"value\": \"toto\"" +
-                "   }" +
+        final String filtersDefinition = "{" + //
+                "   \"contains\": {" + //
+                "       \"value\": \"toto\"" + //
+                "   }" + //
                 "}";
 
         //when
@@ -221,10 +221,10 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test
     public void should_create_COMPLIES_predicate_on_all() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"matches\": {" +
-                "       \"value\": \"Aa9-\"" +
-                "   }" +
+        final String filtersDefinition = "{" + //
+                "   \"matches\": {" + //
+                "       \"value\": \"Aa9-\"" + //
+                "   }" + //
                 "}";
 
         //when
@@ -245,9 +245,9 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test
     public void should_create_INVALID_predicate_on_all() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"invalid\": {" +
-                "   }" +
+        final String filtersDefinition = "{" + //
+                "   \"invalid\": {" + //
+                "   }" + //
                 "}";
 
         //when
@@ -265,9 +265,9 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test
     public void should_create_VALID_predicate_on_all() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"valid\": {" +
-                "   }" +
+        final String filtersDefinition = "{" + //
+                "   \"valid\": {" + //
+                "   }" + //
                 "}";
 
         //when
@@ -287,9 +287,9 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test
     public void should_create_EMPTY_predicate_on_all() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"empty\": {" +
-                "   }" +
+        final String filtersDefinition = "{" + //
+                "   \"empty\": {" + //
+                "   }" + //
                 "}";
 
         //when
@@ -307,11 +307,11 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test
     public void should_create_number_RANGE_predicate_on_all() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"range\": {" +
-                "       \"start\": \"5\"," +
-                "       \"end\": \"10\"" +
-                "   }" +
+        final String filtersDefinition = "{" + //
+                "   \"range\": {" + //
+                "       \"start\": \"5\"," + //
+                "       \"end\": \"10\"" + //
+                "   }" + //
                 "}";
 
         //when
@@ -329,20 +329,20 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test(expected = TalendRuntimeException.class)
     public void should_create_NOT_predicate_invalid1() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"not\": [" +
-                "       {" +
-                "           \"empty\": {" +
-                "               \"field\": \"0001\"" +
-                "           }" +
-                "       }," +
-                "       {" +
-                "           \"eq\": {" +
-                "               \"field\": \"0002\"," +
-                "               \"value\": \"toto\"" +
-                "           }" +
-                "       }" +
-                "   ]" +
+        final String filtersDefinition = "{" + //
+                "   \"not\": [" + //
+                "       {" + //
+                "           \"empty\": {" + //
+                "               \"field\": \"0001\"" + //
+                "           }" + //
+                "       }," + //
+                "       {" + //
+                "           \"eq\": {" + //
+                "               \"field\": \"0002\"," + //
+                "               \"value\": \"toto\"" + //
+                "           }" + //
+                "       }" + //
+                "   ]" + //
                 "}";
 
         //when
@@ -354,10 +354,11 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
     @Test(expected = TalendRuntimeException.class)
     public void should_create_NOT_predicate_invalid2() throws Exception {
         //given
-        final String filtersDefinition = "{" +
-                "   \"not\":" +
-                "       {" +
-                "       }" + "}";
+        final String filtersDefinition = "{" + //
+                "   \"not\":" + //
+                "       {" + //
+                "       }" + //
+                "}";
 
         // when
         service.build(filtersDefinition, rowMetadata);
@@ -367,144 +368,251 @@ public class SimpleFilterServiceTest extends MonolingualAbstractFilterServiceTes
 
     @Override
     protected String givenFilter_0001_equals_toto() {
-        return "{" + "   \"eq\": {" + "       \"field\": \"0001\"," + "       \"value\": \"toto\"" + "   }" + "}";
+        return "{" + //
+                "   \"eq\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"value\": \"toto\"" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_equals_5() {
-        return "{" + "   \"eq\": {" + "       \"field\": \"0001\"," + "       \"value\": \"5\"" + "   }" + "}";
+        return "{" + //
+                "   \"eq\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"value\": \"5\"" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_equals_5dot35() {
-        return "{" + "   \"eq\": {" + "       \"field\": \"0001\"," + "       \"value\": \"5.35\"" + "   }" + "}";
+        return "{" + //
+                "   \"eq\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"value\": \"5.35\"" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_not_equal_test() {
-        return "{" +
-                "   \"not\":" +
-                "       {" +
-                "           \"eq\": {" + "               \"field\": \"0001\"," + "               \"value\": \"test\""
-                + "           }" + "       }" + "}";
+        return "{" + //
+                "   \"not\":" + //
+                "       {" + //
+                "           \"eq\": {" + //
+                "               \"field\": \"0001\"," + //
+                "               \"value\": \"test\"" + //
+                "           }" + //
+                "       }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_not_equal_12() {
-        return "{" + "   \"not\":" + "       {" + "           \"eq\": {" + "               \"field\": \"0001\","
-                + "               \"value\": 12" + "           }" + "       }" + "}";
+        return "{" + //
+                "   \"not\":" + //
+                "       {" + //
+                "           \"eq\": {" + //
+                "               \"field\": \"0001\"," + //
+                "               \"value\": 12" + //
+                "           }" + //
+                "       }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_not_equal_24dot6() {
-        return "{" + "   \"not\":" + "       {" + "           \"eq\": {" + "               \"field\": \"0001\","
-                + "               \"value\": 24.6" + "           }" + "       }" + "}";
+        return "{" + //
+                "   \"not\":" + //
+                "       {" + //
+                "           \"eq\": {" + //
+                "               \"field\": \"0001\"," + //
+                "               \"value\": 24.6" + //
+                "           }" + //
+                "       }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_greater_than_5() {
-        return "{" + "   \"gt\": {" + "       \"field\": \"0001\"," + "       \"value\": 5" + "   }" + "}";
+        return "{" + //
+                "   \"gt\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"value\": 5" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_greater_than_minus0dot1() {
-        return "{" + "   \"gt\": {" + "       \"field\": \"0001\"," + "       \"value\": -0.1" + "   }" + "}";
+        return "{" + //
+                "   \"gt\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"value\": -0.1" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_greater_or_equal_5() {
-        return "{" + "   \"gte\": {" + "       \"field\": \"0001\"," + "       \"value\": 5" + "   }" + "}";
+        return "{" + //
+                "   \"gte\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"value\": 5" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_less_than_5() {
-        return "{" + "   \"lt\": {" + "       \"field\": \"0001\"," + "       \"value\": 5" + "   }" + "}";
+        return "{" + //
+                "   \"lt\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"value\": 5" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_less_or_equal_5() {
-        return "{" + "   \"lte\": {" + "       \"field\": \"0001\"," + "       \"value\": 5" + "   }" + "}";
+        return "{" + //
+                "   \"lte\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"value\": 5" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_contains_toto() {
-        return "{" + "   \"contains\": {" + "       \"field\": \"0001\"," + "       \"value\": \"toto\"" + "   }" + "}";
+        return "{" + //
+                "   \"contains\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"value\": \"toto\"" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_complies_Aa9dash() {
-        return "{" + "   \"matches\": {" + "       \"field\": \"0001\"," + "       \"value\": \"Aa9-\"" + "   }" + "}";
+        return "{" + //
+                "   \"matches\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"value\": \"Aa9-\"" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_complies_empty() {
-        return "{" + "   \"matches\": {" + "       \"field\": \"0001\"," + "       \"value\": \"\"" + "   }" + "}";
+        return "{" + //
+                "   \"matches\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"value\": \"\"" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_is_invalid() {
-        return "{" + "   \"invalid\": {" + "       \"field\": \"0001\"" + "   }" + "}";
+        return "{" + //
+                "   \"invalid\": {" + //
+                "       \"field\": \"0001\"" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_is_valid() {
-        return "{" + "   \"valid\": {" + "       \"field\": \"0001\"" + "   }" + "}";
+        return "{" + //
+                "   \"valid\": {" + //
+                "       \"field\": \"0001\"" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_is_empty() {
-        return "{" + "   \"empty\": {" + "       \"field\": \"0001\"" + "   }" + "}";
+        return "{" + //
+                "   \"empty\": {" + //
+                "       \"field\": \"0001\"" + //
+                "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_between_5_and_10() {
-        return "{" + "   \"range\": {" + "       \"field\": \"0001\"," + "       \"start\": \"5\"," + "       \"end\": \"10\""
-                + "   }" +
+        return "{" + //
+                "   \"range\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"start\": \"5\"," + //
+                "       \"end\": \"10\"" + //
+                "   }" + //
                 "}";
     }
 
     @Override
     protected String givenFilter_0001_between_timestampFor19700101_and_timestampFor19900101() {
-        return "{" + "   \"range\": {" + "       \"field\": \"0001\"," + "       \"start\": 0," + // 1970-01-01 UTC timezone
-                "       \"end\": " + (LocalDateTime.of(1990, JANUARY, 1, 0, 0).toEpochSecond(UTC) * 1000) + // 1990-01-01 UTC
-                                                                                                            // timezone
-                "   }" + "}";
+        return "{" + //
+                "   \"range\": {" + //
+                "       \"field\": \"0001\"," + //
+                "       \"start\": 0," + // 1970-01-01 UTC timezone
+                // 1990-01-01 UTC timezone
+                "       \"end\": " + (LocalDateTime.of(1990, JANUARY, 1, 0, 0).toEpochSecond(UTC) * 1000) + "   }" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_is_empty_AND_0002_equals_toto() {
-        return "{" + "   \"and\": [" +
-                "       {" +
-                "           \"empty\": {" +
-                "               \"field\": \"0001\"" +
-                "           }" +
-                "       }," +
-                "       {" +
-                "           \"eq\": {" +
-                "               \"field\": \"0002\"," +
-                "               \"value\": \"toto\"" +
-                "           }" +
-                "       }" +
-                "   ]" +
+        return "{" + //
+                "   \"and\": [" + //
+                "       {" + //
+                "           \"empty\": {" + //
+                "               \"field\": \"0001\"" + //
+                "           }" + //
+                "       }," + //
+                "       {" + //
+                "           \"eq\": {" + //
+                "               \"field\": \"0002\"," + //
+                "               \"value\": \"toto\"" + //
+                "           }" + //
+                "       }" + //
+                "   ]" + //
                 "}";
     }
 
     @Override
     protected String givenFilter_0001_contains_data_OR_0002_equals_12dot3() {
-        return "{" + "   \"or\": [" + "       {" + "           \"contains\": {" + "               \"field\": \"0001\","
-                + "               \"value\": \"data\"" + "           }" + "       }," + "       {" + "           \"eq\": {"
-                + "               \"field\": \"0002\"," + "               \"value\": \"12.3\"" + "           }" + "       }"
-                + "   ]" + "}";
+        return "{" + //
+                "   \"or\": [" + //
+                "       {" + //
+                "           \"contains\": {" + //
+                "               \"field\": \"0001\"," + //
+                "               \"value\": \"data\"" + //
+                "           }" + //
+                "       }," + //
+                "       {" + //
+                "           \"eq\": {" + //
+                "               \"field\": \"0002\"," + //
+                "               \"value\": \"12.3\"" + //
+                "           }" + //
+                "       }" + //
+                "   ]" + //
+                "}";
     }
 
     @Override
     protected String givenFilter_0001_does_not_contain_word() {
-        return "{" +
-                "   \"not\":" +
-                "       {" +
-                "           \"contains\": {" + "               \"field\": \"0001\"," + "               \"value\": \"word\""
-                + "           }" +
-                "       }" +
+        return "{" + //
+                "   \"not\":" + //
+                "       {" + //
+                "           \"contains\": {" + //
+                "               \"field\": \"0001\"," + //
+                "               \"value\": \"word\"" + //
+                "           }" + //
+                "       }" + //
                 "}";
     }
 

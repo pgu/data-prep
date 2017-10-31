@@ -45,6 +45,7 @@ import org.talend.daikon.exception.ExceptionContext;
 import org.talend.dataprep.api.action.ActionDefinition;
 import org.talend.dataprep.api.dataset.DataSetMetadata;
 import org.talend.dataprep.api.dataset.RowMetadata;
+import org.talend.dataprep.api.filter.FilterTranslator;
 import org.talend.dataprep.api.folder.Folder;
 import org.talend.dataprep.api.folder.FolderEntry;
 import org.talend.dataprep.api.preparation.*;
@@ -75,6 +76,8 @@ public class PreparationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PreparationService.class);
 
     private final ActionFactory factory = new ActionFactory();
+
+    private final FilterTranslator filterTranslator = new FilterTranslator();
 
     @Autowired
     private org.springframework.context.ApplicationContext springContext;
@@ -591,6 +594,7 @@ public class PreparationService {
         }
 
         final PreparationMessage details = beanConversionService.convert(preparation, PreparationMessage.class);
+        filterTranslator.translateFiltersToTQL(details);
         LOGGER.info("returning details for {} -> {}", id, details);
         return details;
     }

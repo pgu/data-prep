@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SimpleFilterService implements FilterService {
 
-    private static final String EQ = "eq";
+    protected static final String EQ = "eq";
 
     private static final String GT = "gt";
 
