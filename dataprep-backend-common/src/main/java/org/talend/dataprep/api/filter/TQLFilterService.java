@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang.StringUtils;
 import org.talend.dataprep.api.dataset.RowMetadata;
 import org.talend.dataprep.api.dataset.row.DataSetRow;
 import org.talend.tql.model.*;
@@ -39,6 +40,9 @@ public class TQLFilterService implements FilterService {
 
     @Override
     public Predicate<DataSetRow> build(String filterAsString, RowMetadata rowMetadata) {
+        if (StringUtils.isEmpty(filterAsString)) {
+            return row -> true;
+        }
         final TqlElement parsedPredicate = Tql.parse(filterAsString);
         return (Predicate<DataSetRow>) parsedPredicate.accept(new DataSetPredicateVisitor(predicateFilterProvider, rowMetadata));
     }
