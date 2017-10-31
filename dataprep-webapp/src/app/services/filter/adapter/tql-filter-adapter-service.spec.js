@@ -82,25 +82,25 @@ describe('TQL Filter Adapter Service', () => {
             }));
 
 
-            it('should return value on INVALID_RECORDS filter', inject((FilterAdapterService) => {
+            it('should return value on INVALID_RECORDS filter', inject((TqlFilterAdapterService) => {
                 //when
-                const filter = FilterAdapterService.createFilter(INVALID_RECORDS, null, null, null, null, null, null);
+                const filter = TqlFilterAdapterService.createFilter(INVALID_RECORDS, null, null, null, null, null, null);
 
                 //then
                 expect(filter.value).toEqual([{ label: 'rows with invalid values' }]);
             }));
 
-            it('should return value on QUALITY filter', inject((FilterAdapterService) => {
+            it('should return value on QUALITY filter', inject((TqlFilterAdapterService) => {
                 //when
-                const filter = FilterAdapterService.createFilter(QUALITY, null, null, null, { invalid: true, empty: true }, null, null);
+                const filter = TqlFilterAdapterService.createFilter(QUALITY, null, null, null, { invalid: true, empty: true }, null, null);
 
                 //then
                 expect(filter.value).toEqual([{ label: 'rows with invalid or empty values' }]);
             }));
 
-            it('should return value on EMPTY_RECORDS filter', inject((FilterAdapterService) => {
+            it('should return value on EMPTY_RECORDS filter', inject((TqlFilterAdapterService) => {
                 //when
-                const filter = FilterAdapterService.createFilter(EMPTY_RECORDS, null, null, null, null, null, null);
+                const filter = TqlFilterAdapterService.createFilter(EMPTY_RECORDS, null, null, null, null, null, null);
 
                 //then
                 expect(filter.value).toEqual([
@@ -111,15 +111,15 @@ describe('TQL Filter Adapter Service', () => {
                 ]);
             }));
 
-            it('should return value on VALID_RECORDS filter', inject((FilterAdapterService) => {
+            it('should return value on VALID_RECORDS filter', inject((TqlFilterAdapterService) => {
                 //when
-                const filter = FilterAdapterService.createFilter(VALID_RECORDS, null, null, null, null, null, null);
+                const filter = TqlFilterAdapterService.createFilter(VALID_RECORDS, null, null, null, null, null, null);
 
                 //then
                 expect(filter.value).toEqual([{ label: 'rows with valid values' }]);
             }));
 
-            it('should return value on INSIDE_RANGE filter', inject((FilterAdapterService) => {
+            it('should return value on INSIDE_RANGE filter', inject((TqlFilterAdapterService) => {
                 //given
                 const args = {
                     intervals: [
@@ -132,7 +132,7 @@ describe('TQL Filter Adapter Service', () => {
                 };
 
                 //when
-                const filter = FilterAdapterService.createFilter(INSIDE_RANGE, null, null, null, args, null, null);
+                const filter = TqlFilterAdapterService.createFilter(INSIDE_RANGE, null, null, null, args, null, null);
 
                 //then
                 expect(filter.value).toEqual([
@@ -143,7 +143,7 @@ describe('TQL Filter Adapter Service', () => {
                 ]);
             }));
 
-            it('should return value on MATCHES filter', inject((FilterAdapterService) => {
+            it('should return value on MATCHES filter', inject((TqlFilterAdapterService) => {
                 //given
                 const args = {
                     patterns: [
@@ -154,7 +154,7 @@ describe('TQL Filter Adapter Service', () => {
                 };
 
                 //when
-                const filter = FilterAdapterService.createFilter(MATCHES, null, null, null, args, null, null);
+                const filter = TqlFilterAdapterService.createFilter(MATCHES, null, null, null, args, null, null);
 
                 //then
                 expect(filter.value).toEqual([{ value: 'Aa9' }]);

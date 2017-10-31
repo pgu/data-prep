@@ -23,7 +23,7 @@ export const INSIDE_RANGE = 'inside_range';
 export const MATCHES = 'matches';
 export const QUALITY = 'quality';
 
-export default function TqlFilterAdapterService($translate) {
+export default function TqlFilterAdapterService($translate, FilterUtilsService) {
 	const INVALID_EMPTY_RECORDS_VALUES = [
 		{
 			label: $translate.instant('INVALID_EMPTY_RECORDS_LABEL'),
@@ -89,7 +89,7 @@ export default function TqlFilterAdapterService($translate) {
 	/**
 	 * @ngdoc method
 	 * @name getFilterValueGetter
-	 * @methodOf data-prep.services.filter.service:FilterAdapterService
+	 * @methodOf data-prep.services.filter.service:TqlFilterAdapterService
 	 * @description Return the filter value depending on its type. This function should be used with filter definition object binding
 	 * @returns {Object} The filter value
 	 */
@@ -118,7 +118,7 @@ export default function TqlFilterAdapterService($translate) {
 	/**
 	 * @ngdoc method
 	 * @name getBadgeClass
-	 * @methodOf data-prep.services.filter.service:FilterAdapterService
+	 * @methodOf data-prep.services.filter.service:TqlFilterAdapterService
 	 * @description Return a usable class name for the filter
 	 * @returns {Object} The class name
 	 */
@@ -141,7 +141,7 @@ export default function TqlFilterAdapterService($translate) {
 	/**
 	 * @ngdoc method
 	 * @name getFilterValueSetter
-	 * @methodOf data-prep.services.filter.service:FilterAdapterService
+	 * @methodOf data-prep.services.filter.service:TqlFilterAdapterService
 	 * @description Set the filter value depending on its type. This function should be used with filter definition object binding
 	 * @returns {Object} The filter value
 	 */
@@ -227,21 +227,29 @@ export default function TqlFilterAdapterService($translate) {
 			type = INSIDE_RANGE;
 			field = ctx.children[0].getText();
 
-			// // on date we shift timestamp to fit UTC timezone
-			// let offset = 0;
-			// if (condition.type === 'date') {
-			//	const minDate = new Date(condition.start);
-			//	offset = minDate.getTimezoneOffset() * 60 * 1000;
-			// }
-			//
-			// args = {
-			//	intervals: [{
-			//		label: condition.label,
-			//		value: [condition.start + offset, condition.end + offset],
-			//	}],
-			//	type: condition.type,
-			// };
-			// return createFilterFromTQL(type, field, editable, args),
+			const min  = ctx.children[3].getText();
+			const max  = ctx.children[5].getText();
+			const filteredColumn = _.find(columns, { id: field });
+			const isDateRange = filteredColumn && (filteredColumn.type === 'date');
+			// on date we shift timestamp to fit UTC timezone
+			let offset = 0;
+			if (isDateRange) {
+				const minDate = new Date(min);
+				offset = minDate.getTimezoneOffset() * 60 * 1000;
+			}
+
+			const label = isDateRange ?
+				FilterUtilsService.getDateLabel(filteredColumn.statistics.histogram.pace, min, max) :
+				FilterUtilsService.getRangeLabelFor({ min, max }, isDateRange);
+
+			args = {
+				intervals: [{
+					label,
+					value: [parseInt(min, 10) + offset, parseInt(max, 10) + offset],
+				}],
+				type: filteredColumn.type,
+			};
+			return createFilterFromTQL(type, field, editable, args, columns);
 		};
 		const onEmptyFilter = (ctx) => {
 			type = EMPTY_RECORDS;

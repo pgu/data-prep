@@ -22,7 +22,7 @@ import { CTRL_KEY_NAME } from '../../../services/filter/filter-service.js';
  * @requires data-prep.statistics.service:StatisticsTooltipService
  * @requires data-prep.services.filter-manager.service:FilterManagerService
  */
-export default function ColumnProfileCtrl($translate, $timeout, state, FilterManagerService,
+export default function ColumnProfileCtrl($translate, $timeout, state, FilterManagerService, FilterUtilsService,
                                           StatisticsService, StatisticsTooltipService) {
 	'ngInject';
 
@@ -80,7 +80,7 @@ export default function ColumnProfileCtrl($translate, $timeout, state, FilterMan
 		const args = {
 			intervals: [
 				{
-					label: interval.label || FilterManagerService.getRangeLabelFor(interval, isDateRange),
+					label: interval.label || FilterUtilsService.getRangeLabelFor(interval, isDateRange),
 					value: [min, max],
 					isMaxReached: interval.isMaxReached,
 				},
