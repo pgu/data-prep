@@ -181,7 +181,9 @@ export default function TqlFilterAdapterService($translate) {
 		const createFilterFromTQL = (type, colId, editable, args, columns) => {
 			const filteredColumn = _.find(columns, { id: colId });
 			const colName = (filteredColumn && filteredColumn.name) || colId;
-			filters.push(createFilter(type, colId, colName, editable, args, null));
+			filters.push(
+				createFilter(type, colId, colName, editable, args, null)
+			);
 		};
 
 		const onExactFilter = (ctx) => {
@@ -190,7 +192,7 @@ export default function TqlFilterAdapterService($translate) {
 			args = {
 				phrase: [
 					{
-						value: ctx.children[2].getText().replace(/'/g, ""),
+						value: ctx.children[2].getText().replace(/'/g, ''),
 					},
 				],
 			};
@@ -203,7 +205,7 @@ export default function TqlFilterAdapterService($translate) {
 			args = {
 				phrase: [
 					{
-						value: ctx.children[2].getText().replace(/'/g, ""),
+						value: ctx.children[2].getText().replace(/'/g, ''),
 					},
 				],
 			};
@@ -215,7 +217,7 @@ export default function TqlFilterAdapterService($translate) {
 			args = {
 				patterns: [
 					{
-						value: ctx.children[2].getText().replace(/'/g, ""),
+						value: ctx.children[2].getText().replace(/'/g, ''),
 					},
 				],
 			};
@@ -225,21 +227,21 @@ export default function TqlFilterAdapterService($translate) {
 			type = INSIDE_RANGE;
 			field = ctx.children[0].getText();
 
-			//// on date we shift timestamp to fit UTC timezone
-			//let offset = 0;
-			//if (condition.type === 'date') {
+			// // on date we shift timestamp to fit UTC timezone
+			// let offset = 0;
+			// if (condition.type === 'date') {
 			//	const minDate = new Date(condition.start);
 			//	offset = minDate.getTimezoneOffset() * 60 * 1000;
-			//}
+			// }
 			//
-			//args = {
+			// args = {
 			//	intervals: [{
 			//		label: condition.label,
 			//		value: [condition.start + offset, condition.end + offset],
 			//	}],
 			//	type: condition.type,
-			//};
-			//return createFilterFromTQL(type, field, editable, args),
+			// };
+			// return createFilterFromTQL(type, field, editable, args),
 		};
 		const onEmptyFilter = (ctx) => {
 			type = EMPTY_RECORDS;
@@ -257,15 +259,18 @@ export default function TqlFilterAdapterService($translate) {
 			return createFilterFromTQL(type, field, editable, args, columns);
 		};
 
-		parse(
-			tql,
-			onExactFilter,
-			onContainsFilter,
-			onCompliesFilter,
-			onBetweenFilter,
-			onEmptyFilter,
-			onValidFilter,
-			onInvalidFilter);
+		if (tql) {
+			parse(
+				tql,
+				onExactFilter,
+				onContainsFilter,
+				onCompliesFilter,
+				onBetweenFilter,
+				onEmptyFilter,
+				onValidFilter,
+				onInvalidFilter
+			);
+		}
 
 		return filters;
 	}
