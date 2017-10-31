@@ -13,20 +13,21 @@
 
 package org.talend.dataprep.api.filter;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.talend.dataprep.api.dataset.ColumnMetadata;
-import org.talend.dataprep.api.dataset.row.DataSetRow;
-import org.talend.dataprep.transformation.actions.date.DateParser;
+import static java.time.Month.JANUARY;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.function.Predicate;
 
-import static java.time.Month.JANUARY;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.talend.dataprep.api.dataset.ColumnMetadata;
+import org.talend.dataprep.api.dataset.row.DataSetRow;
+import org.talend.dataprep.transformation.actions.date.DateParser;
 
 public abstract class AbstractFilterServiceTest extends FilterServiceTest {
 
@@ -46,6 +47,34 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
      */
     protected abstract FilterService getFilterService();
 
+    protected void assertThatFilterExecutionReturnsTrueForRow(String columnId, String value) {
+        row.set(columnId, value);
+        assertThatFilterExecutionReturnsTrue();
+    }
+
+    protected void assertThatFilterExecutionReturnsFalseForRow(String columnId, String value) {
+        row.set(columnId, value);
+        assertThatFilterExecutionReturnsFalse();
+    }
+
+    protected void assertThatFilterExecutionReturnsTrueForRow(String[] columnIds, String[] values) {
+        for (int i = 0; i < columnIds.length; i++) {
+            row.set(columnIds[i], values[i]);
+        }
+        assertThatFilterExecutionReturnsTrue();
+    }
+
+    protected void assertThatFilterExecutionReturnsFalseForRow(String[] columnIds, String[] values) {
+        for (int i = 0; i < columnIds.length; i++) {
+            row.set(columnIds[i], values[i]);
+        }
+        assertThatFilterExecutionReturnsFalse();
+    }
+
+    protected void assertThatFilterExecutionReturnsTrue() {
+        assertThat(filter.test(row)).isTrue();
+    }
+
     @Test
     public void testEqualsPredicateOnStringValue() throws Exception {
         // given
@@ -64,15 +93,24 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
 
     protected abstract String givenFilter_0001_equals_toto();
 
-    protected void assertThatFilterExecutionReturnsTrueForRow(String columnId, String value) {
-        row.set(columnId, value);
-        assertThatFilterExecutionReturnsTrue();
+    @Test
+    public void testEqualsPredicateOnStringValueOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_columns_equals_toto();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "titi", "toto" }); // empty
+                                                                                                                      // value
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "toto", "titi" }); // empty
+                                                                                                                      // value
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "titi", "tata" }); // empty
+                                                                                                                       // value
     }
 
-    protected void assertThatFilterExecutionReturnsFalseForRow(String columnId, String value) {
-        row.set(columnId, value);
-        assertThatFilterExecutionReturnsFalse();
-    }
+    protected abstract String givenFilter_one_columns_equals_toto();
 
     @Test
     public void testEqualsPredicateOnIntegerValue() throws Exception {
@@ -98,6 +136,30 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     }
 
     protected abstract String givenFilter_0001_equals_5();
+
+    @Test
+    public void testEqualsPredicateOnIntegerValueOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_equals_5();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "5.0", "4.0" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "5,00", "4.0" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "05.0", "4.0" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "0 005", "4.0" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "3.0", "4.0" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "4.5", "4.0" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "4,5", "4.0" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { ",5", "4.0" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "1.000,5", "4.0" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "1 000.5", "4.0" });
+    }
+
+    protected abstract String givenFilter_one_column_equals_5();
 
     @Test
     public void testEqualsPredicateOnDecimalValue() throws Exception {
@@ -126,6 +188,32 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     protected abstract String givenFilter_0001_equals_5dot35();
 
     @Test
+    public void testEqualsPredicateOnDecimalValueOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_equals_5dot35();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "5.0", "5.35" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "5,35", "4.0" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "5.0", "05.35" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "5,3500", "4.0" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "5.0", "5,3500" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "0 005.35", "4.0" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "5.0", "4.0" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "5,0", "4.0" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { ",5", "4.0" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "5.0", ".5" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "1.000,5", "4.0" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "5.0", "1 000.5" });
+    }
+
+    protected abstract String givenFilter_one_column_equals_5dot35();
+
+    @Test
     public void testNotEqualPredicateOnStringValue() throws Exception {
         // given
         final String filtersDefinition = givenFilter_0001_not_equal_test();
@@ -140,6 +228,22 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     }
 
     protected abstract String givenFilter_0001_not_equal_test();
+
+    @Test
+    public void testNotEqualPredicateOnStringValueOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_not_equal_test();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "toto", "titi" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "toto", "Test" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "toto", "test" });
+    }
+
+    protected abstract String givenFilter_one_column_not_equal_test();
 
     @Test
     public void testNotEqualPredicateOnIntegerValue() throws Exception {
@@ -161,6 +265,25 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     protected abstract String givenFilter_0001_not_equal_12();
 
     @Test
+    public void testNotEqualPredicateOnIntegerValueOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_not_equal_12();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "12.1", "11.99" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "14", "11,99" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "12", "11.99" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "12.1", "12.00" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "012,0", "11.99" });
+    }
+
+    protected abstract String givenFilter_one_column_not_equal_12();
+
+    @Test
     public void testNotEqualPredicateOnDecimalValue() throws Exception {
         // given
         final String filtersDefinition = givenFilter_0001_not_equal_24dot6();
@@ -178,6 +301,24 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     }
 
     protected abstract String givenFilter_0001_not_equal_24dot6();
+
+    @Test
+    public void testNotEqualPredicateOnDecimalValueOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_not_equal_24dot6();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "24", "26.6" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "24.60", "11.99" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "12.1", "24,6" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "024,60", "11.99" });
+    }
+
+    protected abstract String givenFilter_one_column_not_equal_24dot6();
 
     @Test
     public void testGreaterThanPredicateOnIntegerValue() throws Exception {
@@ -215,6 +356,36 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     protected abstract String givenFilter_0001_greater_than_5();
 
     @Test
+    public void testGreaterThanPredicateOnIntegerValueOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_greater_than_5();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "4", "6" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "5", "4" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "4", "2" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "toto", "" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "tata", null });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "4.5", "4,5" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { ".5", ",5" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "5.0", "5,00" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "05.0", "0 005" });
+
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "5.5", "1.6" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "3.0", "5,5" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "-1.000,5", "26.6" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "24", "-1 000.5" });
+    }
+
+    protected abstract String givenFilter_one_column_greater_than_5();
+
+    @Test
     public void testGreaterThanPredicateOnNegativeDecimalValue() throws Exception {
         // given
         final String filtersDefinition = givenFilter_0001_greater_than_minus0dot1();
@@ -235,6 +406,25 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     }
 
     protected abstract String givenFilter_0001_greater_than_minus0dot1();
+
+    @Test
+    public void testGreaterThanPredicateOnNegativeDecimalValueOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_greater_than_minus0dot1();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "-1", "-0.05" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "-4", "6" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "-4", "-6.5" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "", "toto" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "tata", null });
+    }
+
+    protected abstract String givenFilter_one_column_greater_than_minus0dot1();
 
     @Test
     public void testGreaterThanOrEqualPredicateOnIntegerValue() throws Exception {
@@ -272,6 +462,38 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     protected abstract String givenFilter_0001_greater_or_equal_5();
 
     @Test
+    public void testGreaterThanOrEqualPredicateOnIntegerValueOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_greater_or_equal_5();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "6", "3" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "5", "-2" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "4", "-2" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "Wolverine", "" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "X-Men", null });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "4.5", "4,5" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { ".5", ",5" });
+
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "5.0", "3" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "2", "5,00" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "05.0", "3" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "2", "0 005" });
+
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "5,5", "3" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "4", "5.5" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "1.000,5", "3" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "1 000.5", "3" });
+    }
+
+    protected abstract String givenFilter_one_column_greater_or_equal_5();
+
+    @Test
     public void testLessThanPredicateOnIntegerValue() throws Exception {
         // given
         final String filtersDefinition = givenFilter_0001_less_than_5();
@@ -307,6 +529,37 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     protected abstract String givenFilter_0001_less_than_5();
 
     @Test
+    public void testLessThanPredicateOnIntegerValueOoOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_less_than_5();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "6", "5" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "6", "3" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "Iceberg", "" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "X-Men", null });
+
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "4.5", "5,5" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "4,5", "8,5" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "0.5", "12" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { ".5", "12" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "7", ",5" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "7", ",5" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "5.0", "5,00" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "05.0", "0 005" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "5.5", "5,5" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "1.000,5", "1 000.5" });
+    }
+
+    protected abstract String givenFilter_one_column_less_than_5();
+
+    @Test
     public void testLessThanOrEqualPredicateOnIntegerValue() throws Exception {
         // given
         final String filtersDefinition = givenFilter_0001_less_or_equal_5();
@@ -340,6 +593,38 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     }
 
     protected abstract String givenFilter_0001_less_or_equal_5();
+
+    @Test
+    public void testLessThanOrEqualPredicateOnIntegerValueOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_less_or_equal_5();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "7", "8" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "7", ",5" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "3", ",7" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "Cyclops", "" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "X-Men", null });
+
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "4.5", "12.3" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "42", "4,5" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "7", ",5" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "7", ".5" });
+
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "7", "5.0" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "5,00", "9.5" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "7", "05.0" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "0 005", "9.5" });
+
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "5.5", "5,5" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "1.000,5", "1 000.5" });
+    }
+
+    protected abstract String givenFilter_one_column_less_or_equal_5();
 
     @Test
     public void testContainsPredicateOnStringValue() throws Exception {
@@ -391,6 +676,25 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     protected abstract String givenFilter_0001_complies_empty();
 
     @Test
+    @Ignore
+    public void testCompliesEmptyPatternPredicateOnStringValueAllColumns() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_all_columns_complies_empty();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "", "" }); // empty value
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "", "toto" }); // empty value
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "titi", "toto" }); // empty
+                                                                                                                       // value
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "titi", "" }); // empty value
+    }
+
+    protected abstract String givenFilter_all_columns_complies_empty();
+
+    @Test
     public void testInvalidPredicate() throws Exception {
         // given
         final String filtersDefinition = givenFilter_0001_is_invalid();
@@ -407,9 +711,27 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
 
     protected abstract String givenFilter_0001_is_invalid();
 
-    protected void assertThatFilterExecutionReturnsTrue() {
-        assertThat(filter.test(row)).isTrue();
+    @Test
+    @Ignore
+    public void testInvalidPredicateOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_is_invalid();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        row.setInvalid("0001"); // value in invalid array in column metadata
+        row.unsetInvalid("0002");
+        assertThatFilterExecutionReturnsTrue();
+        row.unsetInvalid("0001");
+        row.setInvalid("0002"); // value in invalid array in column metadata
+        assertThatFilterExecutionReturnsTrue();
+        row.unsetInvalid("0002");
+        assertThatFilterExecutionReturnsFalse();
     }
+
+    protected abstract String givenFilter_one_column_is_invalid();
 
     protected void assertThatFilterExecutionReturnsFalse() {
         assertThat(filter.test(row)).isFalse();

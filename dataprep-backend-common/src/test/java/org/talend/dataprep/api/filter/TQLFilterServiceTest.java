@@ -59,8 +59,18 @@ public class TQLFilterServiceTest extends AbstractFilterServiceTest {
     }
 
     @Override
+    protected String givenFilter_one_columns_equals_toto() {
+        return "* = 'toto'";
+    }
+
+    @Override
     protected String givenFilter_0001_equals_5() {
         return "0001 = 5";
+    }
+
+    @Override
+    protected String givenFilter_one_column_equals_5() {
+        return "* = 5";
     }
 
     @Override
@@ -69,8 +79,18 @@ public class TQLFilterServiceTest extends AbstractFilterServiceTest {
     }
 
     @Override
+    protected String givenFilter_one_column_equals_5dot35() {
+        return "* = 5.35";
+    }
+
+    @Override
     protected String givenFilter_0001_not_equal_test() {
         return "0001 != 'test'";
+    }
+
+    @Override
+    protected String givenFilter_one_column_not_equal_test() {
+        return "* != 'test'";
     }
 
     @Override
@@ -79,8 +99,18 @@ public class TQLFilterServiceTest extends AbstractFilterServiceTest {
     }
 
     @Override
+    protected String givenFilter_one_column_not_equal_12() {
+        return "* != 12";
+    }
+
+    @Override
     protected String givenFilter_0001_not_equal_24dot6() {
         return "0001 != 24.6";
+    }
+
+    @Override
+    protected String givenFilter_one_column_not_equal_24dot6() {
+        return "* != 24.6";
     }
 
     @Override
@@ -89,8 +119,18 @@ public class TQLFilterServiceTest extends AbstractFilterServiceTest {
     }
 
     @Override
+    protected String givenFilter_one_column_greater_than_5() {
+        return "* > 5";
+    }
+
+    @Override
     protected String givenFilter_0001_greater_than_minus0dot1() {
         return "0001 > -0.1";
+    }
+
+    @Override
+    protected String givenFilter_one_column_greater_than_minus0dot1() {
+        return "* > -0.1";
     }
 
     @Override
@@ -99,13 +139,28 @@ public class TQLFilterServiceTest extends AbstractFilterServiceTest {
     }
 
     @Override
+    protected String givenFilter_one_column_less_than_5() {
+        return "* < 5";
+    }
+
+    @Override
     protected String givenFilter_0001_greater_or_equal_5() {
         return "0001 >= 5";
     }
 
     @Override
+    protected String givenFilter_one_column_greater_or_equal_5() {
+        return "* >= 5";
+    }
+
+    @Override
     protected String givenFilter_0001_less_or_equal_5() {
         return "0001 <= 5";
+    }
+
+    @Override
+    protected String givenFilter_one_column_less_or_equal_5() {
+        return "* <= 5";
     }
 
     @Override
@@ -119,6 +174,11 @@ public class TQLFilterServiceTest extends AbstractFilterServiceTest {
     }
 
     @Override
+    protected String givenFilter_all_columns_complies_empty() {
+        return "* complies ''";
+    }
+
+    @Override
     protected String givenFilter_0001_is_valid() {
         return "0001 is valid";
     }
@@ -126,6 +186,11 @@ public class TQLFilterServiceTest extends AbstractFilterServiceTest {
     @Override
     protected String givenFilter_0001_is_invalid() {
         return "0001 is invalid";
+    }
+
+    @Override
+    protected String givenFilter_one_column_is_invalid() {
+        return "* is invalid";
     }
 
     @Override
