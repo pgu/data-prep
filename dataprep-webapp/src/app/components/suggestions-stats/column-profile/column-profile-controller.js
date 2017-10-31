@@ -22,8 +22,15 @@ import { CTRL_KEY_NAME } from '../../../services/filter/filter-service.js';
  * @requires data-prep.statistics.service:StatisticsTooltipService
  * @requires data-prep.services.filter-manager.service:FilterManagerService
  */
-export default function ColumnProfileCtrl($translate, $timeout, state, FilterManagerService, FilterUtilsService,
-                                          StatisticsService, StatisticsTooltipService) {
+export default function ColumnProfileCtrl(
+	$translate,
+	$timeout,
+	state,
+	FilterManagerService,
+	FilterUtilsService,
+	StatisticsService,
+	StatisticsTooltipService
+) {
 	'ngInject';
 
 	const vm = this;
@@ -48,9 +55,23 @@ export default function ColumnProfileCtrl($translate, $timeout, state, FilterMan
 			],
 			caseSensitive: true,
 		};
-		return value.length || keyName === CTRL_KEY_NAME ?
-			FilterManagerService.addFilterAndDigest('exact', column.id, column.name, args, null, keyName) :
-			FilterManagerService.addFilterAndDigest('empty_records', column.id, column.name, null, null, keyName);
+		return value.length || keyName === CTRL_KEY_NAME
+			? FilterManagerService.addFilterAndDigest(
+					'exact',
+					column.id,
+					column.name,
+					args,
+					null,
+					keyName
+				)
+			: FilterManagerService.addFilterAndDigest(
+					'empty_records',
+					column.id,
+					column.name,
+					null,
+					null,
+					keyName
+				);
 	}
 
 	/**
@@ -80,21 +101,33 @@ export default function ColumnProfileCtrl($translate, $timeout, state, FilterMan
 		const args = {
 			intervals: [
 				{
-					label: interval.label || FilterUtilsService.getRangeLabelFor(interval, isDateRange),
+					label:
+						interval.label ||
+						FilterUtilsService.getRangeLabelFor(
+							interval,
+							isDateRange
+						),
 					value: [min, max],
 					isMaxReached: interval.isMaxReached,
+					excludeMax: interval.excludeMax,
 				},
 			],
 			type: selectedColumn.type,
 		};
-		FilterManagerService.addFilterAndDigest('inside_range', selectedColumn.id, selectedColumn.name, args, removeFilterFn, keyName);
+		FilterManagerService.addFilterAndDigest(
+			'inside_range',
+			selectedColumn.id,
+			selectedColumn.name,
+			args,
+			removeFilterFn,
+			keyName
+		);
 	}
 
 	function changeAggregation(column, aggregation) {
 		if (aggregation) {
 			StatisticsService.processAggregation(column, aggregation);
-		}
-		else {
+		} else {
 			StatisticsService.processClassicChart();
 		}
 	}

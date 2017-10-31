@@ -586,7 +586,7 @@ describe('Recipe controller', () => {
 			expect(PlaygroundService.updateStep).toHaveBeenCalled();
 			const callArgs = PlaygroundService.updateStep.calls.argsFor(0);
 			expect(callArgs[0]).toBe(stepWithMultipleFilters);
-			expect(callArgs[1].filter).toEqual('(0002 contains toto)');
+			expect(callArgs[1].filter).toEqual("((0002 contains 'toto'))");
 		}));
 	});
 
