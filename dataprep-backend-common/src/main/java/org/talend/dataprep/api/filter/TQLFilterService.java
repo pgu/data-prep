@@ -144,19 +144,19 @@ public class TQLFilterService implements FilterService {
         @Override
         public Predicate<DataSetRow> visit(FieldIsEmptyExpression fieldIsEmptyExpression) {
             final String columnName = fieldIsEmptyExpression.getFieldName();
-            return DataSetRowFilters.createEmptyPredicate(columnName);
+            return createEmptyPredicate(columnName);
         }
 
         @Override
         public Predicate<DataSetRow> visit(FieldIsValidExpression fieldIsValidExpression) {
             final String columnName = fieldIsValidExpression.getFieldName();
-            return DataSetRowFilters.createValidPredicate(columnName);
+            return createValidPredicate(columnName);
         }
 
         @Override
         public Predicate<DataSetRow> visit(FieldIsInvalidExpression fieldIsInvalidExpression) {
             final String columnName = fieldIsInvalidExpression.getFieldName();
-            return DataSetRowFilters.createInvalidPredicate(columnName);
+            return createInvalidPredicate(columnName);
         }
 
         @Override
@@ -173,7 +173,7 @@ public class TQLFilterService implements FilterService {
             final String columnName = fieldCompliesPattern.getFieldName();
             final String pattern = fieldCompliesPattern.getPattern();
 
-            return DataSetRowFilters.createCompliesPredicate(columnName, pattern);
+            return createCompliesPredicate(columnName, pattern);
         }
 
         @Override
@@ -182,7 +182,7 @@ public class TQLFilterService implements FilterService {
             final String low = fieldBetweenExpression.getLeft().getValue();
             final String high = fieldBetweenExpression.getRight().getValue();
 
-            return DataSetRowFilters.createRangePredicate(columnName, low, high, rowMetadata);
+            return createRangePredicate(columnName, low, high, rowMetadata);
         }
 
         @Override
@@ -195,7 +195,13 @@ public class TQLFilterService implements FilterService {
             final String columnName = fieldContainsExpression.getFieldName();
             final String value = fieldContainsExpression.getValue();
 
-            return DataSetRowFilters.createContainsPredicate(columnName, value);
+            return createContainsPredicate(columnName, value);
+        }
+
+        @Override
+        public Predicate<DataSetRow> visit(AllFields allFields) {
+            fields.push("*");
+            return null;
         }
     }
 }
