@@ -11,6 +11,8 @@
 
  ============================================================================*/
 
+import { find } from 'lodash';
+
 import { Parser } from '@talend/daikon-tql-client';
 import { parse } from '@talend/tql/index';
 
@@ -176,16 +178,85 @@ export default function TqlFilterAdapterService($translate, FilterUtilsService) 
 		let args;
 		let field;
 		const editable = false;
-		const filters = [];
+		let filters = [];
 
 		const createFilterFromTQL = (type, colId, editable, args, columns) => {
-			const filteredColumn = _.find(columns, { id: colId });
+			const filteredColumn = find(columns, { id: colId });
 			const colName = (filteredColumn && filteredColumn.name) || colId;
-			filters.push(
-				createFilter(type, colId, colName, editable, args, null)
-			);
+
+			const sameColEmptyFilter = find(filters, {
+				colId,
+				type: EMPTY_RECORDS,
+			});
+
+			// EMPTY_RECORDS case: if the filter is EMPTY_RECORDS, merge it into EXACT or MATCHES filters
+			if (type === EMPTY_RECORDS) {
+				const sameColExactFilter = find(filters, {
+					colId,
+					type: EXACT,
+				});
+				const sameColMatchFilter = find(filters, {
+					colId,
+					type: MATCHES,
+				});
+
+				if (sameColExactFilter) {
+					sameColExactFilter.args.phrase = sameColExactFilter.args.phrase.concat(this.EMPTY_RECORDS_VALUES);
+				}
+				else if (sameColMatchFilter) {
+					sameColExactFilter.args.patterns = sameColExactFilter.args.patterns.concat(this.EMPTY_RECORDS_VALUES);
+				}
+				else {
+					filters.push(
+						createFilter(type, colId, colName, editable, args, null)
+					);
+				}
+			}
+			// EMPTY_RECORDS case: if the filter is EMPTY_RECORDS, merge it into EXACT or MATCHES filters
+			else if (sameColEmptyFilter) { // if EMPTY_RECORDS filter is already added,  merge it into new EXACT or MATCHES filters
+				filters = filters.filter(filter => filter.colId !== colId || filter.type !== EMPTY_RECORDS);
+				let filterArgs = {};
+				switch (type) {
+				case EXACT:
+					filterArgs.phrase = this.EMPTY_RECORDS_VALUES.concat(args.phrase);
+					break;
+				case MATCHES:
+					filterArgs.patterns = this.EMPTY_RECORDS_VALUES.concat(args.patterns);
+					break;
+				}
+				filters.push(
+					createFilter(type, colId, colName, editable, filterArgs, null)
+				);
+			}
+			// others case: if the filter is EMPTY_RECORDS, merge it into EXACT or MATCHES filters
+			else {
+				const sameColAndTypeFilter = find(filters, {
+					colId,
+					type,
+				});
+				if (sameColAndTypeFilter) {
+					switch (type) {
+					case CONTAINS:
+					case EXACT:
+						sameColAndTypeFilter.args.phrase = sameColAndTypeFilter.args.phrase.concat(args.phrase);
+						break;
+					case INSIDE_RANGE:
+						sameColAndTypeFilter.args.intervals = sameColAndTypeFilter.args.intervals.concat(args.intervals);
+						break;
+					case MATCHES:
+						sameColAndTypeFilter.args.patterns = sameColAndTypeFilter.args.patterns.concat(args.patterns);
+						break;
+					}
+				}
+				else {
+					filters.push(
+						createFilter(type, colId, colName, editable, args, null)
+					);
+				}
+			}
 		};
 
+		//Initialize filter listeners
 		const onExactFilter = (ctx) => {
 			type = EXACT;
 			field = ctx.children[0].getText();
@@ -229,7 +300,7 @@ export default function TqlFilterAdapterService($translate, FilterUtilsService) 
 
 			const min  = ctx.children[3].getText();
 			const max  = ctx.children[5].getText();
-			const filteredColumn = _.find(columns, { id: field });
+			const filteredColumn = find(columns, { id: field });
 			const isDateRange = filteredColumn && (filteredColumn.type === 'date');
 			// on date we shift timestamp to fit UTC timezone
 			let offset = 0;
