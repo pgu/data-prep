@@ -174,13 +174,13 @@ public class TQLFilterServiceTest extends AbstractFilterServiceTest {
     }
 
     @Override
-    protected String givenFilter_all_columns_complies_empty() {
-        return "* complies ''";
+    protected String givenFilter_0001_is_valid() {
+        return "0001 is valid";
     }
 
     @Override
-    protected String givenFilter_0001_is_valid() {
-        return "0001 is valid";
+    protected String givenFilter_one_column_is_valid() {
+        return "* is valid";
     }
 
     @Override
@@ -199,8 +199,18 @@ public class TQLFilterServiceTest extends AbstractFilterServiceTest {
     }
 
     @Override
+    protected String givenFilter_one_column_complies_Aa9dash() {
+        return "* complies 'Aa9-'";
+    }
+
+    @Override
     protected String givenFilter_0001_complies_empty() {
         return "0001 complies ''";
+    }
+
+    @Override
+    protected String givenFilter_one_column_complies_empty() {
+        return "* complies ''";
     }
 
     @Override

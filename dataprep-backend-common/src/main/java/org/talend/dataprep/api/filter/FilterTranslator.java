@@ -76,7 +76,7 @@ public class FilterTranslator {
         }
 
         @Override
-        public String createMatchesPredicate(JsonNode currentNode, String columnId, String value) {
+        public String createCompliesPredicate(JsonNode currentNode, String columnId, String value) {
             return columnId + " matches " + value;
         }
 
@@ -97,7 +97,7 @@ public class FilterTranslator {
 
         @Override
         public String createRangePredicate(String columnId, JsonNode node, RowMetadata rowMetadata) {
-            return columnId + " in [" + node.get(0).asText() + ", " + node.get(1).asText() + "]";
+            return columnId + " between [" + node.get("start").asText() + ", " + node.get("end").asText() + "]";
         }
 
         @Override

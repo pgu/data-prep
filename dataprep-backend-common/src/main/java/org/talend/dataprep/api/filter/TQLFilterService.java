@@ -149,13 +149,15 @@ public class TQLFilterService implements FilterService {
 
         @Override
         public Predicate<DataSetRow> visit(FieldIsValidExpression fieldIsValidExpression) {
-            final String columnName = fieldIsValidExpression.getFieldName();
+            fieldIsValidExpression.getField().accept(this);
+            final String columnName = fields.pop();
             return createValidPredicate(columnName);
         }
 
         @Override
         public Predicate<DataSetRow> visit(FieldIsInvalidExpression fieldIsInvalidExpression) {
-            final String columnName = fieldIsInvalidExpression.getFieldName();
+            fieldIsInvalidExpression.getField().accept(this);
+            final String columnName = fields.pop();
             return createInvalidPredicate(columnName);
         }
 
@@ -170,7 +172,8 @@ public class TQLFilterService implements FilterService {
 
         @Override
         public Predicate<DataSetRow> visit(FieldCompliesPattern fieldCompliesPattern) {
-            final String columnName = fieldCompliesPattern.getFieldName();
+            fieldCompliesPattern.getField().accept(this);
+            final String columnName = fields.pop();
             final String pattern = fieldCompliesPattern.getPattern();
 
             return createCompliesPredicate(columnName, pattern);

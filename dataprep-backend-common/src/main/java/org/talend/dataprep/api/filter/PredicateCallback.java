@@ -1,29 +1,14 @@
 package org.talend.dataprep.api.filter;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.talend.daikon.number.BigDecimalParser;
-import org.talend.dataprep.api.dataset.ColumnMetadata;
-import org.talend.dataprep.api.dataset.RowMetadata;
-import org.talend.dataprep.api.dataset.row.DataSetRow;
-import org.talend.dataprep.api.type.Type;
-import org.talend.dataprep.date.DateManipulator;
-import org.talend.dataprep.quality.AnalyzerService;
-import org.talend.dataprep.transformation.actions.Providers;
-import org.talend.dataprep.transformation.actions.date.DateParser;
-import org.talend.dataprep.util.NumericHelper;
-
 import java.text.ParseException;
-import java.time.DateTimeException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Predicate;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.talend.dataprep.util.NumericHelper.isBigDecimal;
+import org.apache.commons.lang.StringUtils;
+import org.talend.dataprep.api.dataset.RowMetadata;
+import org.talend.dataprep.api.dataset.row.DataSetRow;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * An implementation of {@link JSONFilterCallback} that builds a {@link Predicate} for {@link DataSetRow}.
@@ -31,21 +16,6 @@ import static org.talend.dataprep.util.NumericHelper.isBigDecimal;
  * @see SimpleFilterService
  */
 public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRow>> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PredicateCallback.class);
-
-    private DateParser dateParser;
-
-    private static Predicate<DataSetRow> safeDate(Predicate<DataSetRow> inner) {
-        return r -> {
-            try {
-                return inner.test(r);
-            } catch (DateTimeException e) { // thrown by DateParser
-                LOGGER.debug("Unable to parse date.", e);
-                return false;
-            }
-        };
-    }
 
     @Override
     public Predicate<DataSetRow> and(Predicate<DataSetRow> left, Predicate<DataSetRow> right) {
@@ -80,15 +50,7 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
     @Override
     public Predicate<DataSetRow> createEqualsPredicate(final JsonNode node, final String columnId, final String value) {
         checkValidValue(node, value);
-        return r -> {
-            if (StringUtils.equals(r.get(columnId), value)) {
-                return true;
-            } else {
-                return isBigDecimal(r.get(columnId)) //
-                        && isBigDecimal(value) //
-                        && NumberUtils.compare(toBigDecimal(r.get(columnId)), toBigDecimal(value)) == 0;
-            }
-        };
+        return DataSetRowFilters.createEqualsPredicate(columnId, value);
     }
 
     /**
@@ -102,9 +64,7 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
     @Override
     public Predicate<DataSetRow> createGreaterThanPredicate(final JsonNode node, final String columnId, final String value) {
         checkValidValue(node, value);
-        return r -> isBigDecimal(r.get(columnId)) //
-                && isBigDecimal(value) //
-                && toBigDecimal(r.get(columnId)) > toBigDecimal(value);
+        return DataSetRowFilters.createGreaterThanPredicate(columnId, value);
     }
 
     /**
@@ -118,9 +78,7 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
     @Override
     public Predicate<DataSetRow> createLowerThanPredicate(final JsonNode node, final String columnId, final String value) {
         checkValidValue(node, value);
-        return r -> isBigDecimal(r.get(columnId)) //
-                && isBigDecimal(value) //
-                && toBigDecimal(r.get(columnId)) < toBigDecimal(value);
+        return DataSetRowFilters.createLowerThanPredicate(columnId, value);
     }
 
     /**
@@ -134,9 +92,7 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
     @Override
     public Predicate<DataSetRow> createGreaterOrEqualsPredicate(final JsonNode node, final String columnId, final String value) {
         checkValidValue(node, value);
-        return r -> isBigDecimal(r.get(columnId)) //
-                && isBigDecimal(value) //
-                && toBigDecimal(r.get(columnId)) >= toBigDecimal(value);
+        return DataSetRowFilters.createGreaterOrEqualsPredicate(columnId, value);
     }
 
     /**
@@ -150,9 +106,7 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
     @Override
     public Predicate<DataSetRow> createLowerOrEqualsPredicate(final JsonNode node, final String columnId, final String value) {
         checkValidValue(node, value);
-        return r -> isBigDecimal(r.get(columnId)) //
-                && isBigDecimal(value) //
-                && toBigDecimal(r.get(columnId)) <= toBigDecimal(value);
+        return DataSetRowFilters.createLowerOrEqualsPredicate(columnId, value);
     }
 
     /**
@@ -166,7 +120,7 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
     @Override
     public Predicate<DataSetRow> createContainsPredicate(final JsonNode node, final String columnId, final String value) {
         checkValidValue(node, value);
-        return r -> StringUtils.containsIgnoreCase(r.get(columnId), value);
+        return DataSetRowFilters.createContainsPredicate(columnId, value);
     }
 
     /**
@@ -178,9 +132,9 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
      * @return The match predicate
      */
     @Override
-    public Predicate<DataSetRow> createMatchesPredicate(final JsonNode node, final String columnId, final String value) {
+    public Predicate<DataSetRow> createCompliesPredicate(final JsonNode node, final String columnId, final String value) {
         checkValidValue(node, value);
-        return r -> matches(r.get(columnId), value);
+        return DataSetRowFilters.createCompliesPredicate(columnId, value);
     }
 
     /**
@@ -191,7 +145,7 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
      */
     @Override
     public Predicate<DataSetRow> createInvalidPredicate(final String columnId) {
-        return r -> r.isInvalid(columnId);
+        return DataSetRowFilters.createInvalidPredicate(columnId);
     }
 
     /**
@@ -202,7 +156,7 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
      */
     @Override
     public Predicate<DataSetRow> createValidPredicate(final String columnId) {
-        return r -> !r.isInvalid(columnId) && !isEmpty(r.get(columnId));
+        return DataSetRowFilters.createValidPredicate(columnId);
     }
 
     /**
@@ -213,7 +167,7 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
      */
     @Override
     public Predicate<DataSetRow> createEmptyPredicate(final String columnId) {
-        return r -> isEmpty(r.get(columnId));
+        return DataSetRowFilters.createEmptyPredicate(columnId);
     }
 
     /**
@@ -228,81 +182,7 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
                                                       final RowMetadata rowMetadata) {
         final String start = node.get("start").asText();
         final String end = node.get("end").asText();
-        return r -> {
-            final String columnType = rowMetadata.getById(columnId).getType();
-            Type parsedType = Type.get(columnType);
-            if (Type.DATE.isAssignableFrom(parsedType)) {
-                return createDateRangePredicate(columnId, start, end, rowMetadata).test(r);
-            } else {
-                // Assume range can be parsed as number (may happen if column is currently marked as string, but will
-                // contain some numbers).
-                return createNumberRangePredicate(columnId, start, end).test(r);
-            }
-        };
-    }
-
-    /**
-     * Create a predicate that checks if the date value is within a range [min, max[
-     *
-     * @param columnId The column id
-     * @param start    The start value
-     * @param end      The end value
-     * @return The date range predicate
-     */
-    private Predicate<DataSetRow> createDateRangePredicate(final String columnId, final String start, final String end,
-                                                          final RowMetadata rowMetadata) {
-        try {
-            final long minTimestamp = Long.parseLong(start);
-            final long maxTimestamp = Long.parseLong(end);
-
-            final LocalDateTime minDate = DateManipulator.fromEpochMillisecondsWithSystemOffset(minTimestamp);
-            final LocalDateTime maxDate = DateManipulator.fromEpochMillisecondsWithSystemOffset(maxTimestamp);
-
-            return safeDate(r -> {
-                final ColumnMetadata columnMetadata = rowMetadata.getById(columnId);
-                final LocalDateTime columnValue = getDateParser().parse(r.get(columnId), columnMetadata);
-                return minDate.compareTo(columnValue) == 0 || (minDate.isBefore(columnValue) && maxDate.isAfter(columnValue));
-            });
-        } catch (Exception e) {
-            LOGGER.debug("Unable to create date range predicate.", e);
-            throw new IllegalArgumentException(
-                    "Unsupported query, malformed date 'range' (expected timestamps in min and max properties).");
-        }
-    }
-
-    private synchronized DateParser getDateParser() {
-        if (dateParser == null) {
-            dateParser = new DateParser(Providers.get(AnalyzerService.class));
-        }
-        return dateParser;
-    }
-
-
-    /**
-     * Create a predicate that checks if the number value is within a range [min, max[
-     *
-     * @param columnId The column id
-     * @param start    The start value
-     * @param end      The end value
-     * @return The number range predicate
-     */
-    private Predicate<DataSetRow> createNumberRangePredicate(final String columnId, final String start, final String end) {
-        try {
-            final double min = toBigDecimal(start);
-            final double max = toBigDecimal(end);
-            return r -> {
-                final String value = r.get(columnId);
-                if (NumericHelper.isBigDecimal(value)) {
-                    final double columnValue = toBigDecimal(value);
-                    return NumberUtils.compare(columnValue, min) == 0 || (columnValue > min && columnValue < max);
-                } else {
-                    return false;
-                }
-            };
-        } catch (Exception e) {
-            LOGGER.debug("Unable to create number range predicate.", e);
-            throw new IllegalArgumentException("Unsupported query, malformed 'range' (expected number min and max properties).");
-        }
+        return DataSetRowFilters.createRangePredicate(columnId, start, end, rowMetadata);
     }
 
     /**
@@ -316,67 +196,5 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
         if (value == null) {
             throw new UnsupportedOperationException("Unsupported query, the filter needs a value : " + node.toString());
         }
-    }
-
-    /**
-     * Test a string value against a pattern returned during value analysis.
-     *
-     * @param value   A string value. May be null.
-     * @param pattern A pattern as returned in value analysis.
-     * @return <code>true</code> if value matches, <code>false</code> otherwise.
-     */
-    private boolean matches(String value, String pattern) {
-        if (value == null && pattern == null) {
-            return true;
-        }
-        if (value == null) {
-            return false;
-        }
-        // Character based patterns
-        if (StringUtils.containsAny(pattern, new char[]{'A', 'a', '9'})) {
-            if (value.length() != pattern.length()) {
-                return false;
-            }
-            final char[] valueArray = value.toCharArray();
-            final char[] patternArray = pattern.toCharArray();
-            for (int i = 0; i < valueArray.length; i++) {
-                if (patternArray[i] == 'A') {
-                    if (!Character.isUpperCase(valueArray[i])) {
-                        return false;
-                    }
-                } else if (patternArray[i] == 'a') {
-                    if (!Character.isLowerCase(valueArray[i])) {
-                        return false;
-                    }
-                } else if (patternArray[i] == '9') {
-                    if (!Character.isDigit(valueArray[i])) {
-                        return false;
-                    }
-                } else {
-                    if (valueArray[i] != patternArray[i]) {
-                        return false;
-                    }
-                }
-            }
-        } else {
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-            try {
-                formatter.toFormat().parseObject(value);
-            } catch (ParseException e) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Simple wrapper to call BigDecimalParser to simplify code above.
-     */
-    private double toBigDecimal(String value) {
-        return BigDecimalParser.toBigDecimal(value).doubleValue();
-    }
-
-    public void setDateParser(DateParser dateParser) {
-        this.dateParser = dateParser;
     }
 }
