@@ -163,20 +163,4 @@ public class CommandHelper {
         return Flux.from(toPublisher(clazz, mapper, command)).toStream(1);
     }
 
-    /**
-     * Wrap a {@link GenericCommand} into a {@link Observable} following javanica recommandation at:
-     * https://github.com/Netflix/Hystrix/tree/master/hystrix-contrib/hystrix-javanica#reactive-execution
-     */
-    public static <T> Observable<T> toObservable(GenericCommand<T> command) {
-        return Observable.create(observer -> {
-            try {
-                if (!observer.isUnsubscribed()) {
-                    observer.onNext(command.run());
-                    observer.onCompleted();
-                }
-            } catch (Exception e) {
-                observer.onError(e);
-            }
-        });
-    }
 }
