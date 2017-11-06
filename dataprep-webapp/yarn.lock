@@ -8,9 +8,9 @@
   dependencies:
     bootstrap-sass "3.3.7"
 
-"@talend/daikon-tql-client@0.19.3-SNAPSHOT":
-  version "0.19.3-SNAPSHOT"
-  resolved "https://registry.yarnpkg.com/@talend/daikon-tql-client/-/daikon-tql-client-0.19.3-SNAPSHOT.tgz#b1c296c12800f629af01297103c91ef77dc0d294"
+"@talend/daikon-tql-client@0.19.4":
+  version "0.19.4"
+  resolved "https://registry.yarnpkg.com/@talend/daikon-tql-client/-/daikon-tql-client-0.19.4.tgz#31440520947d257b612201ff6dc9f86ea1fb1c86"
   dependencies:
     babel-polyfill "^6.26.0"
     hoist-non-react-statics "^1.2.0"
