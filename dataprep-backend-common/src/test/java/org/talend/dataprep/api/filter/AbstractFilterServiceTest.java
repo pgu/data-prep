@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.util.function.Predicate;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.talend.dataprep.api.dataset.ColumnMetadata;
@@ -676,7 +675,7 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     protected abstract String givenFilter_0001_complies_empty();
 
     @Test
-    public void testCompliesEmptyPatternPredicateOnStringValueAllColumns() throws Exception {
+    public void testCompliesEmptyPatternPredicateOnStringValueOnOneColumns() throws Exception {
         // given
         final String filtersDefinition = givenFilter_all_columns_complies_empty();
 
@@ -719,14 +718,15 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
         filter = service.build(filtersDefinition, rowMetadata);
 
         // then
-        row.setInvalid("0001"); // value in invalid array in column metadata
+        row.setInvalid("0001");
         row.unsetInvalid("0002");
-        assertThatFilterExecutionReturnsTrue();
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "b" });
         row.unsetInvalid("0001");
-        row.setInvalid("0002"); // value in invalid array in column metadata
-        assertThatFilterExecutionReturnsTrue();
+        row.setInvalid("0002");
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "", "" });
+        row.unsetInvalid("0001");
         row.unsetInvalid("0002");
-        assertThatFilterExecutionReturnsFalse();
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "", "" });
     }
 
     protected abstract String givenFilter_one_column_is_invalid();
@@ -757,6 +757,30 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     protected abstract String givenFilter_0001_is_valid();
 
     @Test
+    public void testValidPredicateOnOneColumns() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_is_valid();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        row.setInvalid("0001"); // value is marked as invalid
+        row.unsetInvalid("0002"); // value is marked as valid
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "", "" }); // empty value
+
+        row.unsetInvalid("0001"); // value is marked as valid
+        row.setInvalid("0002"); // value is marked as invalid
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "", "" }); // empty value
+
+        row.unsetInvalid("0001"); // value is marked as valid
+        row.unsetInvalid("0002"); // value is marked as valid
+        assertThatFilterExecutionReturnsTrueForRow("0001", "toto"); // correct value
+    }
+
+    protected abstract String givenFilter_one_column_is_valid();
+
+    @Test
     public void testEmptyPredicate() throws Exception {
         // given
         final String filtersDefinition = givenFilter_0001_is_empty();
@@ -770,6 +794,22 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     }
 
     protected abstract String givenFilter_0001_is_empty();
+
+    @Test
+    public void testEmptyPredicateOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_is_empty();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "Thor", null });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "Thor", "" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "Thor", "Odinson" });
+    }
+
+    protected abstract String givenFilter_one_column_is_empty();
 
     @Test
     public void testBetweenPredicateOnNumberValue() throws Exception {
@@ -811,6 +851,36 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     protected abstract String givenFilter_0001_between_5_and_10();
 
     @Test
+    public void testBetweenPredicateOnNumberValueOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_between_5_and_10();
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        row.getRowMetadata().getById("0001").setType("integer");
+        row.getRowMetadata().getById("0002").setType("integer");
+        // assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "a", "4" });
+        // assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "5" });
+        // assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "8" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "10" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "toto", "20" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "", null });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "4.5", "4,5" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { ",5", ".5" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "5.0" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "5,00" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "05.0" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "0 005" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "5.5" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "5.5" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "1.000,5", "1 000.5" });
+    }
+
+    protected abstract String givenFilter_one_column_between_5_and_10();
+
+    @Test
     public void testBetweenPredicateOnDateValue() throws Exception {
         // given
         final String filtersDefinition = givenFilter_0001_between_timestampFor19700101_and_timestampFor19900101();
@@ -839,6 +909,43 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     }
 
     protected abstract String givenFilter_0001_between_timestampFor19700101_and_timestampFor19900101();
+
+    @Test
+    public void testBetweenPredicateOnDateValueOnOneColumn() throws Exception {
+        // given
+        final String filtersDefinition = givenFilter_one_column_between_timestampFor19700101_and_timestampFor19900101();
+
+        final DateParser dateParser = Mockito.mock(DateParser.class);
+
+        final ColumnMetadata column1 = row.getRowMetadata().getById("0001");
+        column1.setType("date");
+        when(dateParser.parse("a", column1)).thenThrow(new DateTimeException(""));
+        when(dateParser.parse("1960-01-01", column1)).thenReturn(LocalDateTime.of(1960, JANUARY, 1, 0, 0));
+        when(dateParser.parse("1970-01-01", column1)).thenReturn(LocalDateTime.of(1970, JANUARY, 1, 0, 0));
+        when(dateParser.parse("1980-01-01", column1)).thenReturn(LocalDateTime.of(1980, JANUARY, 1, 0, 0));
+        when(dateParser.parse("1990-01-01", column1)).thenReturn(LocalDateTime.of(1990, JANUARY, 1, 0, 0));
+        when(dateParser.parse("2000-01-01", column1)).thenReturn(LocalDateTime.of(2000, JANUARY, 1, 0, 0));
+
+        final ColumnMetadata column2 = row.getRowMetadata().getById("0002");
+        column2.setType("date");
+        when(dateParser.parse("a", column2)).thenThrow(new DateTimeException(""));
+        when(dateParser.parse("1960-01-01", column2)).thenReturn(LocalDateTime.of(1960, JANUARY, 1, 0, 0));
+        when(dateParser.parse("1970-01-01", column2)).thenReturn(LocalDateTime.of(1970, JANUARY, 1, 0, 0));
+        when(dateParser.parse("1980-01-01", column2)).thenReturn(LocalDateTime.of(1980, JANUARY, 1, 0, 0));
+        when(dateParser.parse("1990-01-01", column2)).thenReturn(LocalDateTime.of(1990, JANUARY, 1, 0, 0));
+        when(dateParser.parse("2000-01-01", column2)).thenReturn(LocalDateTime.of(2000, JANUARY, 1, 0, 0));
+
+        // when
+        filter = service.build(filtersDefinition, rowMetadata);
+
+        // then
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "a", "1960-01-01" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "1960-01-01", "1970-01-01" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "1980-01-01" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "1990-01-01", "2000-01-01" });
+    }
+
+    protected abstract String givenFilter_one_column_between_timestampFor19700101_and_timestampFor19900101();
 
     @Test
     public void should_create_AND_predicate() throws Exception {

@@ -174,6 +174,11 @@ public class TQLFilterServiceTest extends AbstractFilterServiceTest {
     }
 
     @Override
+    protected String givenFilter_one_column_is_empty() {
+        return "* is empty";
+    }
+
+    @Override
     protected String givenFilter_all_columns_complies_empty() {
         return "* complies ''";
     }
@@ -181,6 +186,11 @@ public class TQLFilterServiceTest extends AbstractFilterServiceTest {
     @Override
     protected String givenFilter_0001_is_valid() {
         return "0001 is valid";
+    }
+
+    @Override
+    protected String givenFilter_one_column_is_valid() {
+        return "* is valid";
     }
 
     @Override
@@ -224,11 +234,24 @@ public class TQLFilterServiceTest extends AbstractFilterServiceTest {
     }
 
     @Override
+    protected String givenFilter_one_column_between_5_and_10() {
+        return "* between [5, 10]";
+    }
+
+    @Override
     protected String givenFilter_0001_between_timestampFor19700101_and_timestampFor19900101() {
         final long secondsFrom_1970_01_01_UTC = (LocalDateTime.of(1990, JANUARY, 1, 0, 0).toEpochSecond(UTC) * 1000); // 1990-01-01
                                                                                                                       // UTC
                                                                                                                       // timezone
         return "0001 between [0, " + secondsFrom_1970_01_01_UTC + "]";
+    }
+
+    @Override
+    protected String givenFilter_one_column_between_timestampFor19700101_and_timestampFor19900101() {
+        final long secondsFrom_1970_01_01_UTC = (LocalDateTime.of(1990, JANUARY, 1, 0, 0).toEpochSecond(UTC) * 1000); // 1990-01-01
+        // UTC
+        // timezone
+        return "* between [0, " + secondsFrom_1970_01_01_UTC + "]";
     }
 
 }

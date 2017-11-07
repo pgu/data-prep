@@ -612,10 +612,26 @@ public class SimpleFilterServiceTest extends AbstractFilterServiceTest {
     }
 
     @Override
+    protected String givenFilter_one_column_is_valid() {
+        return "{" + //
+                "   \"valid\": {" + //
+                "   }" + //
+                "}";
+    }
+
+    @Override
     protected String givenFilter_0001_is_empty() {
         return "{" + //
                 "   \"empty\": {" + //
                 "       \"field\": \"0001\"" + //
+                "   }" + //
+                "}";
+    }
+
+    @Override
+    protected String givenFilter_one_column_is_empty() {
+        return "{" + //
+                "   \"empty\": {" + //
                 "   }" + //
                 "}";
     }
@@ -632,10 +648,30 @@ public class SimpleFilterServiceTest extends AbstractFilterServiceTest {
     }
 
     @Override
+    protected String givenFilter_one_column_between_5_and_10() {
+        return "{" + //
+                "   \"range\": {" + //
+                "       \"start\": \"5\"," + //
+                "       \"end\": \"10\"" + //
+                "   }" + //
+                "}";
+    }
+
+    @Override
     protected String givenFilter_0001_between_timestampFor19700101_and_timestampFor19900101() {
         return "{" + //
                 "   \"range\": {" + //
                 "       \"field\": \"0001\"," + //
+                "       \"start\": 0," + // 1970-01-01 UTC timezone
+                // 1990-01-01 UTC timezone
+                "       \"end\": " + (LocalDateTime.of(1990, JANUARY, 1, 0, 0).toEpochSecond(UTC) * 1000) + "   }" + //
+                "}";
+    }
+
+    @Override
+    protected String givenFilter_one_column_between_timestampFor19700101_and_timestampFor19900101() {
+        return "{" + //
+                "   \"range\": {" + //
                 "       \"start\": 0," + // 1970-01-01 UTC timezone
                 // 1990-01-01 UTC timezone
                 "       \"end\": " + (LocalDateTime.of(1990, JANUARY, 1, 0, 0).toEpochSecond(UTC) * 1000) + "   }" + //
