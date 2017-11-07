@@ -259,24 +259,25 @@ class DataSetRowFilters {
      * Create a predicate that checks if the value is within a range [min, max[.
      *
      * @param columnId    The column id
-     * @param min         The range minimum (included)
-     * @param max         The range maximum (excluded)
-     * @param rowMetadata The row metadata
-     * @return The range predicate
+     * @param min         The range minimum
+     * @param max         The range maximum
+     * @param lowerOpen   <code>true</code> if min number is excluded from range.
+     * @param upperOpen   <code>true</code> if max number is excluded from range.
+     * @param rowMetadata The row metadata  @return The range predicate
      */
     static Predicate<DataSetRow> createRangePredicate(final String columnId, final String min, final String max,
-                                                      final RowMetadata rowMetadata) {
+                                                      boolean lowerOpen, boolean upperOpen, final RowMetadata rowMetadata) {
         return r -> r.values().entrySet().stream() //
                 .filter(getColumnFilter(columnId)) //
                 .anyMatch(e -> {
                     final String columnType = rowMetadata.getById(e.getKey()).getType();
                     Type parsedType = Type.get(columnType);
                     if (Type.DATE.isAssignableFrom(parsedType)) {
-                        return createDateRangePredicate(e.getKey(), min, max, rowMetadata).test(r);
+                        return createDateRangePredicate(e.getKey(), min, lowerOpen, max, upperOpen, rowMetadata).test(r);
                     } else {
                         // Assume range can be parsed as number (may happen if column is currently marked as string, but will
                         // contain some numbers).
-                        return createNumberRangePredicate(e.getKey(), min, max).test(r);
+                        return createNumberRangePredicate(e.getKey(), min, lowerOpen, max, upperOpen).test(r);
                     }
                 });
     }
@@ -287,10 +288,12 @@ class DataSetRowFilters {
      * @param columnId The column id
      * @param start    The start value
      * @param end      The end value
+     * @param lowerOpen   <code>true</code> if start is excluded from range.
+     * @param upperOpen   <code>true</code> if end is excluded from range.
      * @return The date range predicate
      */
-    private static Predicate<DataSetRow> createDateRangePredicate(final String columnId, final String start, final String end,
-                                                                  final RowMetadata rowMetadata) {
+    private static Predicate<DataSetRow> createDateRangePredicate(final String columnId, final String start, boolean lowerOpen, final String end,
+                                                                  boolean upperOpen, final RowMetadata rowMetadata) {
         try {
             final long minTimestamp = Long.parseLong(start);
             final long maxTimestamp = Long.parseLong(end);
@@ -301,7 +304,20 @@ class DataSetRowFilters {
             return safeDate(r -> {
                 final ColumnMetadata columnMetadata = rowMetadata.getById(columnId);
                 final LocalDateTime columnValue = getDateParser().parse(r.get(columnId), columnMetadata);
-                return minDate.compareTo(columnValue) == 0 || (minDate.isBefore(columnValue) && maxDate.isAfter(columnValue));
+
+                final boolean lowerBound;
+                if (lowerOpen) {
+                    lowerBound = minDate.compareTo(columnValue) != 0 && minDate.isBefore(columnValue);
+                } else {
+                    lowerBound = minDate.compareTo(columnValue) == 0 || minDate.isBefore(columnValue);
+                }
+                final boolean upperBound;
+                if (upperOpen) {
+                    upperBound = maxDate.compareTo(columnValue) != 0 && maxDate.isAfter(columnValue);
+                } else {
+                    upperBound = maxDate.compareTo(columnValue) == 0 || maxDate.isAfter(columnValue);
+                }
+                return lowerBound && upperBound;
             });
         } catch (Exception e) {
             LOGGER.debug("Unable to create date range predicate.", e);
@@ -332,11 +348,13 @@ class DataSetRowFilters {
      * Create a predicate that checks if the number value is within a range [min, max[
      *
      * @param columnId The column id
-     * @param min      The minimal value (included)
-     * @param max      The maximal value (excluded)
+     * @param min      The minimal value
+     * @param max      The maximal value
+     * @param lowerOpen   <code>true</code> if min number is excluded from range.
+     * @param upperOpen   <code>true</code> if max number is excluded from range.
      * @return The number range predicate
      */
-    private static Predicate<DataSetRow> createNumberRangePredicate(final String columnId, final String min, final String max) {
+    private static Predicate<DataSetRow> createNumberRangePredicate(final String columnId, final String min, boolean lowerOpen, final String max, boolean upperOpen) {
         try {
             final BigDecimal low = toBigDecimal(min);
             final BigDecimal high = toBigDecimal(max);
@@ -346,7 +364,20 @@ class DataSetRowFilters {
                     return false;
                 }
                 final BigDecimal cellValue = toBigDecimal(value);
-                return cellValue.compareTo(low) >= 0 && cellValue.compareTo(high) < 0;
+
+                final boolean lowerBound;
+                if (lowerOpen) {
+                    lowerBound = cellValue.compareTo(low) > 0;
+                } else {
+                    lowerBound = cellValue.compareTo(low) >= 0;
+                }
+                final boolean upperBound;
+                if (upperOpen) {
+                    upperBound = cellValue.compareTo(high) < 0;
+                } else {
+                    upperBound = cellValue.compareTo(high) <= 0;
+                }
+                return lowerBound && upperBound;
             };
         } catch (Exception e) {
             LOGGER.debug("Unable to create number range predicate.", e);

@@ -767,11 +767,11 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
         // then
         row.setInvalid("0001"); // value is marked as invalid
         row.unsetInvalid("0002"); // value is marked as valid
-        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "", "" }); // empty value
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "aa", "bb" }); // non empty value
 
         row.unsetInvalid("0001"); // value is marked as valid
         row.setInvalid("0002"); // value is marked as invalid
-        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "", "" }); // empty value
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "aa", "bb" }); // non empty value
 
         row.unsetInvalid("0001"); // value is marked as valid
         row.unsetInvalid("0002"); // value is marked as valid
@@ -804,7 +804,6 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
         filter = service.build(filtersDefinition, rowMetadata);
 
         // then
-        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "Thor", null });
         assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "Thor", "" });
         assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "Thor", "Odinson" });
     }
@@ -825,7 +824,7 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
         assertThatFilterExecutionReturnsFalseForRow("0001", "4"); // lt min
         assertThatFilterExecutionReturnsTrueForRow("0001", "5"); // eq min
         assertThatFilterExecutionReturnsTrueForRow("0001", "8"); // in range
-        assertThatFilterExecutionReturnsFalseForRow("0001", "10"); // eq max
+        assertThatFilterExecutionReturnsTrueForRow("0001", "10"); // eq max
         assertThatFilterExecutionReturnsFalseForRow("0001", "20"); // gt max
 
         assertThatFilterExecutionReturnsFalseForRow("0001", "toto"); // nan
@@ -861,9 +860,9 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
         // then
         row.getRowMetadata().getById("0001").setType("integer");
         row.getRowMetadata().getById("0002").setType("integer");
-        // assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "a", "4" });
-        // assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "5" });
-        // assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "8" });
+        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "a", "4" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "5" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "8" });
         assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "10" });
         assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "toto", "20" });
         assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "", null });
@@ -903,7 +902,7 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
         assertThatFilterExecutionReturnsFalseForRow("0001", "1960-01-01"); // lt min
         assertThatFilterExecutionReturnsTrueForRow("0001", "1970-01-01"); // eq min
         assertThatFilterExecutionReturnsTrueForRow("0001", "1980-01-01"); // in range
-        assertThatFilterExecutionReturnsFalseForRow("0001", "1990-01-01"); // eq max
+        assertThatFilterExecutionReturnsTrueForRow("0001", "1990-01-01"); // eq max
         assertThatFilterExecutionReturnsFalseForRow("0001", "2000-01-01"); // gt max
 
     }
@@ -942,7 +941,7 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
         assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "a", "1960-01-01" });
         assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "1960-01-01", "1970-01-01" });
         assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "a", "1980-01-01" });
-        assertThatFilterExecutionReturnsFalseForRow(new String[] { "0001", "0002" }, new String[] { "1990-01-01", "2000-01-01" });
+        assertThatFilterExecutionReturnsTrueForRow(new String[] { "0001", "0002" }, new String[] { "1990-01-01", "2000-01-01" });
     }
 
     protected abstract String givenFilter_one_column_between_timestampFor19700101_and_timestampFor19900101();

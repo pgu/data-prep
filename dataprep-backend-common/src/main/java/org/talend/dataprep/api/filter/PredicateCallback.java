@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -228,15 +229,17 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
                                                       final RowMetadata rowMetadata) {
         final String start = node.get("start").asText();
         final String end = node.get("end").asText();
+        final boolean upperBoundOpen = Optional.ofNullable(node.get("upperOpen")).map(JsonNode::asBoolean).orElse(true);
+        final boolean lowerBoundOpen = Optional.ofNullable(node.get("lowerOpen")).map(JsonNode::asBoolean).orElse(false);
         return r -> {
             final String columnType = rowMetadata.getById(columnId).getType();
             Type parsedType = Type.get(columnType);
             if (Type.DATE.isAssignableFrom(parsedType)) {
-                return createDateRangePredicate(columnId, start, end, rowMetadata).test(r);
+                return createDateRangePredicate(columnId, start, lowerBoundOpen, end, upperBoundOpen, rowMetadata).test(r);
             } else {
                 // Assume range can be parsed as number (may happen if column is currently marked as string, but will
                 // contain some numbers).
-                return createNumberRangePredicate(columnId, start, end).test(r);
+                return createNumberRangePredicate(columnId, start, lowerBoundOpen, end, upperBoundOpen).test(r);
             }
         };
     }
@@ -247,10 +250,12 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
      * @param columnId The column id
      * @param start    The start value
      * @param end      The end value
+     * @param lowerBoundOpen   <code>true</code> if start is excluded from range.
+     * @param upperBoundOpen   <code>true</code> if end is excluded from range.
      * @return The date range predicate
      */
-    private Predicate<DataSetRow> createDateRangePredicate(final String columnId, final String start, final String end,
-                                                          final RowMetadata rowMetadata) {
+    private Predicate<DataSetRow> createDateRangePredicate(final String columnId, final String start, boolean lowerBoundOpen, final String end,
+                                                           boolean upperBoundOpen, final RowMetadata rowMetadata) {
         try {
             final long minTimestamp = Long.parseLong(start);
             final long maxTimestamp = Long.parseLong(end);
@@ -261,7 +266,20 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
             return safeDate(r -> {
                 final ColumnMetadata columnMetadata = rowMetadata.getById(columnId);
                 final LocalDateTime columnValue = getDateParser().parse(r.get(columnId), columnMetadata);
-                return minDate.compareTo(columnValue) == 0 || (minDate.isBefore(columnValue) && maxDate.isAfter(columnValue));
+
+                final boolean lowerBound;
+                if (lowerBoundOpen) {
+                    lowerBound = minDate.compareTo(columnValue) != 0 && minDate.isBefore(columnValue);
+                } else {
+                    lowerBound = minDate.compareTo(columnValue) == 0 || minDate.isBefore(columnValue);
+                }
+                final boolean upperBound;
+                if (upperBoundOpen) {
+                    upperBound = maxDate.compareTo(columnValue) != 0 && maxDate.isAfter(columnValue);
+                } else {
+                    upperBound = maxDate.compareTo(columnValue) == 0 || maxDate.isAfter(columnValue);
+                }
+                return lowerBound && upperBound;
             });
         } catch (Exception e) {
             LOGGER.debug("Unable to create date range predicate.", e);
@@ -284,17 +302,32 @@ public class PredicateCallback implements JSONFilterCallback<Predicate<DataSetRo
      * @param columnId The column id
      * @param start    The start value
      * @param end      The end value
+     * @param lowerBoundOpen   <code>true</code> if start is excluded from range.
+     * @param upperBoundOpen   <code>true</code> if end is excluded from range.
      * @return The number range predicate
      */
-    private Predicate<DataSetRow> createNumberRangePredicate(final String columnId, final String start, final String end) {
+    private Predicate<DataSetRow> createNumberRangePredicate(final String columnId, final String start, boolean lowerBoundOpen, final String end, boolean upperBoundOpen) {
         try {
             final double min = toBigDecimal(start);
             final double max = toBigDecimal(end);
             return r -> {
                 final String value = r.get(columnId);
                 if (NumericHelper.isBigDecimal(value)) {
-                    final double columnValue = toBigDecimal(value);
-                    return NumberUtils.compare(columnValue, min) == 0 || (columnValue > min && columnValue < max);
+                    final Double columnValue = toBigDecimal(value);
+
+                    final boolean lowerBound;
+                    if (lowerBoundOpen) {
+                        lowerBound = columnValue.compareTo(min) > 0;
+                    } else {
+                        lowerBound = columnValue.compareTo(min) >= 0;
+                    }
+                    final boolean upperBound;
+                    if (upperBoundOpen) {
+                        upperBound = columnValue.compareTo(max) < 0;
+                    } else {
+                        upperBound = columnValue.compareTo(max) <= 0;
+                    }
+                    return lowerBound && upperBound;
                 } else {
                     return false;
                 }

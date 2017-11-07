@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang.StringUtils;
 import org.talend.dataprep.api.dataset.RowMetadata;
 
+import java.util.Optional;
+
 import static org.talend.dataprep.api.filter.JSONFilterWalker.walk;
 
 /**
@@ -97,7 +99,12 @@ public class FilterTranslator {
 
         @Override
         public String createRangePredicate(String columnId, JsonNode node, RowMetadata rowMetadata) {
-            return columnId + " in [" + node.get(0).asText() + ", " + node.get(1).asText() + "]";
+            final boolean upperBoundOpen = Optional.ofNullable(node.get("upperOpen")).map(JsonNode::asBoolean).orElse(true);
+            final boolean lowerBoundOpen = Optional.ofNullable(node.get("lowerOpen")).map(JsonNode::asBoolean).orElse(false);
+            final String lowerBound = lowerBoundOpen ? "]" : "[";
+            final String upperBound = upperBoundOpen ? "[" : "]";
+
+            return columnId + " in " + lowerBound + node.get(0).asText() + ", " + node.get(1).asText() + upperBound;
         }
 
         @Override

@@ -259,7 +259,8 @@ public class SimpleFilterServiceTest extends AbstractFilterServiceTest {
         final String filtersDefinition = "{" + //
                 "   \"range\": {" + //
                 "       \"start\": \"5\"," + //
-                "       \"end\": \"10\"" + //
+                "       \"end\": \"10\"," + //
+                "       \"upperOpen\": false" + //
                 "   }" + //
                 "}";
 
@@ -642,7 +643,8 @@ public class SimpleFilterServiceTest extends AbstractFilterServiceTest {
                 "   \"range\": {" + //
                 "       \"field\": \"0001\"," + //
                 "       \"start\": \"5\"," + //
-                "       \"end\": \"10\"" + //
+                "       \"end\": \"10\"," + //
+                "       \"upperOpen\": false" + //
                 "   }" + //
                 "}";
     }
@@ -652,7 +654,8 @@ public class SimpleFilterServiceTest extends AbstractFilterServiceTest {
         return "{" + //
                 "   \"range\": {" + //
                 "       \"start\": \"5\"," + //
-                "       \"end\": \"10\"" + //
+                "       \"end\": \"10\"," + //
+                "       \"upperOpen\": false" + //
                 "   }" + //
                 "}";
     }
@@ -664,7 +667,8 @@ public class SimpleFilterServiceTest extends AbstractFilterServiceTest {
                 "       \"field\": \"0001\"," + //
                 "       \"start\": 0," + // 1970-01-01 UTC timezone
                 // 1990-01-01 UTC timezone
-                "       \"end\": " + (LocalDateTime.of(1990, JANUARY, 1, 0, 0).toEpochSecond(UTC) * 1000) + "   }" + //
+                "       \"end\": " + (LocalDateTime.of(1990, JANUARY, 1, 0, 0).toEpochSecond(UTC) * 1000) + "," + //
+                "       \"upperOpen\": false }" + //
                 "}";
     }
 
@@ -674,7 +678,8 @@ public class SimpleFilterServiceTest extends AbstractFilterServiceTest {
                 "   \"range\": {" + //
                 "       \"start\": 0," + // 1970-01-01 UTC timezone
                 // 1990-01-01 UTC timezone
-                "       \"end\": " + (LocalDateTime.of(1990, JANUARY, 1, 0, 0).toEpochSecond(UTC) * 1000) + "   }" + //
+                "       \"end\": " + (LocalDateTime.of(1990, JANUARY, 1, 0, 0).toEpochSecond(UTC) * 1000) + "," + //
+                "       \"upperOpen\": false }" + //
                 "}";
     }
 

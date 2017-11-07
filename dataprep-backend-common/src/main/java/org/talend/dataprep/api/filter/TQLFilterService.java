@@ -188,8 +188,10 @@ public class TQLFilterService implements FilterService {
             final String columnName = fields.pop();
             final String low = fieldBetweenExpression.getLeft().getValue();
             final String high = fieldBetweenExpression.getRight().getValue();
+            final boolean lowerOpen = fieldBetweenExpression.isLowerOpen();
+            final boolean upperOpen = fieldBetweenExpression.isUpperOpen();
 
-            return createRangePredicate(columnName, low, high, rowMetadata);
+            return createRangePredicate(columnName, low, high, lowerOpen, upperOpen, rowMetadata);
         }
 
         @Override
