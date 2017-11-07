@@ -676,7 +676,6 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     protected abstract String givenFilter_0001_complies_empty();
 
     @Test
-    @Ignore
     public void testCompliesEmptyPatternPredicateOnStringValueAllColumns() throws Exception {
         // given
         final String filtersDefinition = givenFilter_all_columns_complies_empty();
@@ -712,7 +711,6 @@ public abstract class AbstractFilterServiceTest extends FilterServiceTest {
     protected abstract String givenFilter_0001_is_invalid();
 
     @Test
-    @Ignore
     public void testInvalidPredicateOnOneColumn() throws Exception {
         // given
         final String filtersDefinition = givenFilter_one_column_is_invalid();
