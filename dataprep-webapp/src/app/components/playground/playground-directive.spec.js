@@ -159,6 +159,7 @@ describe('Playground directive', () => {
 
 		createElement = () => {
 			element = angular.element('<playground></playground>');
+			angular.element('body').append(element);
 			$compile(element)(scope);
 			scope.$digest();
 
@@ -240,21 +241,18 @@ describe('Playground directive', () => {
 			// when
 			createElement();
 
-			expect(element.find('talend-modal').length).toBe(0);
+			expect(angular.element('body').find('preparation-picker').length).toBe(0);
 		});
 
 		it('should display preparation picker modal', inject(() => {
 			// given
 			stateMock.playground.dataset = metadata;
-			// stateMock.playground.isPreprationPickerVisible = true;
+			stateMock.playground.isPreprationPickerVisible = true;
 
 			// when
 			createElement();
 
-			ctrl.showPreparationPicker();
-			scope.$digest();
-
-			expect(element.find('talend-modal').length).toBe(1);
+			expect(angular.element('body').find('preparation-picker').length).toBe(1);
 		}));
 	});
 
