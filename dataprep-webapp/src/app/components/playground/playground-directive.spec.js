@@ -19,6 +19,8 @@ describe('Playground directive', () => {
 	let ctrl;
 	let stateMock;
 
+	const body = angular.element('body');
+
 	const metadata = {
 		id: '12ce6c32-bf80-41c8-92e5-66d70f22ec1f',
 		name: 'US States',
@@ -159,7 +161,7 @@ describe('Playground directive', () => {
 
 		createElement = () => {
 			element = angular.element('<playground></playground>');
-			angular.element('body').append(element);
+			body.append(element);
 			$compile(element)(scope);
 			scope.$digest();
 
@@ -241,7 +243,7 @@ describe('Playground directive', () => {
 			// when
 			createElement();
 
-			expect(angular.element('body').find('preparation-picker').length).toBe(0);
+			expect(body.find('preparation-picker').length).toBe(0);
 		});
 
 		it('should display preparation picker modal', inject(() => {
@@ -252,7 +254,7 @@ describe('Playground directive', () => {
 			// when
 			createElement();
 
-			expect(angular.element('body').find('preparation-picker').length).toBe(1);
+			expect(body.find('preparation-picker').length).toBe(1);
 		}));
 	});
 
@@ -335,7 +337,7 @@ describe('Playground directive', () => {
 		it('should focus on playground container when event target is on input element', inject(($timeout) => {
 			// given
 			createElement();
-			angular.element('body').append(element);
+			body.append(element);
 			const container = element.find('.playground-container').eq(0)[0];
 			expect(document.activeElement).not.toBe(container);
 
