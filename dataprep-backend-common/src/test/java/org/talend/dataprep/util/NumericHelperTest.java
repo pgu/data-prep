@@ -12,9 +12,10 @@
 
 package org.talend.dataprep.util;
 
-import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class NumericHelperTest {
 
@@ -31,12 +32,17 @@ public class NumericHelperTest {
         assertTrue(NumericHelper.isBigDecimal(".6"));
         assertTrue(NumericHelper.isBigDecimal(",6"));
         assertTrue(NumericHelper.isBigDecimal("(6)"));
+        assertTrue(NumericHelper.isBigDecimal("6%"));
+
+        // TODO : should be false
+        assertTrue(NumericHelper.isBigDecimal("5%55"));
     }
 
     @Test
     public void shouldReturnFalseOnNonNumeric() throws Exception {
         assertFalse(NumericHelper.isBigDecimal("a"));
         assertFalse(NumericHelper.isBigDecimal(""));
+        assertFalse(NumericHelper.isBigDecimal(" "));
         assertFalse(NumericHelper.isBigDecimal(null));
         assertFalse(NumericHelper.isBigDecimal("6aaa"));
         assertFalse(NumericHelper.isBigDecimal("6 aaa"));

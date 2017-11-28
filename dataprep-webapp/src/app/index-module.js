@@ -13,10 +13,13 @@
 
 /* eslint-disable angular/window-service */
 
+import d3 from 'd3';
 import angular from 'angular';
 import ngSanitize from 'angular-sanitize';
 import ngTranslate from 'angular-translate';
 import uiRouter from 'angular-ui-router';
+
+import { init } from 'i18next';
 
 import APP_MODULE from './components/app/app-module';
 import HOME_MODULE from './components/home/home-module';
@@ -31,12 +34,32 @@ import SETTINGS_MODULE from './settings/settings-module';
 import { routeConfig, routeInterceptor } from './index-route';
 import getAppConfiguration from './index-config';
 
+import d3LocaleFr from '../lib/d3.locale.fr';
+
 const MODULE_NAME = 'data-prep';
+
+const I18N_DOMAIN_COMPONENTS = 'tui-components';
+const I18N_DOMAIN_FORMS = 'tui-forms';
 
 let ws;
 let wsPing;
-const app = angular.module(MODULE_NAME,
-	[
+
+let preferredLanguage;
+const fallbackLng = 'en';
+export const i18n = init({
+	fallbackLng, // Fallback language
+	ns: [
+		I18N_DOMAIN_COMPONENTS,
+		I18N_DOMAIN_FORMS,
+	],
+	defaultNS: I18N_DOMAIN_COMPONENTS,
+	fallbackNS: I18N_DOMAIN_COMPONENTS,
+	debug: false,
+	wait: true, // globally set to wait for loaded translations in translate hoc
+});
+
+const app = angular
+	.module(MODULE_NAME, [
 		ngSanitize,
 		ngTranslate,
 		uiRouter,
@@ -50,7 +73,7 @@ const app = angular.module(MODULE_NAME,
 		SERVICES_UTILS_MODULE, // configuration: register constants (version, ...)
 		SETTINGS_MODULE, // configuration: get app settings
 	])
-// Performance config
+	// Performance config
 	.config(($httpProvider) => {
 		'ngInject';
 		$httpProvider.useApplyAsync(true);
@@ -62,80 +85,108 @@ const app = angular.module(MODULE_NAME,
 			prefix: 'i18n/',
 			suffix: '.json',
 		});
-
-		$translateProvider.preferredLanguage('en');
 		$translateProvider.useSanitizeValueStrategy(null);
 	})
-
 	// Router config
 	.config(routeConfig)
-	.run(routeInterceptor)
-
-	// Language to use at startup (for now only english)
-	.run(($window, $translate) => {
-		'ngInject';
-		$translate.use('en');
-	});
+	.run(routeInterceptor);
 
 window.fetchConfiguration = function fetchConfiguration() {
-	return getAppConfiguration()
-		.then(({ config, appSettings }) => {
-			app
+	return getAppConfiguration().then(({ config, appSettings }) => {
+		app
 			// Debug config
-				.config(($compileProvider) => {
-					'ngInject';
-					$compileProvider.debugInfoEnabled(config.enableDebug);
-				})
-				// Fetch dynamic configuration
-				.run((SettingsService) => {
-					'ngInject';
-					// base settings
-					SettingsService.setSettings(appSettings);
-				})
-				// Configure server api urls and refresh supported encoding
-				.run((DatasetService, HelpService, RestURLs) => {
-					'ngInject';
+			.config(($compileProvider) => {
+				'ngInject';
+				$compileProvider.debugInfoEnabled(config.enableDebug);
+			})
+			.config(($translateProvider) => {
+				'ngInject';
 
-					const { help } = appSettings;
-					if (help) {
-						HelpService.register(help);
+				preferredLanguage =
+					(appSettings.context && appSettings.context.language) ||
+					fallbackLng;
+
+				$translateProvider.preferredLanguage(preferredLanguage);
+
+				moment.locale(preferredLanguage);
+
+				if (preferredLanguage !== fallbackLng) {
+					i18n.changeLanguage(preferredLanguage);
+
+					if (preferredLanguage === 'fr') {
+						const d3locale = d3.locale(d3LocaleFr);
+						d3.format = d3locale.numberFormat;
+						d3.time.format = d3locale.timeFormat;
 					}
-
-					RestURLs.register(config, appSettings.uris);
-
-					// dataset encodings
-					DatasetService.refreshSupportedEncodings();
-				})
-				// Open a keepalive websocket if requested
-				.run(() => {
-					if (!config.serverKeepAliveUrl) return;
-					function setupWebSocket() {
-						clearInterval(wsPing);
-
-						ws = new WebSocket(config.serverKeepAliveUrl);
-						ws.onclose = () => {
-							setTimeout(setupWebSocket, 1000);
-						};
-
-						wsPing = setInterval(() => {
-							ws.send('ping');
-						}, 3 * 60 * 1000);
+					if ($.datetimepicker) {
+						$.datetimepicker.setLocale(preferredLanguage);
 					}
+				}
+			})
+			// Fetch dynamic configuration
+			.run((SettingsService) => {
+				'ngInject';
+				// base settings
+				SettingsService.setSettings(appSettings);
+			})
+			// Configure server api urls and refresh supported encoding
+			.run((DatasetService, HelpService, RestURLs) => {
+				'ngInject';
 
-					setupWebSocket();
+				const { help } = appSettings;
+				if (help) {
+					HelpService.register(help);
+				}
+
+				RestURLs.register(config, appSettings.uris);
+
+				// dataset encodings
+				DatasetService.refreshSupportedEncodings();
+			})
+			// Open a keepalive websocket if requested
+			.run(() => {
+				if (!config.serverKeepAliveUrl) return;
+
+				function setupWebSocket() {
+					clearInterval(wsPing);
+
+					ws = new WebSocket(config.serverKeepAliveUrl);
+					ws.onclose = () => {
+						setTimeout(setupWebSocket, 1000);
+					};
+
+					wsPing = setInterval(() => {
+						ws.send('ping');
+					}, 3 * 60 * 1000);
+				}
+
+				setupWebSocket();
+			})
+			.run(($translate) => {
+				'ngInject';
+
+				$translate.onReady(() => {
+					i18n.addResourceBundle(
+						preferredLanguage,
+						I18N_DOMAIN_COMPONENTS,
+						$translate.getTranslationTable(),
+						false,
+						false
+					);
 				});
+			});
 
-			angular.module(SERVICES_UTILS_MODULE)
-				.value('version', config.version)
-				.value('copyRights', config.copyRights)
-				.value('analyticsEnabled', config.analyticsEnabled)
-				.value('analyticsAccount', config.analyticsAccount);
-		});
+		angular
+			.module(SERVICES_UTILS_MODULE)
+			.value('version', config.version)
+			.value('copyRights', config.copyRights);
+	});
 };
 
-window.bootstrapDataPrepApplication = function bootstrapDataPrepApplication(modules) {
-	angular.element(document)
-		.ready(() => angular.bootstrap(document, modules));
+window.bootstrapDataPrepApplication = function bootstrapDataPrepApplication(
+	modules
+) {
+	angular.element(document).ready(() => angular.bootstrap(document, modules));
 };
 /* eslint-enable angular/window-service */
 

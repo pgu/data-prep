@@ -13,6 +13,7 @@
 package org.talend.dataprep.preparation.configuration;
 
 import static java.util.stream.Collectors.toList;
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 import static org.talend.dataprep.conversions.BeanConversionService.fromBean;
 
 import java.util.Collections;
@@ -29,6 +30,7 @@ import org.talend.dataprep.api.action.ActionDefinition;
 import org.talend.dataprep.api.filter.FilterTranslator;
 import org.talend.dataprep.api.preparation.*;
 import org.talend.dataprep.api.preparation.Action;
+import org.talend.dataprep.api.action.ActionForm;
 import org.talend.dataprep.api.preparation.Preparation;
 import org.talend.dataprep.api.preparation.PreparationActions;
 import org.talend.dataprep.api.preparation.PreparationMessage;
@@ -152,8 +154,9 @@ public class PreparationConversions extends BeanConversionServiceWrapper {
                         LOGGER.debug("No action metadata available, unable to serialize action metadata for preparation {}.",
                                 source.id());
                     } else {
-                        List<ActionDefinition> actionDefinitions = actions.stream() //
+                        List<ActionForm> actionDefinitions = actions.stream() //
                                 .map(a -> actionRegistry.get(a.getName())) //
+                                .map(a -> a.getActionForm(getLocale())) //
                                 .collect(Collectors.toList());
                         target.setMetadata(actionDefinitions);
                     }

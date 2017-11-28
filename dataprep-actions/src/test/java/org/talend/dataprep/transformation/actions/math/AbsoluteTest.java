@@ -21,6 +21,7 @@ import static org.talend.dataprep.transformation.actions.ActionMetadataTestUtils
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Before;
@@ -91,7 +92,7 @@ public class AbsoluteTest extends AbstractMetadataBaseTest {
 
     @Test
     public void testCategory() throws Exception {
-        assertThat(absolute.getCategory(), is(ActionCategory.MATH.getDisplayName()));
+        assertThat(absolute.getCategory(Locale.US), is(ActionCategory.MATH.getDisplayName(Locale.US)));
     }
 
     @Test
@@ -132,6 +133,16 @@ public class AbsoluteTest extends AbstractMetadataBaseTest {
         final DataSetRow row = new DataSetRow(values);
 
         assertInteger(row, "5.42");
+    }
+
+    @Test
+    public void testAbsoluteFloatWithNegativePercentage() {
+        // given
+        final Map<String, String> values = new HashMap<>();
+        values.put(FLOAT_COLUMN, "-5%"); //$NON-NLS-1$
+        final DataSetRow row = new DataSetRow(values);
+
+        assertFloat(row, "0.05");
     }
 
     @Test

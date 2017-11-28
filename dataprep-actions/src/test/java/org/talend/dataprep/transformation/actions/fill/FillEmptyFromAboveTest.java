@@ -18,10 +18,7 @@ import static org.junit.Assert.*;
 import static org.talend.dataprep.api.dataset.ColumnMetadata.Builder.column;
 import static org.talend.dataprep.transformation.actions.ActionMetadataTestUtils.getColumn;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -64,7 +61,7 @@ public class FillEmptyFromAboveTest extends AbstractMetadataBaseTest {
         List<String> parameterNames = Arrays.asList("column_id", "row_id", "scope", "filter");
 
         // when
-        final List<Parameter> parameters = action.getParameters();
+        final List<Parameter> parameters = action.getParameters(Locale.US);
 
         // then
         assertNotNull(parameters);
@@ -181,6 +178,118 @@ public class FillEmptyFromAboveTest extends AbstractMetadataBaseTest {
         assertEquals("600", row81.get("0001"));
         assertEquals("600", row82.get("0001"));
         assertEquals("600", row83.get("0001"));
+        assertEquals("900", row9.get("0001"));
+        assertEquals("aaa", row10.get("0001"));
+    }
+
+    @Test
+    public void should_fill_empty_string_with_deleted_rows() throws Exception {
+        // given
+        Map<String, String> rowContent = new HashMap<>();
+
+        // row 0
+        rowContent.put("0000", "David");
+        rowContent.put("0001", null);
+        final DataSetRow row0 = new DataSetRow(rowContent);
+
+        // row 1
+        rowContent.put("0000", "David");
+        rowContent.put("0001", "");
+        final DataSetRow row1 = new DataSetRow(rowContent);
+
+        // row 2
+        rowContent = new HashMap<>();
+        rowContent.put("0000", "John");
+        rowContent.put("0001", "200");
+        final DataSetRow row2 = new DataSetRow(rowContent);
+        row2.setDeleted(true);
+
+        // row 3
+        rowContent = new HashMap<>();
+        rowContent.put("0000", "John");
+        rowContent.put("0001", "");
+        final DataSetRow row3 = new DataSetRow(rowContent);
+
+        // row 4
+        rowContent = new HashMap<>();
+        rowContent.put("0000", "John");
+        rowContent.put("0001", "2011-08-19");
+        final DataSetRow row4 = new DataSetRow(rowContent);
+
+        // row 5
+        rowContent = new HashMap<>();
+        rowContent.put("0000", "John");
+        rowContent.put("0001", null);
+        final DataSetRow row5 = new DataSetRow(rowContent);
+
+        // row 6
+        rowContent = new HashMap<>();
+        rowContent.put("0000", "John");
+        rowContent.put("0001", "600");
+        final DataSetRow row6 = new DataSetRow(rowContent);
+        row6.setDeleted(true);
+
+        // row 7
+        rowContent = new HashMap<>();
+        rowContent.put("0000", "John");
+        rowContent.put("0001", "");
+        final DataSetRow row7 = new DataSetRow(rowContent);
+
+        // row 8
+        rowContent = new HashMap<>();
+        rowContent.put("0000", "John");
+        rowContent.put("0001", "\t");
+        final DataSetRow row8 = new DataSetRow(rowContent);
+
+
+        rowContent = new HashMap<>();
+        rowContent.put("0000", "John");
+        rowContent.put("0001", "\f");
+        final DataSetRow row81 = new DataSetRow(rowContent);
+
+        rowContent = new HashMap<>();
+        rowContent.put("0000", "John");
+        rowContent.put("0001", "\n");
+        final DataSetRow row82 = new DataSetRow(rowContent);
+
+        rowContent = new HashMap<>();
+        rowContent.put("0000", "John");
+        rowContent.put("0001", "\r");
+        final DataSetRow row83 = new DataSetRow(rowContent);
+
+        // row 9
+        rowContent = new HashMap<>();
+        rowContent.put("0000", "John");
+        rowContent.put("0001", "900");
+        final DataSetRow row9 = new DataSetRow(rowContent);
+
+        // row 10
+        rowContent = new HashMap<>();
+        rowContent.put("0000", "John");
+        rowContent.put("0001", "aaa");
+        final DataSetRow row10 = new DataSetRow(rowContent);
+
+        final Map<String, String> parameters = new HashMap<>();
+        parameters.put(ImplicitParameters.SCOPE.getKey().toLowerCase(), "column");
+        parameters.put("column_id", "0001");
+
+        // when
+        ActionTestWorkbench.test(Arrays.asList(row0,row1, row2,row3, row4,row5, row6,row7, row8, row81, row82, row83, row9, row10), actionRegistry, factory.create(
+                action, parameters));
+
+        // then
+        assertNull(row0.get("0001"));
+        assertEquals("", row1.get("0001"));
+        assertEquals("200", row2.get("0001"));
+        assertEquals("", row3.get("0001"));
+        assertEquals("2011-08-19", row4.get("0001"));
+        assertEquals("2011-08-19", row5.get("0001"));
+        assertEquals("600", row6.get("0001"));
+        assertEquals("2011-08-19", row7.get("0001"));
+        assertEquals("2011-08-19", row8.get("0001"));
+        assertEquals("2011-08-19", row81.get("0001"));
+        assertEquals("2011-08-19", row82.get("0001"));
+        assertEquals("2011-08-19", row83.get("0001"));
         assertEquals("900", row9.get("0001"));
         assertEquals("aaa", row10.get("0001"));
     }

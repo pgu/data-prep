@@ -16,12 +16,11 @@ import static java.math.RoundingMode.HALF_UP;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.talend.daikon.exception.ExceptionContext;
 import org.talend.daikon.exception.TalendRuntimeException;
 import org.talend.daikon.number.BigDecimalParser;
@@ -31,7 +30,6 @@ import org.talend.dataprep.api.dataset.RowMetadata;
 import org.talend.dataprep.api.dataset.row.DataSetRow;
 import org.talend.dataprep.api.type.Type;
 import org.talend.dataprep.exception.error.ActionErrorCodes;
-import org.talend.dataprep.i18n.ActionsBundle;
 import org.talend.dataprep.parameters.Parameter;
 import org.talend.dataprep.parameters.ParameterType;
 import org.talend.dataprep.parameters.SelectParameter;
@@ -77,45 +75,47 @@ public class NumericOperations extends AbstractActionMetadata implements ColumnA
 
     private static final String DIVIDE = "/";
 
+    /** Class logger. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(NumericOperations.class);
+
     @Override
     public String getName() {
         return ACTION_NAME;
     }
 
     @Override
-    public String getCategory() {
-        return ActionCategory.MATH.getDisplayName();
+    public String getCategory(Locale locale) {
+        return ActionCategory.MATH.getDisplayName(locale);
     }
 
     @Override
-    public List<Parameter> getParameters() {
-        final List<Parameter> parameters = super.getParameters();
+    public List<Parameter> getParameters(Locale locale) {
+        final List<Parameter> parameters = super.getParameters(locale);
 
         //@formatter:off
-        parameters.add(SelectParameter.Builder.builder()
+        parameters.add(SelectParameter.selectParameter(locale)
                         .name(OPERATOR_PARAMETER)
                         .item(PLUS)
                         .item(MULTIPLY)
                         .item(MINUS)
                         .item(DIVIDE)
                         .defaultValue(MULTIPLY)
-                        .build()
+                        .build(this )
         );
         //@formatter:on
 
         //@formatter:off
-        parameters.add(SelectParameter.Builder.builder()
+        parameters.add(SelectParameter.selectParameter(locale)
                         .name(MODE_PARAMETER)
-                        .item(CONSTANT_MODE, CONSTANT_MODE, new Parameter(OPERAND_PARAMETER, ParameterType.STRING, "2"))
+                        .item(CONSTANT_MODE, CONSTANT_MODE, Parameter.parameter(locale).setName(OPERAND_PARAMETER).setType(ParameterType.STRING).setDefaultValue("2").build(this))
                         .item(OTHER_COLUMN_MODE, OTHER_COLUMN_MODE,
-                              new Parameter(SELECTED_COLUMN_PARAMETER, ParameterType.COLUMN, //
-                                            StringUtils.EMPTY, false, false, StringUtils.EMPTY)) //
+                              Parameter.parameter(locale).setName(SELECTED_COLUMN_PARAMETER).setType(ParameterType.COLUMN).setDefaultValue(StringUtils.EMPTY).setCanBeBlank(false).build(this)) //
                         .defaultValue(CONSTANT_MODE)
-                        .build()
+                        .build(this )
         );
         //@formatter:on
 
-        return ActionsBundle.attachToAction(parameters, this);
+        return parameters;
     }
 
     @Override
@@ -214,7 +214,13 @@ public class NumericOperations extends AbstractActionMetadata implements ColumnA
 
             // Format result:
             return toReturn.setScale(scale, rm).stripTrailingZeros().toPlainString();
-        } catch (ArithmeticException | NullPointerException e) {
+        } catch (ArithmeticException | NumberFormatException | NullPointerException e) {
+            LOGGER.debug("Unable to compute with operands {}, {} and operator {} due to exception {}.", stringOperandOne,
+                    stringOperandTwo, operator, e);
+            return StringUtils.EMPTY;
+        } catch (Exception e) {
+            LOGGER.debug("Unable to compute with operands {}, {} and operator {} due to an unknown exception {}.",
+                    stringOperandOne, stringOperandTwo, operator, e);
             return StringUtils.EMPTY;
         }
     }

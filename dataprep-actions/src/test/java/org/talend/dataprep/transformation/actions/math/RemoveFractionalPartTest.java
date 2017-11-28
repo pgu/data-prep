@@ -21,6 +21,7 @@ import static org.talend.dataprep.transformation.actions.ActionMetadataTestUtils
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Before;
@@ -62,7 +63,7 @@ public class RemoveFractionalPartTest extends AbstractRoundTest {
 
     @Test
     public void testCategory() throws Exception {
-        assertThat(action.getCategory(), is(ActionCategory.NUMBERS.getDisplayName()));
+        assertThat(action.getCategory(Locale.US), is(ActionCategory.NUMBERS.getDisplayName(Locale.US)));
     }
 
     @Test
@@ -86,6 +87,13 @@ public class RemoveFractionalPartTest extends AbstractRoundTest {
         testCommon("891234567897.9", "891234567897");
         testCommon("891234567899.9", "891234567899");
         testCommon("999999999999.9", "999999999999");
+    }
+
+    @Test
+    public void test_percentage_number() {
+        testCommon("5%", "0");
+        testCommon("50%", "0");
+        testCommon("500%", "5");
     }
 
     @Test

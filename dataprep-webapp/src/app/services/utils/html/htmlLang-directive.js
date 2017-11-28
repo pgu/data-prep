@@ -11,13 +11,22 @@
 
   ============================================================================*/
 
-describe('Analytics account service', () => {
-    'use strict';
+export default function htmlLang($rootScope) {
+	'ngInject';
 
-    beforeEach(angular.mock.module('data-prep.services.utils'));
+	return {
+		restrict: 'A',
+		link: (scope, element) => {
+			const listener = function (event, translationResp) {
+				const defaultLang = 'en';
+				const currentlang = translationResp && translationResp.language;
 
-    it('should set value by default', inject((analyticsAccount) => {
-        //then
-        expect(analyticsAccount).toBe('');
-    }));
-});
+				element
+					.removeAttr('html-lang')
+					.attr('lang', currentlang || defaultLang);
+			};
+
+			$rootScope.$on('$translateChangeSuccess', listener);
+		},
+	};
+}

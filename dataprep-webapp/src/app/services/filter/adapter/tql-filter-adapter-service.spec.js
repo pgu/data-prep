@@ -22,6 +22,8 @@ import {
     QUALITY,
 } from './tql-filter-adapter-service';
 
+import i18n from './../../../../i18n/en.json';
+
 describe('TQL Filter Adapter Service', () => {
     const COL_ID = '0001';
     const getArgs = (key, ...args) => ({ [key]: args.map(a => ({ value: a })) });
@@ -29,12 +31,7 @@ describe('TQL Filter Adapter Service', () => {
     beforeEach(angular.mock.module('data-prep.services.filter-adapter'));
 
 	beforeEach(angular.mock.module('pascalprecht.translate', ($translateProvider) => {
-		$translateProvider.translations('en', {
-            "INVALID_RECORDS_LABEL": "rows with invalid values",
-            "VALID_RECORDS_LABEL": "rows with valid values",
-            "INVALID_EMPTY_RECORDS_LABEL": "rows with invalid or empty values",
-            "EMPTY_RECORDS_LABEL": "rows with empty values",
-		});
+		$translateProvider.translations('en', i18n);
 		$translateProvider.preferredLanguage('en');
 	}));
 
