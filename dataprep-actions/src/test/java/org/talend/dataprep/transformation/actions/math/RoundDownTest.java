@@ -21,6 +21,7 @@ import static org.talend.dataprep.transformation.actions.ActionMetadataTestUtils
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Before;
@@ -62,7 +63,7 @@ public class RoundDownTest extends AbstractRoundTest {
 
     @Test
     public void testCategory() throws Exception {
-        assertThat(action.getCategory(), is(ActionCategory.NUMBERS.getDisplayName()));
+        assertThat(action.getCategory(Locale.US), is(ActionCategory.NUMBERS.getDisplayName(Locale.US)));
     }
 
 
@@ -102,6 +103,13 @@ public class RoundDownTest extends AbstractRoundTest {
         testCommon("-5.00", "-5.0", 1);
         testCommon("-5.45", "-5.4", 1);
         testCommon("-5.63", "-5.6", 1);
+    }
+
+    @Test
+    public void test_percentage_number() {
+        testCommon("5%", "0.05", 2);
+        testCommon("50%", "0.50", 2);
+        testCommon("500%", "5.00", 2);
     }
 
     @Test

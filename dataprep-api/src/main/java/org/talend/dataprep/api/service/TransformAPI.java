@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-import org.talend.dataprep.api.action.ActionDefinition;
+import org.talend.dataprep.api.action.ActionForm;
 import org.talend.dataprep.api.service.api.DynamicParamsInput;
 import org.talend.dataprep.api.service.command.preparation.PreparationGetContent;
 import org.talend.dataprep.api.service.command.transformation.*;
@@ -56,9 +56,9 @@ public class TransformAPI extends APIService {
     @RequestMapping(value = "/api/transform/actions/column", method = RequestMethod.POST, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get all actions for a data set column.", notes = "Returns all actions for the given column.")
     @Timed
-    public Stream<ActionDefinition> columnActions(@ApiParam(value = "Optional column Metadata content as JSON") InputStream body) {
+    public Stream<ActionForm> columnActions(@ApiParam(value = "Optional column Metadata content as JSON") InputStream body) {
         // Asks transformation service for all actions for column type and domain
-        return toStream(ActionDefinition.class, mapper, getCommand(ColumnActions.class, body));
+        return toStream(ActionForm.class, mapper, getCommand(ColumnActions.class, body));
     }
 
     /**
@@ -72,19 +72,29 @@ public class TransformAPI extends APIService {
     @RequestMapping(value = "/api/transform/suggest/column", method = RequestMethod.POST, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get suggested actions for a data set column.", notes = "Returns the suggested actions for the given column in decreasing order of likeness.")
     @Timed
-    public Stream<ActionDefinition> suggestColumnActions(@ApiParam(value = "Column Metadata content as JSON") InputStream body) {
+    public Stream<ActionForm> suggestColumnActions(@ApiParam(value = "Column Metadata content as JSON") InputStream body) {
         // Asks transformation service for suggested actions for column type and domain
-        return toStream(ActionDefinition.class, mapper, getCommand(SuggestColumnActions.class, body));
+        return toStream(ActionForm.class, mapper, getCommand(SuggestColumnActions.class, body));
     }
 
     /**
      * Get all the possible actions available on lines.
      */
     @RequestMapping(value = "/api/transform/actions/line", method = GET, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get all actions on line", notes = "Returns all actions for the given column.")
+    @ApiOperation(value = "Get all actions on line", notes = "Returns all actions for a line.")
     @Timed
-    public Stream<ActionDefinition> lineActions() {
-        return toStream(ActionDefinition.class, mapper, getCommand(LineActions.class));
+    public Stream<ActionForm> lineActions() {
+        return toStream(ActionForm.class, mapper, getCommand(LineActions.class));
+    }
+
+    /**
+     * Get all the possible actions available on the whole dataset.
+     */
+    @RequestMapping(value = "/api/transform/actions/dataset", method = GET, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get all actions the whole dataset.", notes = "Returns all actions for the whole dataset..")
+    @Timed
+    public Stream<ActionForm> datasetActions() {
+        return toStream(ActionForm.class, mapper, getCommand(DatasetActions.class));
     }
 
     /**

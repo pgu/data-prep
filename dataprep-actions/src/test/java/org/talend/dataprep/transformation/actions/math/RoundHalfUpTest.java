@@ -1,15 +1,15 @@
-//  ============================================================================
+// ============================================================================
 //
-//  Copyright (C) 2006-2016 Talend Inc. - www.talend.com
+// Copyright (C) 2006-2016 Talend Inc. - www.talend.com
 //
-//  This source code is available under agreement available at
-//  https://github.com/Talend/data-prep/blob/master/LICENSE
+// This source code is available under agreement available at
+// https://github.com/Talend/data-prep/blob/master/LICENSE
 //
-//  You should have received a copy of the agreement
-//  along with this program; if not, write to Talend SA
-//  9 rue Pages 92150 Suresnes, France
+// You should have received a copy of the agreement
+// along with this program; if not, write to Talend SA
+// 9 rue Pages 92150 Suresnes, France
 //
-//  ============================================================================
+// ============================================================================
 
 package org.talend.dataprep.transformation.actions.math;
 
@@ -21,6 +21,7 @@ import static org.talend.dataprep.transformation.actions.ActionMetadataTestUtils
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Before;
@@ -62,7 +63,7 @@ public class RoundHalfUpTest extends AbstractRoundTest {
 
     @Test
     public void testCategory() throws Exception {
-        assertThat(action.getCategory(), is(ActionCategory.NUMBERS.getDisplayName()));
+        assertThat(action.getCategory(Locale.US), is(ActionCategory.NUMBERS.getDisplayName(Locale.US)));
     }
 
     @Test
@@ -78,6 +79,13 @@ public class RoundHalfUpTest extends AbstractRoundTest {
         testCommon("-5.0", "-5");
         testCommon("-5.4", "-5");
         testCommon("-5.6", "-6");
+    }
+
+    @Test
+    public void test_percentage_number() {
+        testCommon("5%", "0.05", 2);
+        testCommon("50%", "0.50", 2);
+        testCommon("500%", "5.00", 2);
     }
 
     @Test

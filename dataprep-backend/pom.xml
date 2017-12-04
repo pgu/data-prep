@@ -31,7 +31,7 @@
         <java.version>1.8</java.version>
         <junit.version>4.12</junit.version>
         <tika.version>1.16</tika.version>
-        <org.talend.daikon.version>0.18.3</org.talend.daikon.version>
+        <org.talend.daikon.version>0.19.0-SNAPSHOT</org.talend.daikon.version>
         <dataquality-libraries.version>4.0.0-SNAPSHOT</dataquality-libraries.version>
         <org.talend.dataquality.common.version>${dataquality-libraries.version}</org.talend.dataquality.common.version>
         <org.talend.dataquality.semantic.version>${dataquality-libraries.version}</org.talend.dataquality.semantic.version>
@@ -70,6 +70,7 @@
         <module>../dataprep-preparation</module>
         <module>../dataprep-api</module>
         <module>../dataprep-maintenance</module>
+        <module>../dataprep-test-api</module>
     </modules>
     <dependencyManagement>
         <dependencies>
@@ -330,6 +331,11 @@
                         <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.talend.daikon</groupId>
+                <artifactId>daikon-spring-tenancy</artifactId>
+                <version>${org.talend.daikon.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.inject</groupId>
@@ -638,133 +644,10 @@
         </dependencies>
     </dependencyManagement>
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot.version}</version>
-                    <configuration>
-                        <!-- start-class is a property set in service modules -->
-                        <mainClass>${start-class}</mainClass>
-                        <!-- Needed to allow use of loader.path in Cloud setup (to bundle additional JARs) -->
-                        <layout>ZIP</layout>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-clean-plugin</artifactId>
-                    <version>2.6.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.3</version>
-                    <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>pl.project13.maven</groupId>
-                    <artifactId>git-commit-id-plugin</artifactId>
-                    <version>2.2.2</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>2.10</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>2.6</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-install-plugin</artifactId>
-                    <version>2.5.2</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>2.7</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.19.1</version>
-                    <configuration>
-                        <systemPropertyVariables>
-                            <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
-                        </systemPropertyVariables>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>1.4.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.7.4.201502262128</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>buildnumber-maven-plugin</artifactId>
-                    <version>1.4</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <bannedDependencies>
-                                    <excludes>
-                                        <exclude>org.slf4j:slf4j-simple</exclude>
-                                        <exclude>commons-logging:commons-logging-api</exclude>
-                                        <exclude>org.apache.logging.log4j:log4j-core</exclude>
-                                        <exclude>org.apache.logging.log4j:log4j-api</exclude>
-                                        <exclude>log4j:log4j</exclude>
-                                        <exclude>org.codehaus.jackson:jackson-jaxrs</exclude>
-                                        <exclude>org.codehaus.jackson:jackson-xc</exclude>
-                                        <exclude>javax.servlet.jsp:jsp-api</exclude>
-                                        <exclude>org.powermock:powermock-api-mockito</exclude>
-                                        <exclude>org.powermock:powermock-module-junit4</exclude>
-                                    </excludes>
-                                </bannedDependencies>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default-prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>default-report</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

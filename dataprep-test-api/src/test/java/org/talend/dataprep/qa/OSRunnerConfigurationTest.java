@@ -21,9 +21,10 @@ import cucumber.api.junit.Cucumber;
 /**
  * This runner is used to run only OS cucumber test (do not need authentification)
  */
-@RunWith(Cucumber.class)
-@CucumberOptions(plugin = { "pretty", "html:target/cucumber",
-        "json:target/cucumber.json" }, glue = "classpath:org/talend/dataprep/qa/step", features = "classpath:features")
+@RunWith(Cucumber.class) //
+@CucumberOptions(plugin = { "pretty", "html:target/cucumber", "json:target/cucumber.json" }, //
+        glue = { "classpath:org/talend/dataprep/qa/step", "classpath:org/talend/dataprep/qa/config" }, //
+        features = "classpath:features") //
 public class OSRunnerConfigurationTest {
 
 }

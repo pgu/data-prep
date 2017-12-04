@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.preparation.Preparation;
@@ -33,13 +34,14 @@ import org.talend.dataprep.api.preparation.Step;
 import org.talend.dataprep.api.preparation.StepRowMetadata;
 import org.talend.dataprep.preparation.store.PersistentStep;
 import org.talend.dataprep.preparation.store.PreparationRepository;
-import org.talend.dataprep.security.ForAll;
 import org.talend.dataprep.security.SecurityProxy;
+import org.talend.tenancy.ForAll;
 
 /**
  * Cleans the preparation repository. It removes all the steps that do NOT belong to a preparation any more.
  */
 @Component
+@ConditionalOnProperty(value = "preparation.store.orphan.cleanup", havingValue = "true", matchIfMissing = true)
 public class PreparationCleaner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PreparationCleaner.class);

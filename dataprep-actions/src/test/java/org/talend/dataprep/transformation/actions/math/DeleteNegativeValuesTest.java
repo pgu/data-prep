@@ -20,6 +20,7 @@ import static org.talend.dataprep.transformation.actions.ActionMetadataTestUtils
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Before;
@@ -65,7 +66,7 @@ public class DeleteNegativeValuesTest extends AbstractMetadataBaseTest {
 
     @Test
     public void testCategory() throws Exception {
-        assertThat(action.getCategory(), is(ActionCategory.DATA_CLEANSING.getDisplayName()));
+        assertThat(action.getCategory(Locale.US), is(ActionCategory.DATA_CLEANSING.getDisplayName(Locale.US)));
     }
 
     @Test
@@ -83,6 +84,40 @@ public class DeleteNegativeValuesTest extends AbstractMetadataBaseTest {
         assertTrue(row.isDeleted());
         assertEquals("David Bowie", row.get("0000"));
         assertEquals("-12", row.get("0001"));
+    }
+
+    @Test
+    public void should_delete_percentage() {
+        // given
+        final Map<String, String> values = new HashMap<>();
+        values.put("0000", "David Bowie");
+        values.put("0001", "-12%");
+        final DataSetRow row = new DataSetRow(values);
+
+        // when
+        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+
+        // then
+        assertTrue(row.isDeleted());
+        assertEquals("David Bowie", row.get("0000"));
+        assertEquals("-12%", row.get("0001"));
+    }
+
+    @Test
+    public void should_not_delete_percentage() {
+        // given
+        final Map<String, String> values = new HashMap<>();
+        values.put("0000", "David Bowie");
+        values.put("0001", "12%");
+        final DataSetRow row = new DataSetRow(values);
+
+        // when
+        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+
+        // then
+        assertFalse(row.isDeleted());
+        assertEquals("David Bowie", row.get("0000"));
+        assertEquals("12%", row.get("0001"));
     }
 
     @Test

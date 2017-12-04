@@ -17,8 +17,6 @@ import toaster from 'angularjs-toaster';
 
 import copyright from './config/utils-copyrights-service';
 import version from './config/utils-version-service';
-import analyticsEnabled from './config/utils-analytics-enabled-service';
-import analyticsAccount from './config/utils-analytics-account-service';
 import TDPMoment from './moment/moment-filter';
 import RestURLs from './config/utils-rest-urls-service';
 import ConverterService from './converter/converter-service';
@@ -29,6 +27,7 @@ import StepUtilsService from './step/step-utils-service';
 import StorageService from './storage/storage-service';
 import TextFormatService from './text-format/text-format-service';
 import DisableRightClick from './click/disable-right-click-directive';
+import HtmlLang from './html/htmlLang-directive';
 import TitleService from './title/title-service';
 
 const MODULE_NAME = 'data-prep.services.utils';
@@ -38,15 +37,10 @@ const MODULE_NAME = 'data-prep.services.utils';
  * @name data-prep.services.utils
  * @description This module contains all the utiles services
  */
-angular.module(MODULE_NAME,
-	[
-		ngTranslate,
-		toaster,
-	])
+angular
+	.module(MODULE_NAME, [ngTranslate, toaster])
 	.value('copyRights', copyright)
 	.value('version', version)
-	.value('analyticsEnabled', analyticsEnabled)
-	.value('analyticsAccount', analyticsAccount)
 	.filter('TDPMoment', TDPMoment)
 	.service('RestURLs', RestURLs)
 	.service('ConverterService', ConverterService)
@@ -57,6 +51,7 @@ angular.module(MODULE_NAME,
 	.service('StorageService', StorageService)
 	.service('TextFormatService', TextFormatService)
 	.service('TitleService', TitleService)
-	.directive('disableRightClick', DisableRightClick);
+	.directive('disableRightClick', DisableRightClick)
+	.directive('htmlLang', HtmlLang);
 
 export default MODULE_NAME;

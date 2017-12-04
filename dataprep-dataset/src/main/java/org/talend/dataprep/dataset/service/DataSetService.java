@@ -16,36 +16,22 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.StreamSupport.stream;
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 import static org.talend.daikon.exception.ExceptionContext.build;
 import static org.talend.dataprep.exception.error.CommonErrorCodes.UNEXPECTED_CONTENT;
-import static org.talend.dataprep.exception.error.DataSetErrorCodes.MAX_STORAGE_MAY_BE_EXCEEDED;
-import static org.talend.dataprep.exception.error.DataSetErrorCodes.UNABLE_CREATE_DATASET;
-import static org.talend.dataprep.exception.error.DataSetErrorCodes.UNABLE_TO_CREATE_OR_UPDATE_DATASET;
-import static org.talend.dataprep.exception.error.DataSetErrorCodes.UNSUPPORTED_CONTENT;
+import static org.talend.dataprep.exception.error.DataSetErrorCodes.*;
+import static org.talend.dataprep.i18n.DataprepBundle.message;
+import static org.talend.dataprep.exception.error.DataSetErrorCodes.*;
 import static org.talend.dataprep.quality.AnalyzerService.Analysis.SEMANTIC;
 import static org.talend.dataprep.util.SortAndOrderHelper.getDataSetMetadataComparator;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -63,23 +49,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.talend.daikon.exception.ExceptionContext;
-import org.talend.dataprep.api.dataset.ColumnMetadata;
-import org.talend.dataprep.api.dataset.DataSet;
+import org.talend.dataprep.api.dataset.*;
 import org.talend.dataprep.api.dataset.DataSetGovernance.Certification;
-import org.talend.dataprep.api.dataset.DataSetLocation;
-import org.talend.dataprep.api.dataset.DataSetMetadata;
-import org.talend.dataprep.api.dataset.Import;
 import org.talend.dataprep.api.dataset.Import.ImportBuilder;
-import org.talend.dataprep.api.dataset.RowMetadata;
 import org.talend.dataprep.api.dataset.location.DataSetLocationService;
 import org.talend.dataprep.api.dataset.location.LocalStoreLocation;
 import org.talend.dataprep.api.dataset.location.locator.DataSetLocatorService;
@@ -168,12 +142,6 @@ public class DataSetService extends BaseDataSetService {
      */
     @Autowired
     private Security security;
-
-    /**
-     * Encoding support service.
-     */
-    @Autowired
-    private EncodingSupport encodings;
 
     /**
      * All possible data set locations.
@@ -542,7 +510,7 @@ public class DataSetService extends BaseDataSetService {
         // use a default name if empty (original name + " Copy" )
         final String newName;
         if (StringUtils.isBlank(copyName)) {
-            newName = original.getName() + " Copy";
+            newName = message("dataset.copy.newname", original.getName());
         } else {
             newName = copyName;
         }
@@ -617,6 +585,9 @@ public class DataSetService extends BaseDataSetService {
         }
 
         DataSetMetadata currentDataSetMetadata = dataSetMetadataRepository.get(dataSetId);
+        if (currentDataSetMetadata == null && name == null) {
+            throw new TDPException(INVALID_DATASET_NAME, ExceptionContext.build().put("name", name));
+        }
 
         // just like the creation, let's make sure invalid size forbids dataset creation
         if (size < 0) {
@@ -1056,7 +1027,7 @@ public class DataSetService extends BaseDataSetService {
     @Timed
     @PublicAPI
     public Stream<String> listSupportedEncodings() {
-        return encodings.getSupportedCharsets().stream().map(Charset::displayName);
+        return EncodingSupport.getSupportedCharsets().stream().map(Charset::displayName);
     }
 
     @RequestMapping(value = "/datasets/imports/{import}/parameters", method = GET, produces = APPLICATION_JSON_VALUE)
@@ -1072,9 +1043,9 @@ public class DataSetService extends BaseDataSetService {
             parametersToReturn = emptyList();
         } else {
             if (matchingDatasetLocation.isSchemaOriented()) {
-                parametersToReturn = matchingDatasetLocation.getParametersAsSchema();
+                parametersToReturn = matchingDatasetLocation.getParametersAsSchema(getLocale());
             } else {
-                parametersToReturn = matchingDatasetLocation.getParameters();
+                parametersToReturn = matchingDatasetLocation.getParameters(getLocale());
             }
         }
         return parametersToReturn;
@@ -1095,11 +1066,11 @@ public class DataSetService extends BaseDataSetService {
                 parametersToReturn = emptyList();
             } else {
                 if (matchingDatasetLocation.isSchemaOriented()) {
-                    ComponentProperties parametersAsSchema = matchingDatasetLocation.getParametersAsSchema();
-                    parametersAsSchema.setProperties(dataSetMetadata.getLocation().getParametersAsSchema().getProperties());
+                    ComponentProperties parametersAsSchema = matchingDatasetLocation.getParametersAsSchema(getLocale());
+                    parametersAsSchema.setProperties(dataSetMetadata.getLocation().getParametersAsSchema(getLocale()).getProperties());
                     parametersToReturn = parametersAsSchema;
                 } else {
-                    parametersToReturn = matchingDatasetLocation.getParameters();
+                    parametersToReturn = matchingDatasetLocation.getParameters(getLocale());
                 }
             }
         }
@@ -1125,7 +1096,7 @@ public class DataSetService extends BaseDataSetService {
                     if (l.isDynamic()) {
                         builder = builder.dynamic(true);
                     } else {
-                        builder = builder.dynamic(false).parameters(l.getParameters());
+                        builder = builder.dynamic(false).parameters(l.getParameters(getLocale()));
                     }
                     return builder.build();
                 }) //

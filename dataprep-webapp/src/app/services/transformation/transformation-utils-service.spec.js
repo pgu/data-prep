@@ -21,7 +21,7 @@ function generateTransformations() {
 			"description": "Keep only the lines that match the current filters",
 			"label": "Keep these Filtered Lines",
 			"docUrl": "",
-			"actionScope": [],
+			"actionScope": ["column_filtered"],
 			"parameters": [
 				{
 					"name": "column_id",
@@ -72,7 +72,7 @@ function generateTransformations() {
 			"description": "Delete only the lines that match the current filters",
 			"label": "Delete these Filtered Lines",
 			"docUrl": "",
-			"actionScope": [],
+			"actionScope": ["column_filtered"],
 			"parameters": [
 				{
 					"name": "column_id",
@@ -425,7 +425,7 @@ function generateTransformations() {
 			"description": "Change type of this column (number, text, date, etc.)",
 			"label": "Change Data Type",
 			"docUrl": "",
-			"actionScope": [],
+			"actionScope": ["hidden_in_action_list"],
 			"parameters": [
 				{
 					"name": "column_id",
@@ -623,6 +623,87 @@ function generateSuggestions() {
 				}
 			]
 		},
+		{
+			"name":"lookup",
+			"parameters":[
+				{
+					"name":"column_id",
+					"type":"string",
+					"implicit":true,
+					"canBeBlank":true,
+					"placeHolder":"",
+					"default":"",
+					"description":"The column to which you want to apply this action",
+					"label":"Column"
+				},
+				{
+					"name":"filter",
+					"type":"filter",
+					"implicit":true,
+					"canBeBlank":true,
+					"placeHolder":"",
+					"default":"",
+					"description":"An optional filter to apply action on matching values only.",
+					"label":"Filter"
+				},
+				{
+					"name":"lookup_ds_name",
+					"type":"string",
+					"implicit":false,
+					"canBeBlank":false,
+					"placeHolder":"",
+					"default":"",
+					"description":"Lookup dataset name",
+					"label":"Lookup dataset name"
+				},
+				{
+					"name":"lookup_ds_id",
+					"type":"string",
+					"implicit":false,
+					"canBeBlank":false,
+					"placeHolder":"",
+					"default":"",
+					"description":"Lookup dataset id",
+					"label":"Lookup dataset id"
+				},
+				{
+					"name":"lookup_join_on",
+					"type":"string",
+					"implicit":false,
+					"canBeBlank":false,
+					"placeHolder":"",
+					"default":"",
+					"description":"Lookup column join",
+					"label":"Lookup column join"
+				},
+				{
+					"name":"lookup_join_on_name",
+					"type":"string",
+					"implicit":false,
+					"canBeBlank":false,
+					"placeHolder":"",
+					"default":"",
+					"description":"Lookup column join name",
+					"label":"Lookup column join name"
+				},
+				{
+					"name":"lookup_selected_cols",
+					"type":"list",
+					"implicit":false,
+					"canBeBlank":false,
+					"placeHolder":"",
+					"default":"",
+					"description":"Lookup selected columns",
+					"label":"Lookup selected columns"
+				}
+			],
+			"category":"data_blending",
+			"description":"Blends columns from another dataset into this one",
+			"label":"Lookup",
+			"dynamic":false,
+			"docUrl":"",
+			"actionScope":[]
+		},
 	];
 }
 
@@ -781,7 +862,7 @@ describe('Transformation Utils Service', () => {
 	});
 
 	describe('sortAndGroupByCategory', () => {
-		it('should filter "column_metadata" category',
+		it('should filter "hidden_in_action_list" scope',
 			inject((TransformationUtilsService) => {
 				// given
 				const transformations = generateTransformations();
@@ -792,7 +873,10 @@ describe('Transformation Utils Service', () => {
 
 				// then
 				categories.forEach((item) => {
-					expect(item.category).not.toBe('column_metadata');
+				    item.transformations.forEach((transfo) => {
+				        expect(transfo.actionScope.indexOf("hidden_in_action_list")).toBe(-1);
+				    });
+					expect(item.category).not.toBe('data_blending');
 				});
 			})
 		);
