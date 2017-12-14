@@ -101,8 +101,10 @@ export default class DatasetActionsService {
 		}
 		case '@@dataset/CLONE': {
 			const dataset = action.payload.model;
+			this.StateService.setFetchingInventoryDatasets(true);
 			this.DatasetService.clone(dataset)
-				.then(() => this.MessageService.success('COPY_SUCCESS_TITLE', 'COPY_SUCCESS'));
+				.then(() => this.MessageService.success('COPY_SUCCESS_TITLE', 'COPY_SUCCESS'))
+				.finally(() => this.StateService.setFetchingInventoryDatasets(false));
 			break;
 		}
 		case '@@dataset/UPDATE': {
