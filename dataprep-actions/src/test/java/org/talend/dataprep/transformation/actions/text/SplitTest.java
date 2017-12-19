@@ -32,7 +32,6 @@ import org.talend.dataprep.api.dataset.RowMetadata;
 import org.talend.dataprep.api.dataset.row.DataSetRow;
 import org.talend.dataprep.api.dataset.statistics.PatternFrequency;
 import org.talend.dataprep.api.dataset.statistics.Statistics;
-import org.talend.dataprep.api.preparation.Action;
 import org.talend.dataprep.api.type.Type;
 import org.talend.dataprep.parameters.Parameter;
 import org.talend.dataprep.transformation.actions.AbstractMetadataBaseTest;
@@ -45,12 +44,16 @@ import org.talend.dataprep.transformation.api.action.ActionTestWorkbench;
  *
  * @see Split
  */
-public class SplitTest extends AbstractMetadataBaseTest {
+public class SplitTest extends AbstractMetadataBaseTest<Split> {
 
     /**
      * The action to test.
      */
-    private Split action = new Split();
+    private final Split action = new Split();
+
+    public SplitTest() {
+        super(new Split());
+    }
 
     /** The action parameters. */
     private Map<String, String> parameters;
@@ -90,7 +93,7 @@ public class SplitTest extends AbstractMetadataBaseTest {
     }
 
     @Test
-    public void should_split_row() {
+    public void test_apply_in_newcolumn() {
         // given
         final DataSetRow row = getRow("lorem bacon", "Bacon ipsum dolor amet swine leberkas pork belly", "01/01/2015");
 
@@ -134,7 +137,7 @@ public class SplitTest extends AbstractMetadataBaseTest {
         // given
         final DataSetRow row = getRow("lorem bacon", "Bacon_ipsum", "01/01/2015");
 
-        parameters.put(Split.SEPARATOR_PARAMETER, "other (string)");
+        parameters.put(Split.SEPARATOR_PARAMETER, Split.OTHER_STRING);
         parameters.put(Split.MANUAL_SEPARATOR_PARAMETER_STRING, "_");
 
         final Map<String, String> expectedValues = new HashMap<>();
@@ -156,7 +159,7 @@ public class SplitTest extends AbstractMetadataBaseTest {
         // given
         final DataSetRow row = getRow("lorem bacon", "Bacon\tipsum", "01/01/2015");
 
-        parameters.put(Split.SEPARATOR_PARAMETER, "other (string)");
+        parameters.put(Split.SEPARATOR_PARAMETER, Split.OTHER_STRING);
         parameters.put(Split.MANUAL_SEPARATOR_PARAMETER_STRING, "\t");
 
         final Map<String, String> expectedValues = new HashMap<>();
@@ -182,7 +185,7 @@ public class SplitTest extends AbstractMetadataBaseTest {
         values.put("0002", "01/01/2015");
         final DataSetRow row = new DataSetRow(values);
 
-        parameters.put(Split.SEPARATOR_PARAMETER, "other (string)");
+        parameters.put(Split.SEPARATOR_PARAMETER, Split.OTHER_STRING);
         parameters.put(Split.MANUAL_SEPARATOR_PARAMETER_STRING, "");
 
         // when
@@ -201,7 +204,7 @@ public class SplitTest extends AbstractMetadataBaseTest {
         values.put("0002", "01/01/2015");
         final DataSetRow row = new DataSetRow(values);
 
-        parameters.put(Split.SEPARATOR_PARAMETER, "other (regex)");
+        parameters.put(Split.SEPARATOR_PARAMETER, Split.OTHER_REGEX);
         parameters.put(Split.MANUAL_SEPARATOR_PARAMETER_STRING, "(");
 
         // when
@@ -216,7 +219,7 @@ public class SplitTest extends AbstractMetadataBaseTest {
         // given
         final DataSetRow row = getRow("lorem bacon", "Je vais bien (tout va bien)", "01/01/2015");
 
-        parameters.put(Split.SEPARATOR_PARAMETER, "other (string)");
+        parameters.put(Split.SEPARATOR_PARAMETER, Split.OTHER_STRING);
         parameters.put(Split.MANUAL_SEPARATOR_PARAMETER_STRING, "(");
 
         final Map<String, String> expectedValues = new HashMap<>();
@@ -238,7 +241,7 @@ public class SplitTest extends AbstractMetadataBaseTest {
         // given
         final DataSetRow row = getRow("lorem bacon", "Je vais bien (tout va bien)", "01/01/2015");
 
-        parameters.put(Split.SEPARATOR_PARAMETER, "other (regex)");
+        parameters.put(Split.SEPARATOR_PARAMETER, Split.OTHER_REGEX);
         parameters.put(Split.MANUAL_SEPARATOR_PARAMETER_REGEX, "bien");
 
         final Map<String, String> expectedValues = new HashMap<>();
@@ -260,7 +263,7 @@ public class SplitTest extends AbstractMetadataBaseTest {
         // given
         final DataSetRow row = getRow("lorem bacon", "Je vais bien (tout va bien)", "01/01/2015");
 
-        parameters.put(Split.SEPARATOR_PARAMETER, "other (regex)");
+        parameters.put(Split.SEPARATOR_PARAMETER, Split.OTHER_REGEX);
         parameters.put(Split.MANUAL_SEPARATOR_PARAMETER_REGEX, "bien|fff");
 
         final Map<String, String> expectedValues = new HashMap<>();
@@ -278,9 +281,6 @@ public class SplitTest extends AbstractMetadataBaseTest {
     }
 
     @Test
-    /**
-     * @see SplitTest#should_split_row()
-     */
     public void test_TDP_876() {
         // given
         final DataSetRow row = builder() //
@@ -324,9 +324,6 @@ public class SplitTest extends AbstractMetadataBaseTest {
         assertEquals(expectedValues, row.values());
     }
 
-    /**
-     * @see Action#getRowAction()
-     */
     @Test
     public void should_split_row_with_separator_at_the_end() {
         // given
@@ -346,9 +343,6 @@ public class SplitTest extends AbstractMetadataBaseTest {
         assertEquals(expectedValues, row.values());
     }
 
-    /**
-     * @see Action#getRowAction()
-     */
     @Test
     public void should_split_row_no_separator() {
         // given
@@ -368,9 +362,6 @@ public class SplitTest extends AbstractMetadataBaseTest {
         assertEquals(expectedValues, row.values());
     }
 
-    /**
-     * @see Action#getRowAction()
-     */
     @Test
     public void should_update_metadata() {
         // given
@@ -394,9 +385,6 @@ public class SplitTest extends AbstractMetadataBaseTest {
         assertEquals(expected, rowMetadata.getColumns());
     }
 
-    /**
-     * @see Action#getRowAction()
-     */
     @Test
     public void should_update_metadata_twice() {
         // given
@@ -530,6 +518,16 @@ public class SplitTest extends AbstractMetadataBaseTest {
                 .invalid(2)
                 .valid(5)
                 .build();
+    }
+
+    @Test
+    public void test_apply_inplace() {
+        // Nothing to test, this action is never applied in place
+    }
+
+    @Override
+    public CreateNewColumnPolicy getCreateNewColumnPolicy() {
+        return CreateNewColumnPolicy.INVISIBLE_ENABLED;
     }
 
 }

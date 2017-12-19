@@ -30,39 +30,14 @@ const DELAY = 700;
  */
 export default function EarlyPreviewService($timeout, state, RecipeService, PreviewService) {
 	'ngInject';
-
-	let previewDisabled = false;
 	let previewTimeout;
 	let previewCancelerTimeout;
 
 	return {
-		activatePreview,
-		deactivatePreview,
-
 		cancelPendingPreview,
 		earlyPreview,
 		cancelEarlyPreview,
 	};
-
-    /**
-     * @ngdoc method
-     * @name deactivatePreview
-     * @methodOf data-prep.services.early-preview.service:EarlyPreviewService
-     * @description deactivates the preview
-     */
-	function deactivatePreview() {
-		previewDisabled = true;
-	}
-
-    /**
-     * @ngdoc method
-     * @name activatePreview
-     * @methodOf data-prep.services.early-preview.service:EarlyPreviewService
-     * @description activates the preview
-     */
-	function activatePreview() {
-		previewDisabled = false;
-	}
 
     /**
      * @ngdoc method
@@ -85,7 +60,7 @@ export default function EarlyPreviewService($timeout, state, RecipeService, Prev
      */
 	function earlyPreview(action, scope) {
 		return (params) => {
-			if (previewDisabled) {
+			if (state.playground.previewDisabled) {
 				return;
 			}
 
@@ -141,7 +116,7 @@ export default function EarlyPreviewService($timeout, state, RecipeService, Prev
      * @description Cancel any current or pending early preview
      */
 	function cancelEarlyPreview() {
-		if (previewDisabled) {
+		if (state.playground.previewDisabled) {
 			return;
 		}
 

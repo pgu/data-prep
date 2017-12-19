@@ -38,17 +38,28 @@ import org.talend.dataprep.transformation.api.action.ActionTestWorkbench;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ExtractDateTokensTest extends BaseDateTest {
-
-    /** The action to test. */
-    private ExtractDateTokens action = new ExtractDateTokens();
+public class ExtractDateTokensTest extends BaseDateTest<ExtractDateTokens> {
 
     private Map<String, String> parameters;
+
+    public ExtractDateTokensTest() {
+        super(new ExtractDateTokens());
+    }
 
     @Before
     public void init() throws IOException {
         parameters = ActionMetadataTestUtils
                 .parseParameters(getDateTestJsonAsStream("extractDateTokensAction.json"));
+    }
+
+    @Override
+    protected  CreateNewColumnPolicy getCreateNewColumnPolicy(){
+        return CreateNewColumnPolicy.INVISIBLE_ENABLED;
+    }
+
+    @Test
+    public void test_apply_inplace() throws Exception {
+        // Nothing to test, this action is never applied in place
     }
 
     @Test
@@ -64,7 +75,7 @@ public class ExtractDateTokensTest extends BaseDateTest {
     }
 
     @Test
-    public void should_process_row() throws Exception {
+    public void test_apply_in_newcolumn() throws Exception {
         // given
         final DataSetRow row = builder() //
                 .with(value("toto").type(Type.STRING)) //
@@ -104,6 +115,34 @@ public class ExtractDateTokensTest extends BaseDateTest {
         expectedValues.put("0004", "4");
         expectedValues.put("0005", "0");
         expectedValues.put("0006", "0");
+        expectedValues.put("0002", "tata");
+
+        //when
+        ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
+
+        // then
+        assertEquals(expectedValues, row.values());
+    }
+
+    @Test
+    public void test_TDP_4494() throws Exception {
+        // given
+        final DataSetRow row = builder() //
+                .with(value("toto").type(Type.STRING)) //
+                .with(value("Apr-25-1999").type(Type.DATE).statistics(getDateTestJsonAsStream("statistics_MM_dd_yyyy.json"))) //
+                .with(value("tata").type(Type.STRING)) //
+                .build();
+
+        parameters.put(ExtractDateTokens.QUARTER, "true");
+
+        final Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("0000", "toto");
+        expectedValues.put("0001", "Apr-25-1999");
+        expectedValues.put("0003", "1999");
+        expectedValues.put("0004", "2");
+        expectedValues.put("0005", "4");
+        expectedValues.put("0006", "0");
+        expectedValues.put("0007", "0");
         expectedValues.put("0002", "tata");
 
         //when
@@ -216,6 +255,14 @@ public class ExtractDateTokensTest extends BaseDateTest {
         assertNotNull(rowMetadata.getById("0005"));
         assertNotNull(rowMetadata.getById("0006"));
         assertNull(rowMetadata.getById("0007"));
+    }
+
+    @Test
+    public void test_getQuarter() {
+        assertEquals(3, action.getQuarter(8));
+        assertEquals(4, action.getQuarter(12));
+        assertEquals(1, action.getQuarter(3));
+        assertEquals(1, action.getQuarter(1));
     }
 
     private ColumnMetadata createMetadata(String id) {

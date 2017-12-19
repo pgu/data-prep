@@ -15,13 +15,15 @@ const NO_OP = () => {};
 const DROPDOWN_ACTION = 'dropdown';
 const SPLITDROPDOWN_ACTION = 'splitDropdown';
 const ACTION_TYPE = 'actions';
+const LOADING_TIMEOUT_VALUE = 400;
 
 export default class InventoryListCtrl {
-	constructor($element, $translate, appSettings, SettingsActionsService, state) {
+	constructor($element, $translate, $timeout, appSettings, SettingsActionsService, state) {
 		'ngInject';
 
 		this.$element = $element;
 		this.$translate = $translate;
+		this.$timeout = $timeout;
 		this.appSettings = appSettings;
 		this.SettingsActionsService = SettingsActionsService;
 		this.state = state;
@@ -62,6 +64,23 @@ export default class InventoryListCtrl {
 			this.toolbarProps = this.changeSort(this.toolbarProps, field, isDescending);
 			this.listProps = this.changeSort(this.listProps, field, isDescending);
 		}
+		if (changes.isLoading) {
+			if (this.isLoading) {
+				this.loadingTimeout = this.$timeout(() => {
+					this.listProps = {
+						...this.listProps,
+						inProgress: true,
+					};
+				}, LOADING_TIMEOUT_VALUE);
+			}
+			else {
+				this.$timeout.cancel(this.loadingTimeout);
+				this.listProps = {
+					...this.listProps,
+					inProgress: false,
+				};
+			}
+		}
 	}
 
 	changeSort(subProps, field, isDescending) {
@@ -97,6 +116,7 @@ export default class InventoryListCtrl {
 			...listSettings,
 			titleProps: this.getListTitleProps(listSettings.titleProps),
 			sort: this.getSortProps(listSettings.sort),
+			inProgress: this.isLoading,
 		};
 	}
 
@@ -253,23 +273,31 @@ export default class InventoryListCtrl {
 
 	adaptItemActions(item, actions, index) {
 		const adaptedActions = this.adaptActions(actions, item);
-		adaptedActions.forEach((action) => {
-			action.id = `${this.id}-${index}-${action.id}`;
-		});
+		if (adaptedActions) {
+			adaptedActions.forEach((action) => {
+				action.id = `${this.id}-${index}-${action.id}`;
+			});
+		}
 		return adaptedActions;
 	}
 
 	adaptItemsActions(items) {
 		const actionsColumns = this.listProps.columns.filter(column => column.type === ACTION_TYPE);
+		const persistentActionsKey = this.listProps.titleProps.persistentActionsKey;
 		return items.map((item, index) => {
-			const actions = this.adaptItemActions(item, item.actions, index);
 			const adaptedItem = {
 				...item,
-				actions,
+				actions: this.adaptItemActions(item, item.actions, index),
 			};
+
+			if (persistentActionsKey) {
+				adaptedItem[persistentActionsKey] = this.adaptItemActions(item, item[persistentActionsKey], index);
+			}
+
 			actionsColumns.forEach(({ key }) => {
 				adaptedItem[key] = this.adaptItemActions(item, item[key], index);
 			});
+
 			return adaptedItem;
 		});
 	}
