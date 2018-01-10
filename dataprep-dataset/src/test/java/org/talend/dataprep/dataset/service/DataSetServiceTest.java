@@ -58,7 +58,7 @@ import org.talend.dataprep.api.user.UserData;
 import org.talend.dataprep.cache.ContentCache;
 import org.talend.dataprep.dataset.DataSetBaseTest;
 import org.talend.dataprep.dataset.DataSetMetadataBuilder;
-import org.talend.dataprep.dataset.service.cache.UpdateDataSetCacheKey;
+import org.talend.dataprep.dataset.cache.UpdateDataSetCacheKey;
 import org.talend.dataprep.dataset.store.QuotaService;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.DataSetErrorCodes;

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
   ~ ============================================================================
   ~ Copyright (C) 2006-2018 Talend Inc. - www.talend.com
@@ -13,8 +12,8 @@
   ~
   ~ ============================================================================
   -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.talend.dataprep</groupId>
     <artifactId>dataprep-parent</artifactId>
@@ -34,7 +33,7 @@
         <license>
             <name>Apache License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-             <distribution>repo</distribution>
+            <distribution>repo</distribution>
         </license>
     </licenses>
 
@@ -204,63 +203,63 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-        </plugin>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
 
-        <plugin>
-            <groupId>pl.project13.maven</groupId>
-            <artifactId>git-commit-id-plugin</artifactId>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>revision</goal>
-                    </goals>
-                </execution>
-            </executions>
-            <configuration>
-                <generateGitPropertiesFilename>${project.build.outputDirectory}/dataprep-git.properties
-                </generateGitPropertiesFilename>
-                <generateGitPropertiesFile>true</generateGitPropertiesFile>
-            </configuration>
-        </plugin>
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>buildnumber-maven-plugin</artifactId>
-            <executions>
-                <execution>
-                    <phase>validate</phase>
-                    <goals>
-                        <goal>create</goal>
-                    </goals>
-                </execution>
-            </executions>
-            <configuration>
-                <doCheck>false</doCheck>
-                <doUpdate>false</doUpdate>
-            </configuration>
-        </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <executions>
-                <execution>
-                    <id>default-jar</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>jar</goal>
-                    </goals>
-                </execution>
-                <execution>
-                    <goals>
-                        <goal>test-jar</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/dataprep-git.properties
+                    </generateGitPropertiesFilename>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
 
     </build>
     <repositories>

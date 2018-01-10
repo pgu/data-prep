@@ -129,6 +129,10 @@
             <groupId>org.talend.dataquality</groupId>
             <artifactId>dataquality-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
         <!-- END -->
     </dependencies>
 

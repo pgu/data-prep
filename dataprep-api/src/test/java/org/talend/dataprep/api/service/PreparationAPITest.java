@@ -12,6 +12,26 @@
 
 package org.talend.dataprep.api.service;
 
+import static com.jayway.restassured.RestAssured.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptyMap;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.*;
+import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.OK;
+import static org.talend.dataprep.api.folder.FolderContentType.PREPARATION;
+import static org.talend.dataprep.api.service.EntityBuilder.buildAction;
+import static org.talend.dataprep.api.service.EntityBuilder.buildParametersMap;
+import static org.talend.dataprep.api.service.PreparationAPITestClient.appendStepsToPrep;
+import static org.talend.dataprep.api.service.PreparationAPITestClient.changePreparationStepsOrder;
+import static org.talend.dataprep.cache.ContentCache.TimeToLive.PERMANENT;
+import static org.talend.dataprep.services.transformation.ExportParameters.SourceType.FILTER;
+import static org.talend.dataprep.test.SameJSONFile.sameJSONAsFile;
+import static org.talend.dataprep.transformation.format.JsonFormat.JSON;
+import static uk.co.datumedge.hamcrest.json.SameJSONAs.sameJSONAs;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

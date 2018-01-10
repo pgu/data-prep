@@ -14,25 +14,17 @@ package org.talend.dataprep.api.service;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.talend.dataprep.api.service.command.info.VersionCommand;
+import org.talend.daikon.client.ClientService;
 import org.talend.dataprep.api.service.info.VersionService;
-import org.talend.dataprep.exception.TDPException;
-import org.talend.dataprep.exception.error.CommonErrorCodes;
 import org.talend.dataprep.info.BuildDetails;
 import org.talend.dataprep.info.Version;
 import org.talend.dataprep.metrics.Timed;
 import org.talend.dataprep.security.PublicAPI;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netflix.hystrix.HystrixCommand;
 
 import io.swagger.annotations.ApiOperation;
 
@@ -43,16 +35,7 @@ public class VersionServiceAPI extends APIService {
     private VersionService versionService;
 
     @Autowired
-    private ObjectMapper mapper;
-
-    @Value("${transformation.service.url}")
-    protected String transformationServiceUrl;
-
-    @Value("${dataset.service.url}")
-    protected String datasetServiceUrl;
-
-    @Value("${preparation.service.url}")
-    protected String preparationServiceUrl;
+    private ClientService service;
 
     @Value("${dataprep.display.version}")
     protected String applicationVersion;
@@ -73,28 +56,11 @@ public class VersionServiceAPI extends APIService {
         final Version apiVersion = versionService.version();
         apiVersion.setServiceName("API");
         versions[0] = apiVersion;
-        versions[1] = callVersionService(datasetServiceUrl, "DATASET");
+        /*versions[1] = callVersionService(datasetServiceUrl, "DATASET");
         versions[2] = callVersionService(preparationServiceUrl, "PREPARATION");
-        versions[3] = callVersionService(transformationServiceUrl, "TRANSFORMATION");
+        versions[3] = callVersionService(transformationServiceUrl, "TRANSFORMATION");*/
 
         return new BuildDetails(applicationVersion, versions);
-    }
-
-    /**
-     * Call the version service on the given service: dataset, preparation or transformation.
-     *
-     * @param serviceName the name of the service
-     * @return the version of the called service
-     */
-    private Version callVersionService(String serviceUrl, String serviceName) {
-        HystrixCommand<InputStream> versionCommand = getCommand(VersionCommand.class, serviceUrl);
-        try (InputStream content = versionCommand.execute()) {
-            final Version version = mapper.readerFor(Version.class).readValue(content);
-            version.setServiceName(serviceName);
-            return version;
-        } catch (IOException e) {
-            throw new TDPException(CommonErrorCodes.UNABLE_TO_GET_SERVICE_VERSION, e);
-        }
     }
 
 }

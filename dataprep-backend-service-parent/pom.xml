@@ -21,95 +21,52 @@
     </scm>
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.talend.dataprep</groupId>
-        <artifactId>dataprep-backend</artifactId>
-        <version>2.6.0-SNAPSHOT</version>
-        <relativePath>../dataprep-backend/pom.xml</relativePath>
+        <groupId>org.talend.daikon</groupId>
+        <artifactId>service-parent</artifactId>
+        <version>0.21.0-SNAPSHOT</version>
+        <relativePath/>
     </parent>
+    <groupId>org.talend.dataprep</groupId>
     <name>dataprep-backend-service-parent</name>
     <packaging>pom</packaging>
     <artifactId>dataprep-backend-service-parent</artifactId>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    <version>2.4.0-SNAPSHOT</version>
     <dependencies>
-        <!-- SPRING DEPENDENCIES -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jetty</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.talend.dataprep</groupId>
             <artifactId>dataprep-backend-service</artifactId>
+            <version>${project.version}</version>
         </dependency>
-        <!-- UNIT TEST DEPENDENCIES -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
+
         <dependency>
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>uk.co.datumedge</groupId>
-            <artifactId>hamcrest-json</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.talend.dataprep</groupId>
-            <artifactId>dataprep-backend-service</artifactId>
-            <type>test-jar</type>
+            <version>2.9.0</version>
         </dependency>
         <dependency>
             <groupId>org.talend.dataprep</groupId>
             <artifactId>dataprep-backend-common</artifactId>
+            <version>${project.version}</version>
             <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.talend.dataprep</groupId>
+            <artifactId>dataprep-backend-service</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.co.datumedge</groupId>
+            <artifactId>hamcrest-json</artifactId>
+            <version>0.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot.version}</version>
-                    <configuration>
-                        <!-- start-class is a property set in service modules -->
-                        <mainClass>${start-class}</mainClass>
-                        <!-- Needed to allow use of loader.path in Cloud setup (to bundle additional JARs) -->
-                        <layout>ZIP</layout>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>repackage</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
@@ -134,13 +91,56 @@
         </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
+    <repositories>
+        <repository>
+            <id>snapshots</id>
+            <url>https://artifacts-zl.talend.com/nexus/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <updatePolicy>never</updatePolicy>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>releases</id>
+            <url>https://artifacts-zl.talend.com/nexus/content/repositories/releases</url>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>opensource-snapshots</id>
+            <url>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <updatePolicy>never</updatePolicy>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>opensource-releases</id>
+            <url>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceRelease</url>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
 </project>

@@ -14,7 +14,10 @@ package org.talend.dataprep.json;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.annotation.PostConstruct;
 
@@ -26,11 +29,13 @@ import org.springframework.stereotype.Component;
 import org.talend.daikon.exception.TalendRuntimeException;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
+import com.fasterxml.jackson.databind.deser.ValueInstantiator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.type.TypeBindings;
 
 @Component
 public class StreamModule extends SimpleModule {
@@ -46,6 +51,13 @@ public class StreamModule extends SimpleModule {
      */
     @PostConstruct
     private void registerSerializers() {
+        addValueInstantiator(Stream.class, new ValueInstantiator.Base(Stream.class) {
+            @Override
+            public Object createFromObjectWith(DeserializationContext ctxt, Object[] args) throws IOException {
+                return super.createFromObjectWith(ctxt, args);
+            }
+        });
+        addDeserializer(Stream.class, new StreamJsonDeserializer());
         addSerializer(Stream.class, new JsonSerializer<Stream>() {
             @Override
             public void serialize(Stream stream, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
@@ -95,5 +107,38 @@ public class StreamModule extends SimpleModule {
                 }
             }
         });
+    }
+
+    private class StreamJsonDeserializer extends JsonDeserializer<Stream> implements ContextualDeserializer {
+
+        private TypeBindings bindings;
+
+        public StreamJsonDeserializer() {
+        }
+
+        public StreamJsonDeserializer(TypeBindings bindings) {
+            this.bindings = bindings;
+        }
+
+        @Override
+        public Stream deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            if(bindings == null) {
+                return Stream.empty();
+            } else {
+                final JavaType elementType = bindings.getTypeParameters().get(0);
+                final JsonToken jsonToken = p.nextToken();
+                if(jsonToken == JsonToken.START_ARRAY) {
+                    final MappingIterator<?> iterator = mapper.readValues(p, elementType);
+                    return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.SIZED), false);
+                } else {
+                    return Stream.empty();
+                }
+            }
+        }
+
+        @Override
+        public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
+            return new StreamJsonDeserializer(ctxt.getContextualType().getBindings());
+        }
     }
 }

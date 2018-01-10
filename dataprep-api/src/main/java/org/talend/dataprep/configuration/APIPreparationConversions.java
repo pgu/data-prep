@@ -20,16 +20,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import org.talend.daikon.client.ClientService;
 import org.talend.dataprep.api.dataset.DataSetMetadata;
 import org.talend.dataprep.api.folder.Folder;
 import org.talend.dataprep.api.preparation.PreparationMessage;
 import org.talend.dataprep.api.preparation.Step;
 import org.talend.dataprep.api.service.api.EnrichedPreparation;
-import org.talend.dataprep.api.service.command.preparation.LocatePreparation;
 import org.talend.dataprep.command.dataset.DataSetGetMetadata;
 import org.talend.dataprep.conversions.BeanConversionService;
 import org.talend.dataprep.processor.BeanConversionServiceWrapper;
 import org.talend.dataprep.security.SecurityProxy;
+import org.talend.services.tdp.preparation.IPreparationService;
 
 @Component
 public class APIPreparationConversions extends BeanConversionServiceWrapper {
@@ -81,8 +82,8 @@ public class APIPreparationConversions extends BeanConversionServiceWrapper {
         enrichedPreparation.setSteps(collected);
 
         // Add folder information
-        final LocatePreparation command = applicationContext.getBean(LocatePreparation.class, enrichedPreparation.getId());
-        final Folder folder = command.execute();
+        final ClientService clients = applicationContext.getBean(ClientService.class);
+        final Folder folder = clients.of(IPreparationService.class).searchLocation(enrichedPreparation.getId());
         enrichedPreparation.setFolder(folder);
 
         return enrichedPreparation;

@@ -17,9 +17,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.StreamSupport.stream;
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
 import static org.talend.daikon.exception.ExceptionContext.build;
 import static org.talend.dataprep.exception.error.CommonErrorCodes.UNEXPECTED_CONTENT;
 import static org.talend.dataprep.exception.error.DataSetErrorCodes.*;
@@ -31,7 +29,6 @@ import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,11 +45,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.talend.daikon.annotation.ServiceImplementation;
 import org.talend.daikon.exception.ExceptionContext;
+import org.talend.daikon.exception.TalendRuntimeException;
 import org.talend.dataprep.api.dataset.*;
 import org.talend.dataprep.api.dataset.DataSetGovernance.Certification;
-import org.talend.dataprep.api.dataset.Import.ImportBuilder;
 import org.talend.dataprep.api.dataset.location.DataSetLocationService;
 import org.talend.dataprep.api.dataset.location.LocalStoreLocation;
 import org.talend.dataprep.api.dataset.location.locator.DataSetLocatorService;
@@ -68,13 +65,12 @@ import org.talend.dataprep.configuration.EncodingSupport;
 import org.talend.dataprep.conversions.BeanConversionService;
 import org.talend.dataprep.dataset.DataSetMetadataBuilder;
 import org.talend.dataprep.dataset.StatisticsAdapter;
+import org.talend.dataprep.dataset.analysis.synchronous.ContentAnalysis;
+import org.talend.dataprep.dataset.analysis.synchronous.FormatAnalysis;
+import org.talend.dataprep.dataset.analysis.synchronous.SchemaAnalysis;
+import org.talend.dataprep.dataset.cache.UpdateDataSetCacheKey;
 import org.talend.dataprep.dataset.event.DataSetMetadataBeforeUpdateEvent;
 import org.talend.dataprep.dataset.event.DataSetRawContentUpdateEvent;
-import org.talend.dataprep.dataset.service.analysis.synchronous.ContentAnalysis;
-import org.talend.dataprep.dataset.service.analysis.synchronous.FormatAnalysis;
-import org.talend.dataprep.dataset.service.analysis.synchronous.SchemaAnalysis;
-import org.talend.dataprep.dataset.service.api.UpdateColumnParameters;
-import org.talend.dataprep.dataset.service.cache.UpdateDataSetCacheKey;
 import org.talend.dataprep.dataset.store.QuotaService;
 import org.talend.dataprep.dataset.store.content.StrictlyBoundedInputStream;
 import org.talend.dataprep.exception.TDPException;
@@ -83,34 +79,31 @@ import org.talend.dataprep.exception.json.JsonErrorCodeDescription;
 import org.talend.dataprep.http.HttpResponseContext;
 import org.talend.dataprep.lock.DistributedLock;
 import org.talend.dataprep.log.Markers;
-import org.talend.dataprep.metrics.Timed;
-import org.talend.dataprep.metrics.VolumeMetered;
 import org.talend.dataprep.parameters.jsonschema.ComponentProperties;
 import org.talend.dataprep.quality.AnalyzerService;
 import org.talend.dataprep.schema.DraftValidator;
 import org.talend.dataprep.schema.FormatFamily;
 import org.talend.dataprep.schema.FormatFamilyFactory;
 import org.talend.dataprep.schema.Schema;
-import org.talend.dataprep.security.PublicAPI;
 import org.talend.dataprep.security.Security;
+import org.talend.dataprep.services.dataset.Import;
+import org.talend.dataprep.services.dataset.Import.ImportBuilder;
+import org.talend.dataprep.services.dataset.UpdateColumnParameters;
 import org.talend.dataprep.user.store.UserDataRepository;
 import org.talend.dataprep.util.SortAndOrderHelper.Order;
 import org.talend.dataprep.util.SortAndOrderHelper.Sort;
 import org.talend.dataquality.common.inference.Analyzer;
 import org.talend.dataquality.common.inference.Analyzers;
+import org.talend.services.tdp.dataset.IDataSetService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
-@RestController
-@Api(value = "datasets", basePath = "/datasets", description = "Operations on data sets")
-public class DataSetService extends BaseDataSetService {
+@ServiceImplementation
+public class DataSetService extends BaseDataSetService implements IDataSetService {
 
     /** This class' logger. */
     private static final Logger LOG = LoggerFactory.getLogger(DataSetService.class);
 
-    private static final String CONTENT_TYPE = "Content-Type";
+    @Autowired
+    private FilterService filterService;
 
     /**
      * Format analyzer needed to update the schema.
@@ -166,9 +159,6 @@ public class DataSetService extends BaseDataSetService {
     @Autowired
     private AnalyzerService analyzerService;
 
-    @Autowired
-    FilterService filterService;
-
     @Value("${dataset.local.file.size.limit:20000000}")
     private long maximumInputStreamSize;
 
@@ -178,17 +168,9 @@ public class DataSetService extends BaseDataSetService {
     @Resource(name = "serializer#dataset#executor")
     private TaskExecutor executor;
 
-    @RequestMapping(value = "/datasets", method = RequestMethod.GET)
-    @ApiOperation(value = "List all data sets and filters on certified, or favorite or a limited number when asked", notes = "Returns the list of data sets (and filters) the current user is allowed to see. Creation date is a Epoch time value (in UTC time zone).")
-    @Timed
-    public Stream<UserDataSetMetadata> list(
-            @ApiParam(value = "Sort key (by name, creation or modification date)") @RequestParam(defaultValue = "creationDate") Sort sort,
-            @ApiParam(value = "Order for sort key (desc or asc or modif)") @RequestParam(defaultValue = "desc") Order order,
-            @ApiParam(value = "Filter on name containing the specified name") @RequestParam(required = false) String name,
-            @ApiParam(value = "Filter on name containing the specified name strictness") @RequestParam(defaultValue = "false") boolean nameStrict,
-            @ApiParam(value = "Filter on certified data sets") @RequestParam(defaultValue = "false") boolean certified,
-            @ApiParam(value = "Filter on favorite data sets") @RequestParam(defaultValue = "false") boolean favorite,
-            @ApiParam(value = "Only return a limited number of data sets") @RequestParam(defaultValue = "false") boolean limit) {
+    @Override
+    public Stream<UserDataSetMetadata> list(Sort sort, Order order, String name, boolean nameStrict, boolean certified,
+            boolean favorite, boolean limit) {
         // Build filter for data sets
         String userId = security.getUserId();
         final UserData userData = userDataRepository.get(userId);
@@ -196,9 +178,8 @@ public class DataSetService extends BaseDataSetService {
         predicates.add("lifecycle.importing = false");
         if (favorite) {
             if (userData != null && !userData.getFavoritesDatasets().isEmpty()) {
-                predicates.add("id in ["
-                        + userData.getFavoritesDatasets().stream().map(ds -> '\'' + ds + '\'').collect(Collectors.joining(","))
-                        + "]");
+                predicates.add("id in [" + userData.getFavoritesDatasets().stream().map(ds -> '\'' + ds + '\'').collect(
+                        Collectors.joining(",")) + "]");
             } else {
                 // Wants favorites but user has no favorite
                 return Stream.empty();
@@ -224,8 +205,8 @@ public class DataSetService extends BaseDataSetService {
 
         // Get all data sets according to filter
         try (Stream<DataSetMetadata> stream = dataSetMetadataRepository.list(tqlFilter, sort, order)) {
-            Stream<UserDataSetMetadata> userDataSetMetadataStream = stream
-                    .map(m -> conversionService.convert(m, UserDataSetMetadata.class));
+            Stream<UserDataSetMetadata> userDataSetMetadataStream =
+                    stream.map(m -> conversionService.convert(m, UserDataSetMetadata.class));
             if (sort == Sort.AUTHOR || sort == Sort.NAME) { // As theses are not well handled by mongo repository
                 userDataSetMetadataStream = userDataSetMetadataStream.sorted(getDataSetMetadataComparator(sort, order));
             }
@@ -233,24 +214,8 @@ public class DataSetService extends BaseDataSetService {
         }
     }
 
-    /**
-     * Returns a list containing all data sets that are compatible with the data set with id <tt>dataSetId</tt>. If no
-     * compatible data set is found an empty list is returned. The data set with id <tt>dataSetId</tt> is never returned
-     * in the list.
-     *
-     * @param dataSetId the specified data set id
-     * @param sort the sort criterion: either name or date.
-     * @param order the sorting order: either asc or desc.
-     * @return a list containing all data sets that are compatible with the data set with id <tt>dataSetId</tt> and
-     * empty list if no data set is compatible.
-     */
-    @RequestMapping(value = "/datasets/{id}/compatibledatasets", method = RequestMethod.GET)
-    @ApiOperation(value = "List all compatible data sets", notes = "Returns the list of data sets the current user is allowed to see and which are compatible with the specified data set id.")
-    @Timed
-    public Iterable<UserDataSetMetadata> listCompatibleDatasets(
-            @PathVariable(value = "id") @ApiParam(name = "id", value = "Id of the data set metadata") String dataSetId,
-            @ApiParam(value = "Sort key (by name or date).") @RequestParam(defaultValue = "creationDate") Sort sort,
-            @ApiParam(value = "Order for sort key (desc or asc).") @RequestParam(defaultValue = "desc") Order order) {
+    @Override
+    public Iterable<UserDataSetMetadata> listCompatibleDatasets(String dataSetId, Sort sort, Order order) {
 
         Spliterator<DataSetMetadata> iterator = dataSetMetadataRepository.listCompatible(dataSetId).spliterator();
 
@@ -258,35 +223,17 @@ public class DataSetService extends BaseDataSetService {
 
         // Return sorted results
         try (Stream<DataSetMetadata> stream = stream(iterator, false)) {
-            return stream.filter(metadata -> !metadata.getLifecycle().isImporting()) //
+            return stream
+                    .filter(metadata -> !metadata.getLifecycle().isImporting()) //
                     .map(m -> conversionService.convert(m, UserDataSetMetadata.class)) //
                     .sorted(comparator) //
                     .collect(Collectors.toList());
         }
     }
 
-    /**
-     * Creates a new data set and returns the new data set id as text in the response.
-     *
-     * @param name An optional name for the new data set (might be <code>null</code>).
-     * @param size An optional size for the newly created data set.
-     * @param contentType the request content type.
-     * @param content The raw content of the data set (might be a CSV, XLS...) or the connection parameter in case of a
-     * remote csv.
-     * @return The new data id.
-     * @see DataSetService#get(boolean, boolean, String)
-     */
-    //@formatter:off
-    @RequestMapping(value = "/datasets", method = POST, produces = TEXT_PLAIN_VALUE)
-    @ApiOperation(value = "Create a data set", produces = TEXT_PLAIN_VALUE, notes = "Create a new data set based on content provided in POST body. For documentation purposes, body is typed as 'text/plain' but operation accepts binary content too. Returns the id of the newly created data set.")
-    @Timed
-    @VolumeMetered
-    public String create(
-            @ApiParam(value = "User readable name of the data set (e.g. 'Finance Report 2015', 'Test Data Set').") @RequestParam(defaultValue = "") String name,
-            @ApiParam(value = "An optional tag to be added in data set metadata once created.") @RequestParam(defaultValue = "") String tag,
-            @ApiParam(value = "Size of the data set, in bytes.") @RequestParam(defaultValue = "0") long size,
-            @RequestHeader(CONTENT_TYPE) String contentType,
-            @ApiParam(value = "content") InputStream content) throws IOException {
+    @Override
+    public String create(String name, String tag, long size, String contentType, InputStream content)
+            throws IOException {
         //@formatter:on
         checkDataSetName(name);
 
@@ -319,7 +266,8 @@ public class DataSetService extends BaseDataSetService {
                 quotaService.checkIfAddingSizeExceedsAvailableStorage(size);
             }
 
-            dataSetMetadata = metadataBuilder.metadata() //
+            dataSetMetadata = metadataBuilder
+                    .metadata() //
                     .id(id) //
                     .name(name) //
                     .author(security.getUserId()) //
@@ -333,7 +281,8 @@ public class DataSetService extends BaseDataSetService {
             // Save data set content
             LOG.debug(marker, "Storing content...");
             final long maxDataSetSizeAllowed = getMaxDataSetSizeAllowed();
-            final StrictlyBoundedInputStream sizeCalculator = new StrictlyBoundedInputStream(content, maxDataSetSizeAllowed);
+            final StrictlyBoundedInputStream sizeCalculator =
+                    new StrictlyBoundedInputStream(content, maxDataSetSizeAllowed);
             contentStore.storeAsRaw(dataSetMetadata, sizeCalculator);
             dataSetMetadata.setDataSetSize(sizeCalculator.getTotal());
             LOG.debug(marker, "Content stored.");
@@ -348,7 +297,8 @@ public class DataSetService extends BaseDataSetService {
             LOG.debug(marker, "Created!");
             return id;
         } catch (StrictlyBoundedInputStream.InputStreamTooLargeException e) {
-            hypotheticalException = new TDPException(MAX_STORAGE_MAY_BE_EXCEEDED, e, build().put("limit", e.getMaxSize()));
+            hypotheticalException =
+                    new TDPException(MAX_STORAGE_MAY_BE_EXCEEDED, e, build().put("limit", e.getMaxSize()));
         } catch (TDPException e) {
             hypotheticalException = e;
         } catch (Exception e) {
@@ -371,73 +321,52 @@ public class DataSetService extends BaseDataSetService {
         throw hypotheticalException;
     }
 
-    /**
-     * Returns the <b>full</b> data set content for given id.
-     *
-     * @param metadata If <code>true</code>, includes data set metadata information.
-     * @param dataSetId A data set id.
-     * @return The full data set.
-     */
-    @RequestMapping(value = "/datasets/{id}/content", method = RequestMethod.GET)
-    @ApiOperation(value = "Get a data set by id", notes = "Get a data set content based on provided id. Id should be a UUID returned by the list operation. Not valid or non existing data set id returns empty content.")
-    @Timed
-    @ResponseBody
-    public Callable<DataSet> get(
-            @RequestParam(defaultValue = "true") @ApiParam(name = "metadata", value = "Include metadata information in the response") boolean metadata, //
-            @RequestParam(defaultValue = "false") @ApiParam(name = "includeInternalContent", value = "Include internal content in the response") boolean includeInternalContent, //
-            @ApiParam(value = "Filter for retrieved content.") @RequestParam(value = "filter", defaultValue = "") String filter,
-            @PathVariable(value = "id") @ApiParam(name = "id", value = "Id of the requested data set") String dataSetId) {
-        return () -> {
-            final Marker marker = Markers.dataset(dataSetId);
-            LOG.debug(marker, "Get data set #{}", dataSetId);
-            try {
-                DataSetMetadata dataSetMetadata = dataSetMetadataRepository.get(dataSetId);
-                assertDataSetMetadata(dataSetMetadata, dataSetId);
-                // Build the result
-                DataSet dataSet = new DataSet();
-                if (metadata) {
-                    dataSet.setMetadata(conversionService.convert(dataSetMetadata, UserDataSetMetadata.class));
-                }
-                Stream<DataSetRow> stream = contentStore.stream(dataSetMetadata, -1); // Disable line limit
-                if (!includeInternalContent) {
-                    LOG.debug("Skip internal content when serving data set #{} content.", dataSetId);
-                    stream = stream.map(r -> {
-                        final Map<String, Object> values = r.values();
-                        final Map<String, Object> filteredValues = new HashMap<>(values);
-                        values.forEach((k, v) -> {
-                            if (k != null && k.startsWith(FlagNames.INTERNAL_PROPERTY_PREFIX)) { // Removes technical properties
-                                                                                                 // from returned values.
-                                filteredValues.remove(k);
-                            }
-                        });
-                        filteredValues.put(FlagNames.TDP_ID, r.getTdpId()); // Include TDP_ID anyway
-                        return new DataSetRow(r.getRowMetadata(), filteredValues);
-                    });
-                }
-
-                // Filter content
-                stream = stream.filter(filterService.build(URLDecoder.decode(filter, "UTF-8"), dataSetMetadata.getRowMetadata()));
-
-                dataSet.setRecords(stream);
-                return dataSet;
-            } finally {
-                LOG.debug(marker, "Get done.");
+    @Override
+    public DataSet get(boolean metadata, boolean includeInternalContent, String filter, String dataSetId) {
+        final Marker marker = Markers.dataset(dataSetId);
+        LOG.debug(marker, "Get data set #{}", dataSetId);
+        try {
+            DataSetMetadata dataSetMetadata = dataSetMetadataRepository.get(dataSetId);
+            assertDataSetMetadata(dataSetMetadata, dataSetId);
+            // Build the result
+            DataSet dataSet = new DataSet();
+            if (metadata) {
+                dataSet.setMetadata(conversionService.convert(dataSetMetadata, UserDataSetMetadata.class));
             }
-        };
+            Stream<DataSetRow> stream = contentStore.stream(dataSetMetadata, -1); // Disable line limit
+            if (!includeInternalContent) {
+                LOG.debug("Skip internal content when serving data set #{} content.", dataSetId);
+                stream = stream.map(r -> {
+                    final Map<String, Object> values = r.values();
+                    final Map<String, Object> filteredValues = new HashMap<>(values);
+                    values.forEach((k, v) -> {
+                        if (k != null && k.startsWith(FlagNames.INTERNAL_PROPERTY_PREFIX)) { // Removes technical
+                                                                                             // properties
+                                                                                             // from returned
+                                                                                             // values.
+                            filteredValues.remove(k);
+                        }
+                    });
+                    filteredValues.put(FlagNames.TDP_ID, r.getTdpId()); // Include TDP_ID anyway
+                    return new DataSetRow(r.getRowMetadata(), filteredValues);
+                });
+            }
+
+            // Filter content
+            stream = stream
+                    .filter(filterService.build(URLDecoder.decode(filter, "UTF-8"), dataSetMetadata.getRowMetadata()));
+
+            dataSet.setRecords(stream);
+            return dataSet;
+        } catch (UnsupportedEncodingException e) {
+            throw new TalendRuntimeException(DataSetErrorCodes.UNABLE_TO_READ_DATASET_CONTENT, e);
+        } finally {
+            LOG.debug(marker, "Get done.");
+        }
     }
 
-    /**
-     * Returns the data set {@link DataSetMetadata metadata} for given <code>dataSetId</code>.
-     *
-     * @param dataSetId A data set id. If <code>null</code> <b>or</b> if no data set with provided id exits, operation
-     * returns {@link org.apache.commons.httpclient.HttpStatus#SC_NO_CONTENT} if metadata does not exist.
-     */
-    @RequestMapping(value = "/datasets/{id}/metadata", method = RequestMethod.GET)
-    @ApiOperation(value = "Get metadata information of a data set by id", notes = "Get metadata information of a data set by id. Not valid or non existing data set id returns empty content.")
-    @Timed
-    @ResponseBody
-    public DataSet getMetadata(
-            @PathVariable(value = "id") @ApiParam(name = "id", value = "Id of the data set metadata") String dataSetId) {
+    @Override
+    public DataSetMetadata getMetadata(String dataSetId) {
         if (dataSetId == null) {
             HttpResponseContext.status(HttpStatus.NO_CONTENT);
             return null;
@@ -451,30 +380,21 @@ public class DataSetService extends BaseDataSetService {
         }
         if (!metadata.getLifecycle().schemaAnalyzed()) {
             HttpResponseContext.status(HttpStatus.ACCEPTED);
-            return DataSet.empty();
+            return new DataSetMetadata();
         }
-        DataSet dataSet = new DataSet();
-        dataSet.setMetadata(conversionService.convert(metadata, UserDataSetMetadata.class));
-        LOG.info("found dataset {} for #{}", dataSet.getMetadata().getName(), dataSetId);
-        return dataSet;
+        LOG.info("found dataset {} for #{}", metadata.getName(), dataSetId);
+        return conversionService.convert(metadata, UserDataSetMetadata.class);
     }
 
-    /**
-     * Deletes a data set with provided id.
-     *
-     * @param dataSetId A data set id. If data set id is unknown, no exception nor status code to indicate this is set.
-     */
-    @RequestMapping(value = "/datasets/{id}", method = RequestMethod.DELETE)
-    @ApiOperation(value = "Delete a data set by id", notes = "Delete a data set content based on provided id. Id should be a UUID returned by the list operation. Not valid or non existing data set id returns empty content.")
-    @Timed
-    public void delete(
-            @PathVariable(value = "id") @ApiParam(name = "id", value = "Id of the data set to delete") String dataSetId) {
+    @Override
+    public void delete(String dataSetId) {
         DataSetMetadata metadata = dataSetMetadataRepository.get(dataSetId);
         final DistributedLock lock = dataSetMetadataRepository.createDatasetMetadataLock(dataSetId);
         try {
             lock.lock();
             if (metadata != null) {
-                dataSetMetadataRepository.remove(dataSetId); // first remove the metadata as there may be additional check
+                dataSetMetadataRepository.remove(dataSetId); // first remove the metadata as there may be additional
+                                                             // check
                 contentStore.delete(metadata);
             } // do nothing if the dataset does not exists
         } finally {
@@ -482,18 +402,8 @@ public class DataSetService extends BaseDataSetService {
         }
     }
 
-    /**
-     * Copy this dataset to a new one and returns the new data set id as text in the response.
-     *
-     * @param copyName the name of the copy
-     * @return The new data id.
-     */
-    @RequestMapping(value = "/datasets/{id}/copy", method = POST, produces = TEXT_PLAIN_VALUE)
-    @ApiOperation(value = "Copy a data set", produces = TEXT_PLAIN_VALUE, notes = "Copy a new data set based on the given id. Returns the id of the newly created data set.")
-    @Timed
-    public String copy(@PathVariable(value = "id") @ApiParam(name = "id", value = "Id of the data set to clone") String dataSetId,
-            @ApiParam(value = "The name of the cloned dataset.") @RequestParam(required = false) String copyName)
-            throws IOException {
+    @Override
+    public String copy(String dataSetId, String copyName) {
 
         if (copyName != null) {
             checkDataSetName(copyName);
@@ -531,7 +441,8 @@ public class DataSetService extends BaseDataSetService {
             final String newId = UUID.randomUUID().toString();
             final Marker marker = Markers.dataset(newId);
             LOG.debug(marker, "Cloning...");
-            DataSetMetadata target = metadataBuilder.metadata() //
+            DataSetMetadata target = metadataBuilder
+                    .metadata() //
                     .copy(original) //
                     .id(newId) //
                     .name(newName) //
@@ -544,6 +455,8 @@ public class DataSetService extends BaseDataSetService {
             LOG.debug(marker, "Storing content...");
             try (InputStream content = contentStore.getAsRaw(original)) {
                 contentStore.storeAsRaw(target, content);
+            } catch (IOException e) {
+                throw new TDPException(DataSetErrorCodes.UNABLE_TO_CREATE_OR_UPDATE_DATASET, e);
             }
 
             LOG.debug(marker, "Content stored.");
@@ -559,23 +472,8 @@ public class DataSetService extends BaseDataSetService {
         }
     }
 
-    /**
-     * Updates a data set content and metadata. If no data set exists for given id, data set is silently created.
-     *
-     * @param dataSetId The id of data set to be updated.
-     * @param name The new name for the data set. Empty name (or <code>null</code>) does not update dataset name.
-     * @param dataSetContent The new content for the data set. If empty, existing content will <b>not</b> be replaced.
-     * For delete operation, look at {@link #delete(String)}.
-     */
-    @RequestMapping(value = "/datasets/{id}/raw", method = PUT)
-    @ApiOperation(value = "Update a data set by id", notes = "Update a data set content based on provided id and PUT body. Id should be a UUID returned by the list operation. Not valid or non existing data set id returns empty content. For documentation purposes, body is typed as 'text/plain' but operation accepts binary content too.")
-    @Timed
-    @VolumeMetered
-    public void updateRawDataSet(
-            @PathVariable(value = "id") @ApiParam(name = "id", value = "Id of the data set to update") String dataSetId, //
-            @RequestParam(value = "name", required = false) @ApiParam(name = "name", value = "New value for the data set name") String name, //
-            @RequestParam(value = "size", required = false, defaultValue = "0") @ApiParam(name = "size", value = "The size of the dataSet") long size, //
-            @ApiParam(value = "content") InputStream dataSetContent) {
+    @Override
+    public void updateRawDataSet(String dataSetId, String name, long size, InputStream dataSetContent) {
 
         LOG.debug("updating dataset content #{}", dataSetId);
 
@@ -602,7 +500,8 @@ public class DataSetService extends BaseDataSetService {
 
             // check the size if it's available (quick win)
             if (size > 0 && currentDataSetMetadata != null) {
-                quotaService.checkIfAddingSizeExceedsAvailableStorage(Math.abs(size - currentDataSetMetadata.getDataSetSize()));
+                quotaService.checkIfAddingSizeExceedsAvailableStorage(
+                        Math.abs(size - currentDataSetMetadata.getDataSetSize()));
             }
 
             final DataSetMetadataBuilder datasetBuilder = metadataBuilder.metadata().id(dataSetId);
@@ -619,8 +518,8 @@ public class DataSetService extends BaseDataSetService {
 
             // Save data set content into cache to make sure there's enough space in the content store
             final long maxDataSetSizeAllowed = getMaxDataSetSizeAllowed();
-            final StrictlyBoundedInputStream sizeCalculator = new StrictlyBoundedInputStream(dataSetContent,
-                    maxDataSetSizeAllowed);
+            final StrictlyBoundedInputStream sizeCalculator =
+                    new StrictlyBoundedInputStream(dataSetContent, maxDataSetSizeAllowed);
             try (OutputStream cacheEntry = cacheManager.put(cacheKey, TimeToLive.DEFAULT)) {
                 IOUtils.copy(sizeCalculator, cacheEntry);
             }
@@ -632,7 +531,8 @@ public class DataSetService extends BaseDataSetService {
             Runnable r = () -> {
                 try (final InputStream input = cacheManager.get(cacheKey)) {
                     IOUtils.copy(input, fromCache);
-                    fromCache.close(); // it's important to close this stream, otherwise the piped stream will never close
+                    fromCache.close(); // it's important to close this stream, otherwise the piped stream will never
+                                       // close
                 } catch (IOException e) {
                     throw new TDPException(UNABLE_TO_CREATE_OR_UPDATE_DATASET, e);
                 }
@@ -681,12 +581,7 @@ public class DataSetService extends BaseDataSetService {
         }
     }
 
-    /**
-     * List all dataset related error codes.
-     */
-    @RequestMapping(value = "/datasets/errors", method = RequestMethod.GET)
-    @ApiOperation(value = "Get all dataset related error codes.", notes = "Returns the list of all dataset related error codes.")
-    @Timed
+    @Override
     public Iterable<JsonErrorCodeDescription> listErrors() {
         // need to cast the typed dataset errors into mock ones to use json parsing
         List<JsonErrorCodeDescription> errors = new ArrayList<>(DataSetErrorCodes.values().length);
@@ -696,23 +591,8 @@ public class DataSetService extends BaseDataSetService {
         return errors;
     }
 
-    /**
-     * Returns preview of the the data set content for given id (first 100 rows). Service might return
-     * {@link org.apache.commons.httpclient.HttpStatus#SC_ACCEPTED} if the data set exists but analysis is not yet fully
-     * completed so content is not yet ready to be served.
-     *
-     * @param metadata If <code>true</code>, includes data set metadata information.
-     * @param sheetName the sheet name to preview
-     * @param dataSetId A data set id.
-     */
-    @RequestMapping(value = "/datasets/{id}/preview", method = RequestMethod.GET)
-    @ApiOperation(value = "Get a data preview set by id", notes = "Get a data set preview content based on provided id. Not valid or non existing data set id returns empty content. Data set not in drat status will return a redirect 301")
-    @Timed
-    @ResponseBody
-    public DataSet preview(
-            @RequestParam(defaultValue = "true") @ApiParam(name = "metadata", value = "Include metadata information in the response") boolean metadata, //
-            @RequestParam(defaultValue = "") @ApiParam(name = "sheetName", value = "Sheet name to preview") String sheetName, //
-            @PathVariable(value = "id") @ApiParam(name = "id", value = "Id of the requested data set") String dataSetId) {
+    @Override
+    public DataSet preview(boolean metadata, String sheetName, String dataSetId) {
 
         DataSetMetadata dataSetMetadata = dataSetMetadataRepository.get(dataSetId);
 
@@ -740,8 +620,12 @@ public class DataSetService extends BaseDataSetService {
 
             String theSheetName = dataSetMetadata.getSheetName();
 
-            Optional<Schema.SheetContent> sheetContentFound = dataSetMetadata.getSchemaParserResult().getSheetContents().stream()
-                    .filter(sheetContent -> theSheetName.equals(sheetContent.getName())).findFirst();
+            Optional<Schema.SheetContent> sheetContentFound = dataSetMetadata
+                    .getSchemaParserResult()
+                    .getSheetContents()
+                    .stream()
+                    .filter(sheetContent -> theSheetName.equals(sheetContent.getName()))
+                    .findFirst();
 
             if (!sheetContentFound.isPresent()) {
                 HttpResponseContext.status(HttpStatus.NO_CONTENT);
@@ -767,19 +651,8 @@ public class DataSetService extends BaseDataSetService {
         return dataSet;
     }
 
-    /**
-     * Updates a data set metadata. If no data set exists for given id, a {@link TDPException} is thrown.
-     *
-     * @param dataSetId The id of data set to be updated.
-     * @param dataSetMetadata The new content for the data set. If empty, existing content will <b>not</b> be replaced.
-     * For delete operation, look at {@link #delete(String)}.
-     */
-    @RequestMapping(value = "/datasets/{id}", method = PUT)
-    @ApiOperation(value = "Update a data set metadata by id", notes = "Update a data set metadata according to the content of the PUT body. Id should be a UUID returned by the list operation. Not valid or non existing data set id return an error response.")
-    @Timed
-    public void updateDataSet(
-            @PathVariable(value = "id") @ApiParam(name = "id", value = "Id of the data set to update") String dataSetId,
-            @RequestBody DataSetMetadata dataSetMetadata) {
+    @Override
+    public void updateDataSet(String dataSetId, DataSetMetadata dataSetMetadata) {
 
         if (dataSetMetadata != null && dataSetMetadata.getName() != null) {
             checkDataSetName(dataSetMetadata.getName());
@@ -809,8 +682,11 @@ public class DataSetService extends BaseDataSetService {
 
                 // update the sheet content (in case of a multi-sheet excel file)
                 if (metadataForUpdate.getSchemaParserResult() != null) {
-                    Optional<Schema.SheetContent> sheetContentFound = metadataForUpdate.getSchemaParserResult().getSheetContents()
-                            .stream().filter(sheetContent -> dataSetMetadata.getSheetName().equals(sheetContent.getName()))
+                    Optional<Schema.SheetContent> sheetContentFound = metadataForUpdate
+                            .getSchemaParserResult()
+                            .getSheetContents()
+                            .stream()
+                            .filter(sheetContent -> dataSetMetadata.getSheetName().equals(sheetContent.getName()))
                             .findFirst();
 
                     if (sheetContentFound.isPresent()) {
@@ -875,36 +751,15 @@ public class DataSetService extends BaseDataSetService {
         }
     }
 
-    /**
-     * list all the favorites dataset for the current user
-     *
-     * @return a list of the dataset Ids of all the favorites dataset for the current user or an empty list if none
-     * found
-     */
-    @RequestMapping(value = "/datasets/favorites", method = RequestMethod.GET)
-    @ApiOperation(value = "return all favorites datasets of the current user", notes = "Returns the list of favorites datasets.")
-    @Timed
+    @Override
     public Iterable<String> favorites() {
         String userId = security.getUserId();
         UserData userData = userDataRepository.get(userId);
         return userData != null ? userData.getFavoritesDatasets() : emptyList();
     }
 
-    /**
-     * update the current user data dataset favorites list by adding or removing the dataSetId according to the unset
-     * flag. The user data for the current will be created if it does not exist. If no data set exists for given id, a
-     * {@link TDPException} is thrown.
-     *
-     * @param unset, if true this will remove the dataSetId from the list of favorites, if false then it adds the
-     * dataSetId to the favorite list
-     * @param dataSetId, the id of the favorites data set. If the data set does not exists nothing is done.
-     */
-    @RequestMapping(value = "/datasets/{id}/favorite", method = PUT)
-    @ApiOperation(value = "set or unset a dataset as favorite", notes = "Specify if a dataset is or is not a favorite for the current user.")
-    @Timed
-    public void setFavorites(
-            @RequestParam(defaultValue = "false") @ApiParam(name = "unset", value = "if true then unset the dataset as favorite, if false (default value) set the favorite flag") boolean unset, //
-            @PathVariable(value = "id") @ApiParam(name = "id", value = "Id of the favorite data set, do nothing is the id does not exist.") String dataSetId) {
+    @Override
+    public void setFavorites( boolean unset, String dataSetId) {
         String userId = security.getUserId();
         // check that dataset exists
         DataSetMetadata dataSetMetadata = dataSetMetadataRepository.get(dataSetId);
@@ -929,20 +784,8 @@ public class DataSetService extends BaseDataSetService {
         }
     }
 
-    /**
-     * Update the column of the data set and computes the
-     *
-     * @param dataSetId the dataset id.
-     * @param columnId the column id.
-     * @param parameters the new type and domain.
-     */
-    @RequestMapping(value = "/datasets/{datasetId}/column/{columnId}", method = POST)
-    @ApiOperation(value = "Update a column type and/or domain")
-    @Timed
-    public void updateDatasetColumn(
-            @PathVariable(value = "datasetId") @ApiParam(name = "datasetId", value = "Id of the dataset") final String dataSetId,
-            @PathVariable(value = "columnId") @ApiParam(name = "columnId", value = "Id of the column") final String columnId,
-            @RequestBody final UpdateColumnParameters parameters) {
+    @Override
+    public void updateDatasetColumn(String dataSetId, String columnId, final UpdateColumnParameters parameters) {
 
         final DistributedLock lock = dataSetMetadataRepository.createDatasetMetadataLock(dataSetId);
         lock.lock();
@@ -979,10 +822,12 @@ public class DataSetService extends BaseDataSetService {
                 }
                 // change domain
                 else {
-                    final SemanticDomain semanticDomain = column.getSemanticDomains() //
+                    final SemanticDomain semanticDomain = column
+                            .getSemanticDomains() //
                             .stream() //
                             .filter(dom -> StringUtils.equals(dom.getId(), parameters.getDomain())) //
-                            .findFirst().orElse(null);
+                            .findFirst()
+                            .orElse(null);
                     if (semanticDomain != null) {
                         column.setDomain(semanticDomain.getId());
                         column.setDomainLabel(semanticDomain.getLabel());
@@ -1004,41 +849,23 @@ public class DataSetService extends BaseDataSetService {
         }
     }
 
-    /**
-     * Search datasets.
-     *
-     * @param name what to searched in datasets.
-     * @param strict If the searched name should be the full name
-     * @return the list of found datasets metadata.
-     * @deprecated please, use {@link #list(Sort, Order, String, boolean, boolean, boolean, boolean)} on {@code /datasets} enpoint
-     * with name and nameStrict parameters.
-     */
-    @RequestMapping(value = "/datasets/search", method = GET)
-    @ApiOperation(value = "Search the dataset metadata", notes = "Search the dataset metadata.")
-    @Timed
+    @Override
     @Deprecated
-    public Stream<UserDataSetMetadata> search( //
-            @RequestParam @ApiParam(value = "What to search in data sets") final String name, //
-            @RequestParam @ApiParam(value = "The searched name should be the full name") final boolean strict) {
+    public Stream<UserDataSetMetadata> search(String name, boolean strict) {
         LOG.debug("search datasets metadata for {}", name);
         return list(null, null, name, strict, false, false, false);
     }
 
-    @RequestMapping(value = "/datasets/encodings", method = GET)
-    @ApiOperation(value = "list the supported encodings for dataset", notes = "This list can be used by user to change dataset encoding.")
-    @Timed
-    @PublicAPI
+    @Override
     public Stream<String> listSupportedEncodings() {
         return EncodingSupport.getSupportedCharsets().stream().map(Charset::displayName);
     }
 
-    @RequestMapping(value = "/datasets/imports/{import}/parameters", method = GET, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get the import parameters", notes = "This list can be used by user to change dataset encoding.")
-    @Timed
-    @PublicAPI
-    // This method have to return Object because it can either return the legacy List<Parameter> or the new TComp oriented
+    @Override
+    // This method have to return Object because it can either return the legacy List<Parameter> or the new TComp
+    // oriented
     // ComponentProperties
-    public Object getImportParameters(@PathVariable("import") final String importType) {
+    public Object getImportParameters(String importType) {
         DataSetLocation matchingDatasetLocation = locationsService.findLocation(importType);
         Object parametersToReturn;
         if (matchingDatasetLocation == null) {
@@ -1053,23 +880,23 @@ public class DataSetService extends BaseDataSetService {
         return parametersToReturn;
     }
 
-    @RequestMapping(value = "/datasets/{id}/datastore/properties", method = GET)
-    @ApiOperation(value = "Get the dataset import parameters", notes = "This list can be used by user to change dataset encoding.")
-    @Timed
-    // This method have to return Object because it can either return the legacy List<Parameter> or the new TComp oriented
+    @Override
+    // This method have to return Object because it can either return the legacy List<Parameter> or the new TComp
+    // oriented
     // ComponentProperties
-    public Object getDataStoreParameters(@PathVariable("id") final String dataSetId) {
+    public Object getDataStoreParameters(final String dataSetId) {
         DataSetMetadata dataSetMetadata = dataSetMetadataRepository.get(dataSetId);
         Object parametersToReturn = null;
         if (dataSetMetadata != null) {
-            DataSetLocation matchingDatasetLocation = locationsService
-                    .findLocation(dataSetMetadata.getLocation().getLocationType());
+            DataSetLocation matchingDatasetLocation =
+                    locationsService.findLocation(dataSetMetadata.getLocation().getLocationType());
             if (matchingDatasetLocation == null) {
                 parametersToReturn = emptyList();
             } else {
                 if (matchingDatasetLocation.isSchemaOriented()) {
                     ComponentProperties parametersAsSchema = matchingDatasetLocation.getParametersAsSchema(getLocale());
-                    parametersAsSchema.setProperties(dataSetMetadata.getLocation().getParametersAsSchema(getLocale()).getProperties());
+                    parametersAsSchema.setProperties(
+                            dataSetMetadata.getLocation().getParametersAsSchema(getLocale()).getProperties());
                     parametersToReturn = parametersAsSchema;
                 } else {
                     parametersToReturn = matchingDatasetLocation.getParameters(getLocale());
@@ -1079,17 +906,17 @@ public class DataSetService extends BaseDataSetService {
         return parametersToReturn;
     }
 
-    @RequestMapping(value = "/datasets/imports", method = GET)
-    @ApiOperation(value = "list the supported encodings for dataset", notes = "This list can be used by user to change dataset encoding.")
-    @Timed
-    @PublicAPI
+    @Override
     public Stream<Import> listSupportedImports() {
-        return locationsService.getAvailableLocations().stream() //
+        return locationsService
+                .getAvailableLocations()
+                .stream() //
                 .filter(l -> enabledImports.contains(l.getLocationType())) //
                 .filter(DataSetLocation::isEnabled) //
                 .map(l -> { //
                     final boolean defaultImport = LocalStoreLocation.NAME.equals(l.getLocationType());
-                    ImportBuilder builder = ImportBuilder.builder() //
+                    ImportBuilder builder = ImportBuilder
+                            .builder() //
                             .locationType(l.getLocationType()) //
                             .contentType(l.getAcceptedContentType()) //
                             .defaultImport(defaultImport) //
@@ -1115,20 +942,8 @@ public class DataSetService extends BaseDataSetService {
                 });
     }
 
-    /**
-     * Return the semantic types for a given dataset / column.
-     *
-     * @param datasetId the datasetId id.
-     * @param columnId the column id.
-     * @return the semantic types for a given dataset / column.
-     */
-    @RequestMapping(value = "/datasets/{datasetId}/columns/{columnId}/types", method = GET)
-    @ApiOperation(value = "list the types of the wanted column", notes = "This list can be used by user to change the column type.")
-    @Timed
-    @PublicAPI
-    public List<SemanticDomain> getDataSetColumnSemanticCategories(
-            @ApiParam(value = "The dataset id") @PathVariable String datasetId,
-            @ApiParam(value = "The column id") @PathVariable String columnId) {
+    @Override
+    public List<SemanticDomain> getDataSetColumnSemanticCategories(String datasetId, String columnId) {
 
         LOG.debug("listing semantic categories for dataset #{} column #{}", datasetId, columnId);
 
@@ -1152,14 +967,17 @@ public class DataSetService extends BaseDataSetService {
     }
 
     /**
-     * Verify validity of the supplied name for a data set. This check will fail if the supplied name is null or only containing
-     * whitespaces characters. It will also throw an exception if a quote is in the name as it is an illegal TQL chars for searches.
+     * Verify validity of the supplied name for a data set. This check will fail if the supplied name is null or only
+     * containing
+     * whitespaces characters. It will also throw an exception if a quote is in the name as it is an illegal TQL chars
+     * for searches.
      *
      * @param dataSetName the data set name to validate
      */
     private void checkDataSetName(String dataSetName) {
         if (dataSetName.contains("'")) {
-            throw new TDPException(DataSetErrorCodes.INVALID_DATASET_NAME, ExceptionContext.withBuilder().put("name", dataSetName).build());
+            throw new TDPException(DataSetErrorCodes.INVALID_DATASET_NAME,
+                    ExceptionContext.withBuilder().put("name", dataSetName).build());
         }
     }
 

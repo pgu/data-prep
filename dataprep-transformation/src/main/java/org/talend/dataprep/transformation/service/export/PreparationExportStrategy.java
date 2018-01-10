@@ -12,10 +12,11 @@
 
 package org.talend.dataprep.transformation.service.export;
 
-import static org.talend.dataprep.api.export.ExportParameters.SourceType.HEAD;
+import static org.talend.dataprep.services.transformation.ExportParameters.SourceType.HEAD;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.lang.StringUtils;
@@ -25,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.talend.dataprep.api.dataset.DataSet;
-import org.talend.dataprep.api.export.ExportParameters;
+import org.talend.dataprep.api.preparation.Action;
 import org.talend.dataprep.api.preparation.PreparationMessage;
 import org.talend.dataprep.cache.ContentCache;
 import org.talend.dataprep.command.dataset.DataSetGet;
@@ -34,6 +35,7 @@ import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.TransformationErrorCodes;
 import org.talend.dataprep.format.export.ExportFormat;
 import org.talend.dataprep.security.SecurityProxy;
+import org.talend.dataprep.services.transformation.ExportParameters;
 import org.talend.dataprep.transformation.api.transformer.configuration.Configuration;
 import org.talend.dataprep.transformation.cache.CacheKeyGenerator;
 import org.talend.dataprep.transformation.cache.TransformationCacheKey;
@@ -107,7 +109,7 @@ public class PreparationExportStrategy extends BaseSampleExportStrategy {
                 releasedIdentity = true;
 
                 // get the actions to apply (no preparation ==> dataset export ==> no actions)
-                final String actions = getActions(preparationId, version);
+                final List<Action> actions = getActions(preparationId, version);
 
                 final TransformationCacheKey key = cacheKeyGenerator.generateContentKey( //
                         dataSetId, //

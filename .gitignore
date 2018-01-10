@@ -24,3 +24,6 @@ yarn-error.log
 
 #generated folders
 ./cache/
+
+#generated documentation directories
+**/src/main/resources/public/**

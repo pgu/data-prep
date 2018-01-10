@@ -14,16 +14,20 @@ package org.talend.dataprep.api.service.delegate;
 
 import java.util.stream.Stream;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.api.folder.Folder;
-import org.talend.dataprep.api.service.command.folder.SearchFolders;
-import org.talend.dataprep.command.CommandHelper;
+import org.talend.daikon.client.ClientService;
+import org.talend.dataprep.api.folder.UserFolder;
+import org.talend.services.tdp.folder.IFolderService;
 
 /**
  * A {@link SearchDelegate} implementation to search in folders.
  */
 @Component
-public class FolderSearchDelegate extends AbstractSearchDelegate<Folder> {
+public class FolderSearchDelegate extends AbstractSearchDelegate<UserFolder> {
+
+    @Autowired
+    private ClientService clients;
 
     @Override
     public String getSearchCategory() {
@@ -41,8 +45,7 @@ public class FolderSearchDelegate extends AbstractSearchDelegate<Folder> {
     }
 
     @Override
-    public Stream<Folder> search(String query, boolean strict) {
-        final SearchFolders commandListFolders = getCommand(SearchFolders.class, query, strict, null);
-        return CommandHelper.toStream(Folder.class, mapper, commandListFolders);
+    public Stream<UserFolder> search(String query, boolean strict) {
+        return clients.of(IFolderService.class).search(query, strict, null);
     }
 }

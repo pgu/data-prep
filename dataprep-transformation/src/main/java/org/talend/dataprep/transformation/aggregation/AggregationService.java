@@ -24,8 +24,8 @@ import org.talend.dataprep.api.dataset.row.DataSetRow;
 import org.talend.dataprep.api.filter.FilterService;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
-import org.talend.dataprep.transformation.aggregation.api.AggregationParameters;
-import org.talend.dataprep.transformation.aggregation.api.AggregationResult;
+import org.talend.dataprep.services.api.AggregationParameters;
+import org.talend.dataprep.services.transformation.AggregationResult;
 import org.talend.dataprep.transformation.aggregation.operation.Aggregator;
 import org.talend.dataprep.transformation.aggregation.operation.AggregatorFactory;
 

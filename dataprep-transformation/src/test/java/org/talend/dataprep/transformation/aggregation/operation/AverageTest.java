@@ -16,8 +16,8 @@ package org.talend.dataprep.transformation.aggregation.operation;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.talend.dataprep.transformation.aggregation.api.AggregationResult;
-import org.talend.dataprep.transformation.aggregation.api.Operator;
+import org.talend.dataprep.services.api.Operator;
+import org.talend.dataprep.services.transformation.AggregationResult;
 
 /**
  * Unit test for the Average aggregator.

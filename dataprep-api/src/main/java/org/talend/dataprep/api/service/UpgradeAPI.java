@@ -86,7 +86,7 @@ public class UpgradeAPI extends APIService {
         this.upgradeVersionLocation = upgradeVersionLocation;
     }
 
-    @RequestMapping(value = "/api/upgrade/check", method = GET)
+    @RequestMapping(value = "/api/upgrade/check", method = GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Checks if a newer versions are available and returns them as JSON.", produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PublicAPI

@@ -1,0 +1,8 @@
+<enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-1.27.xsd">
+    <modules>
+        <jackson disabled="true"/>
+        <docs includeExampleXml="false"/>
+    </modules>
+
+</enunciate>

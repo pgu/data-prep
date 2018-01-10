@@ -14,7 +14,6 @@
 package org.talend.dataprep.api.service.command.preparation;
 
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -23,13 +22,13 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.springframework.http.HttpStatus;
-import org.talend.dataprep.api.export.ExportParameters;
 import org.talend.dataprep.api.preparation.Action;
 import org.talend.dataprep.api.preparation.Preparation;
 import org.talend.dataprep.command.GenericCommand;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.TransformationErrorCodes;
-import org.talend.dataprep.transformation.preview.api.PreviewParameters;
+import org.talend.dataprep.services.transformation.ExportParameters;
+import org.talend.dataprep.services.transformation.PreviewParameters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -95,16 +94,16 @@ public abstract class PreviewAbstract extends GenericCommand<InputStream> {
      * @param sourceType the source type.
      * @throws JsonProcessingException if an error occurs.
      */
-    protected void setContext(Collection<Action> baseActions,
-                              Collection<Action> newActions,
+    protected void setContext(List<Action> baseActions,
+                              List<Action> newActions,
                               String datasetId,
                               String preparationId,
                               List<Integer> tdpIds,
                               ExportParameters.SourceType sourceType) throws JsonProcessingException {
 
         this.parameters = new PreviewParameters( //
-                serializeActions(baseActions), //
-                serializeActions(newActions), //
+                baseActions, //
+                newActions, //
                 datasetId, //
                 preparationId,
                 serializeIds(tdpIds),

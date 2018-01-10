@@ -24,43 +24,50 @@
     <artifactId>dataprep-api</artifactId>
     <packaging>jar</packaging>
     <name>dataprep-api</name>
-    <properties>
-        <stack.param.name>DataPrepApiFQIN</stack.param.name>
-        <start-class>org.talend.dataprep.api.Application</start-class>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mailapi</artifactId>
+            <version>1.4.3</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>smtp</artifactId>
+            <version>1.4.5</version>
         </dependency>
-        <!-- UNIT TEST DEPENDENCIES -->
+
+        <dependency>
+            <groupId>org.talend.dataprep</groupId>
+            <artifactId>dataprep-dataset-service</artifactId>
+            <version>2.4.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.talend.dataprep</groupId>
+            <artifactId>dataprep-preparation-service</artifactId>
+            <version>2.4.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.talend.dataprep</groupId>
+            <artifactId>dataprep-transformation-service</artifactId>
+            <version>2.4.0-SNAPSHOT</version>
+        </dependency>
+
         <dependency>
             <groupId>org.talend.dataprep</groupId>
             <artifactId>dataprep-dataset</artifactId>
-            <classifier>lib</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.talend.dataprep</groupId>
-            <artifactId>dataprep-preparation</artifactId>
-            <classifier>lib</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.talend.dataprep</groupId>
-            <artifactId>dataprep-transformation</artifactId>
+            <version>2.4.0-SNAPSHOT</version>
             <classifier>lib</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.talend.dataprep</groupId>
             <artifactId>dataprep-transformation</artifactId>
-            <type>test-jar</type>
+            <version>2.4.0-SNAPSHOT</version>
+            <classifier>lib</classifier>
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <properties>
+        <stack.param.name>DataPrepApiFQIN</stack.param.name>
+    </properties>
 </project>
