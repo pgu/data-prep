@@ -24,10 +24,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.IterableUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.talend.daikon.client.ClientService;
+import org.talend.daikon.annotation.Client;
 import org.talend.dataprep.api.action.ActionForm;
 import org.talend.dataprep.api.dataset.DataSet;
 import org.talend.dataprep.api.dataset.DataSetMetadata;
@@ -52,9 +51,15 @@ import io.swagger.annotations.ApiParam;
 @RestController
 public class DataSetAPI extends APIService {
 
-    @Autowired
-    private ClientService clients;
+    @Client
+    private IDataSetService dataSetService;
 
+    @Client
+    private IPreparationService preparationService;
+
+    @Client
+    private ITransformationService transformationService;
+    
     /**
      * Create a dataset from request body content.
      *
@@ -77,7 +82,7 @@ public class DataSetAPI extends APIService {
         return () -> {
             LOG.debug("Creating dataset...");
             try {
-                return clients.of(IDataSetService.class).create(name, tag, size, contentType, dataSetContent);
+                return dataSetService.create(name, tag, size, contentType, dataSetContent);
             } finally {
                 LOG.debug("Dataset creation done.");
             }
@@ -96,7 +101,7 @@ public class DataSetAPI extends APIService {
             @ApiParam(value = "content") InputStream dataSetContent) {
         return () -> {
             LOG.debug("Creating or updating dataset #{}...", id);
-            clients.of(IDataSetService.class).updateRawDataSet(name, id, size, dataSetContent);
+            dataSetService.updateRawDataSet(name, id, size, dataSetContent);
             return id;
         };
     }
@@ -109,7 +114,7 @@ public class DataSetAPI extends APIService {
             @ApiParam(value = "Id of the data set to update / create") @PathVariable(value = "id") String id) {
         return () -> {
             LOG.debug("Copying {}...", id);
-            final String copyId = clients.of(IDataSetService.class).copy(id, name);
+            final String copyId = dataSetService.copy(id, name);
             LOG.info("Dataset {} copied --> {} named '{}'", id, copyId, name);
             return copyId;
         };
@@ -124,7 +129,7 @@ public class DataSetAPI extends APIService {
             @ApiParam(value = "Id of the data set metadata to be updated") @PathVariable(value = "id") String id,
             @ApiParam(value = "content") DataSetMetadata dataSetContent) {
         LOG.debug("Creating or updating dataset #{}...", id);
-        clients.of(IDataSetService.class).updateDataSet(id, dataSetContent);
+        dataSetService.updateDataSet(id, dataSetContent);
         LOG.debug("Dataset creation or update for #{} done.", id);
     }
 
@@ -137,7 +142,7 @@ public class DataSetAPI extends APIService {
             @ApiParam(value = "content") InputStream dataSetContent) {
         return () -> {
             LOG.debug("Creating or updating dataset #{}...", id);
-            clients.of(IDataSetService.class).updateRawDataSet(id, "", 0, dataSetContent);
+            dataSetService.updateRawDataSet(id, "", 0, dataSetContent);
             LOG.debug("Dataset creation or update for #{} done.", id);
             return id;
         };
@@ -153,7 +158,7 @@ public class DataSetAPI extends APIService {
             @PathVariable(value = "columnId") @ApiParam(value = "Id of the column to update") final String columnId,
             @RequestBody final UpdateColumnParameters parameters) {
         LOG.debug("Creating or updating dataset #{}...", datasetId);
-        clients.of(IDataSetService.class).updateDatasetColumn(datasetId, columnId, parameters);
+        dataSetService.updateDatasetColumn(datasetId, columnId, parameters);
         LOG.debug("Dataset creation or update for #{} done.", datasetId);
     }
 
@@ -170,7 +175,7 @@ public class DataSetAPI extends APIService {
                     value = "includeTechnicalProperties", defaultValue = "false") boolean includeTechnicalProperties) {
         LOG.debug("Requesting dataset #{}...", id);
         try {
-            return clients.of(IDataSetService.class).get(true, includeTechnicalProperties, filter, id);
+            return dataSetService.get(true, includeTechnicalProperties, filter, id);
         } finally {
             LOG.debug("Request dataset #{} (pool: {}) done.", id);
         }
@@ -190,7 +195,7 @@ public class DataSetAPI extends APIService {
             getMetadata(@ApiParam(value = "Id of the data set to get") @PathVariable(value = "id") String id) {
         LOG.debug("Requesting dataset metadata #{}...", id);
         try {
-            return clients.of(IDataSetService.class).getMetadata(id);
+            return dataSetService.getMetadata(id);
         } finally {
             LOG.debug("Request dataset metadata #{} done.", id);
         }
@@ -207,7 +212,7 @@ public class DataSetAPI extends APIService {
                     value = "Sheet name to preview") String sheetName) {
         LOG.debug("Requesting dataset #{}...", id);
         try {
-            return clients.of(IDataSetService.class).preview(metadata, sheetName, id);
+            return dataSetService.preview(metadata, sheetName, id);
         } finally {
             LOG.debug("Request dataset #{} (pool: {}) done.", id);
         }
@@ -229,7 +234,7 @@ public class DataSetAPI extends APIService {
             @ApiParam(value = "Filter on recent data sets") @RequestParam(defaultValue = "false") boolean limit) {
         return () -> {
             try {
-                return clients.of(IDataSetService.class).list(sort, order, name, false, certified, favorite, limit);
+                return dataSetService.list(sort, order, name, false, certified, favorite, limit);
             } finally {
                 LOG.info("listing datasets done [favorite: {}, certified: {}, name: {}, limit: {}]", favorite,
                         certified, name, limit);
@@ -255,11 +260,11 @@ public class DataSetAPI extends APIService {
             LOG.debug("Listing datasets summary (pool: {})...", getConnectionStats());
         }
         return () -> {
-            final Stream<UserDataSetMetadata> dataSetList = clients.of(IDataSetService.class).list(sort, order, name, false, certified, favorite, limit);
+            final Stream<UserDataSetMetadata> dataSetList = dataSetService.list(sort, order, name, false, certified, favorite, limit);
             return dataSetList.map(m -> {
                 LOG.debug("found dataset {} in the summary list" + m.getName());
                 // Add the related preparations list to the given dataset metadata.
-                final List<Preparation> preparations = clients.of(IPreparationService.class) //
+                final List<Preparation> preparations = preparationService //
                         .searchPreparations(m.getId(), "", "", false, "", Sort.LAST_MODIFICATION_DATE, Order.DESC) //
                         .filter(p -> p.getSteps() != null) //
                         .collect(Collectors.toList());
@@ -289,7 +294,7 @@ public class DataSetAPI extends APIService {
                     defaultValue = "creationDate") Sort sort,
             @ApiParam(value = "Order for sort key (desc or asc), defaults to 'desc'.") @RequestParam(
                     defaultValue = "desc") Order order) {
-        return clients.of(IDataSetService.class).listCompatibleDatasets(id, sort, order);
+        return dataSetService.listCompatibleDatasets(id, sort, order);
     }
 
     /**
@@ -314,10 +319,10 @@ public class DataSetAPI extends APIService {
         return () -> {
             LOG.debug("Listing compatible preparations...");
             // get the list of compatible data sets
-            final List<String> dataSets = IterableUtils.toList(clients.of(IDataSetService.class).listCompatibleDatasets(dataSetId, sort, order)).stream().map(d -> d.getId()).collect(Collectors.toList());
+            final List<String> dataSets = IterableUtils.toList(dataSetService.listCompatibleDatasets(dataSetId, sort, order)).stream().map(d -> d.getId()).collect(Collectors.toList());
             // get list of preparations
             final Stream<UserPreparation> stream =
-                    clients.of(IPreparationService.class).listAll("", "", "", sort, order);
+                    preparationService.listAll("", "", "", sort, order);
             return stream.filter(p -> dataSets.contains(p.getDataSetId()));
         };
     }
@@ -329,7 +334,7 @@ public class DataSetAPI extends APIService {
     public void delete(@PathVariable(value = "id") @ApiParam(name = "id",
             value = "Id of the data set to delete") String dataSetId) {
             LOG.debug("Delete dataset #{}...", dataSetId);
-        clients.of(IDataSetService.class).delete(dataSetId);
+        dataSetService.delete(dataSetId);
             LOG.debug("Listing datasets done.");
     }
 
@@ -340,9 +345,9 @@ public class DataSetAPI extends APIService {
     public List<ActionForm> suggestDatasetActions(@PathVariable(value = "id") @ApiParam(name = "id",
             value = "Data set id to get suggestions from.") String dataSetId) {
         // Get dataset metadata
-        final DataSetMetadata metadata = clients.of(IDataSetService.class).getMetadata(dataSetId);
+        final DataSetMetadata metadata = dataSetService.getMetadata(dataSetId);
         // Asks transformation service for suggested actions for column type and domain...
-        final List<ActionForm> suggestions = clients.of(ITransformationService.class).suggest(metadata);
+        final List<ActionForm> suggestions = transformationService.suggest(metadata);
         // ... also adds lookup actions
         // TODO
         // Returns actions
@@ -359,7 +364,7 @@ public class DataSetAPI extends APIService {
                     value = "When true, will remove the dataset from favorites, if false (default) this will set the dataset as favorite.") boolean unset) {
         return () -> {
                 LOG.debug((unset ? "Unset" : "Set") + " favorite dataset #{}...", id);
-                clients.of(IDataSetService.class).setFavorites(unset, id);
+                dataSetService.setFavorites(unset, id);
             LOG.debug("Set Favorite for user #{} done.", id);
             return id;
         };
@@ -370,7 +375,7 @@ public class DataSetAPI extends APIService {
     @Timed
     @PublicAPI
     public Stream<String> listEncodings() {
-        return clients.of(IDataSetService.class).listSupportedEncodings();
+        return dataSetService.listSupportedEncodings();
     }
 
     @RequestMapping(value = "/api/datasets/imports/{import}/parameters", method = GET,
@@ -380,7 +385,7 @@ public class DataSetAPI extends APIService {
     @Timed
     @PublicAPI
     public Object getImportParameters(@PathVariable("import") final String importType) {
-        return clients.of(IDataSetService.class).getImportParameters(importType);
+        return dataSetService.getImportParameters(importType);
     }
 
     @RequestMapping(value = "/api/datasets/imports", method = GET, produces = APPLICATION_JSON_VALUE)
@@ -388,7 +393,7 @@ public class DataSetAPI extends APIService {
     @Timed
     @PublicAPI
     public Callable<Stream<Import>> listImports() {
-        return () -> clients.of(IDataSetService.class).listSupportedImports();
+        return () -> dataSetService.listSupportedImports();
     }
 
     /**
@@ -409,7 +414,7 @@ public class DataSetAPI extends APIService {
             @ApiParam(value = "The column id") @PathVariable String columnId) {
         return () -> {
             LOG.debug("listing semantic types for dataset {}, column {}", datasetId, columnId);
-            return clients.of(IDataSetService.class).getDataSetColumnSemanticCategories(datasetId, columnId);
+            return dataSetService.getDataSetColumnSemanticCategories(datasetId, columnId);
         };
     }
 }
