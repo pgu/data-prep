@@ -15,15 +15,18 @@ package org.talend.dataprep.api.service.delegate;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.api.dataset.DataSetMetadata;
-import org.talend.dataprep.command.CommandHelper;
-import org.talend.dataprep.command.dataset.SearchDataSets;
+import org.talend.daikon.annotation.Client;
+import org.talend.dataprep.dataset.service.UserDataSetMetadata;
+import org.talend.services.tdp.dataset.IDataSetService;
 
 /**
  * A {@link SearchDelegate} implementation to search in datasets.
  */
 @Component
-public class DataSetSearchDelegate extends AbstractSearchDelegate<DataSetMetadata> {
+public class DataSetSearchDelegate extends AbstractSearchDelegate<UserDataSetMetadata> {
+
+    @Client
+    private IDataSetService dataSetService;
 
     @Override
     public String getSearchCategory() {
@@ -41,8 +44,7 @@ public class DataSetSearchDelegate extends AbstractSearchDelegate<DataSetMetadat
     }
 
     @Override
-    public Stream<DataSetMetadata> search(String query, boolean strict) {
-        final SearchDataSets command = getCommand(SearchDataSets.class, query, strict);
-        return CommandHelper.toStream(DataSetMetadata.class, mapper, command);
+    public Stream<UserDataSetMetadata> search(String query, boolean strict) {
+        return dataSetService.search(query, strict);
     }
 }

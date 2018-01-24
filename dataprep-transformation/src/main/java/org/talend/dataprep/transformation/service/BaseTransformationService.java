@@ -17,7 +17,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.talend.dataprep.exception.TDPException;
@@ -46,14 +45,6 @@ public abstract class BaseTransformationService {
     /** The format registration service. */
     @Autowired
     protected FormatRegistrationService formatRegistrationService;
-
-    /** Preparation service url. */
-    @Value("${preparation.service.url}")
-    protected String preparationServiceUrl;
-
-    /** DataSet service url. */
-    @Value("${dataset.service.url}")
-    protected String datasetServiceUrl;
 
     /** The dataprep ready to use jackson object mapper. */
     @Autowired

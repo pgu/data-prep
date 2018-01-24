@@ -14,10 +14,7 @@ package org.talend.dataprep.json;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import javax.annotation.PostConstruct;
 
@@ -33,7 +30,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
-import com.fasterxml.jackson.databind.deser.ValueInstantiator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.TypeBindings;
 
@@ -51,18 +47,15 @@ public class StreamModule extends SimpleModule {
      */
     @PostConstruct
     private void registerSerializers() {
-        addValueInstantiator(Stream.class, new ValueInstantiator.Base(Stream.class) {
-            @Override
-            public Object createFromObjectWith(DeserializationContext ctxt, Object[] args) throws IOException {
-                return super.createFromObjectWith(ctxt, args);
-            }
-        });
         addDeserializer(Stream.class, new StreamJsonDeserializer());
         addSerializer(Stream.class, new JsonSerializer<Stream>() {
+
             @Override
-            public void serialize(Stream stream, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            public void serialize(Stream stream, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
+                    throws IOException {
                 // Write values
-                ObjectWriter objectWriter = null; // Cache object writer (to prevent additional search for ObjectWriter).
+                ObjectWriter objectWriter = null; // Cache object writer (to prevent additional search for
+                                                  // ObjectWriter).
                 Object previous = null;
                 boolean startedResultArray = false;
                 try {
@@ -72,7 +65,8 @@ public class StreamModule extends SimpleModule {
                     LOGGER.debug("Iterating over: {}", iterator);
                     while (iterator.hasNext()) {
                         final Object next = iterator.next();
-                        if (!startedResultArray) { // Start array after (indirectly) checked there's at least a result available
+                        if (!startedResultArray) { // Start array after (indirectly) checked there's at least a result
+                                                   // available
                             jsonGenerator.writeStartArray();
                             startedResultArray = true;
                         }
@@ -122,14 +116,19 @@ public class StreamModule extends SimpleModule {
 
         @Override
         public Stream deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            if(bindings == null) {
+            if (bindings == null) {
                 return Stream.empty();
             } else {
                 final JavaType elementType = bindings.getTypeParameters().get(0);
-                final JsonToken jsonToken = p.nextToken();
-                if(jsonToken == JsonToken.START_ARRAY) {
-                    final MappingIterator<?> iterator = mapper.readValues(p, elementType);
-                    return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.SIZED), false);
+                while (p.currentToken() != JsonToken.START_ARRAY) {
+                    p.nextToken();
+                }
+                p.nextToken();
+                if (p.currentToken() != JsonToken.END_ARRAY) {
+                    final MappingIterator<?> iterator = mapper.readerFor(elementType.getRawClass()).readValues(p);
+                    return iterator.readAll().stream();
+                    // return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.SIZED),
+                    // false);
                 } else {
                     return Stream.empty();
                 }

@@ -47,7 +47,6 @@ import org.talend.dataprep.api.service.command.preparation.PreviewAdd;
 import org.talend.dataprep.api.service.command.preparation.PreviewDiff;
 import org.talend.dataprep.api.service.command.preparation.PreviewUpdate;
 import org.talend.dataprep.command.CommandHelper;
-import org.talend.dataprep.command.dataset.DataSetGetMetadata;
 import org.talend.dataprep.command.preparation.PreparationUpdate;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.APIErrorCodes;
@@ -57,6 +56,7 @@ import org.talend.dataprep.security.PublicAPI;
 import org.talend.dataprep.services.transformation.ExportParameters;
 import org.talend.dataprep.transformation.actions.datablending.Lookup;
 import org.talend.dataprep.util.SortAndOrderHelper.Format;
+import org.talend.services.tdp.dataset.IDataSetService;
 import org.talend.services.tdp.preparation.IPreparationService;
 import org.talend.services.tdp.transformation.ITransformationService;
 
@@ -151,8 +151,7 @@ public class PreparationAPI extends APIService {
             LOG.debug("Creating a preparation in {} (pool: {} )...", folder, getConnectionStats());
         }
 
-        DataSetGetMetadata dataSetMetadata = getCommand(DataSetGetMetadata.class, preparation.getDataSetId());
-        DataSetMetadata execute = dataSetMetadata.execute();
+        DataSetMetadata execute = clients.of(IDataSetService.class).getMetadata(preparation.getDataSetId());
         preparation.setRowMetadata(execute.getRowMetadata());
 
         final String preparationId = clients.of(IPreparationService.class).create(preparation, folder);
