@@ -9,13 +9,12 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
+import org.talend.dataprep.security.Security;
 import org.talend.dataprep.upgrade.UpgradeService;
 import org.talend.tenancy.ForAll;
 
 /**
- * System.out.println(arg.getClass().toString());
  *
- * 
  */
 @Component
 public class UpgradeTask {
@@ -34,13 +33,15 @@ public class UpgradeTask {
     @Autowired
     private ForAll forAll;
 
+    @Autowired
+    private Security security;
+
     @PostConstruct
     public void upgradeTask() {
-        executor.execute(() -> {
-            forAll.execute(() -> !upgradeService.isAllVersionTasksApplied(), () -> {
-                LOG.info("Calling upgradeVersion...");
-                upgradeService.upgradeVersion();
-            });
-        });
+        executor.execute(() -> forAll.execute(() -> upgradeService.needUpgrade(), () -> {
+            LOG.info("Performing upgrade for '{}'...", security.getTenantId());
+            upgradeService.upgradeVersion();
+            LOG.info("Performing upgrade done for '{}'.", security.getTenantId());
+        }));
     }
 }
