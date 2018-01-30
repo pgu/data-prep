@@ -40,10 +40,7 @@ import org.talend.dataprep.api.PreparationAddAction;
 import org.talend.dataprep.api.dataset.DataSetMetadata;
 import org.talend.dataprep.api.export.ExportParameters;
 import org.talend.dataprep.api.preparation.*;
-import org.talend.dataprep.api.service.api.EnrichedPreparation;
-import org.talend.dataprep.api.service.api.PreviewAddParameters;
-import org.talend.dataprep.api.service.api.PreviewDiffParameters;
-import org.talend.dataprep.api.service.api.PreviewUpdateParameters;
+import org.talend.dataprep.api.service.api.*;
 import org.talend.dataprep.api.service.command.dataset.CompatibleDataSetList;
 import org.talend.dataprep.api.service.command.preparation.*;
 import org.talend.dataprep.api.service.command.transformation.GetPreparationColumnTypes;
@@ -310,6 +307,30 @@ public class PreparationAPI extends APIService {
         }
     }
 
+    @RequestMapping(value = "/api/preparations/{id}/cache", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get preparation cache status by id and at a given version.")
+    @Timed
+    public PreparationStatus getPreparationCacheAvailability( //
+        @PathVariable(value = "id") @ApiParam(name = "id", value = "Preparation id.") String preparationId, //
+        @RequestParam(value = "version", defaultValue = "head") @ApiParam(name = "version", value = "Version of the preparation (can be 'origin', 'head' or the version id). Defaults to 'head'.") String version) {
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Retrieving preparation cache status for {}/{} (pool: {} )...", preparationId, version, getConnectionStats());
+        }
+
+        try {
+            HystrixCommand<Boolean> command = getCommand(CheckPreparationCache.class, preparationId);
+
+            Boolean cacheAvailability = command.execute();
+
+            return new PreparationStatus(cacheAvailability);
+
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Retrieved preparation cache status (pool: {} )...", getConnectionStats());
+            }
+        }
+    }
 
     // TODO: this API should take a list of AppendStep.
     @RequestMapping(value = "/api/preparations/{id}/actions", method = POST, produces = APPLICATION_JSON_VALUE)
