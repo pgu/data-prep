@@ -256,6 +256,23 @@ public class PreparationAPITest extends ApiServiceTestBase {
     }
 
     @Test
+    public void testGetPreparationCacheAvailability() throws IOException {
+        // given
+        final String dataSetId = testClient.createDataset("dataset/dataset.csv", "unique");
+        final String preparationId = testClient.createPreparationFromDataset(dataSetId, "testPreparation", home.getId());
+
+        // initially cache is not available
+        assertThat(when().get("/api/preparations/{id}/cache", preparationId).asString(), sameJSONAs("{\"cacheAvailability\": false}"));
+
+        // generate initial cache
+        when().get("/api/preparations/{id}/content", preparationId).asString();
+
+        // cache is now available
+        assertThat(when().get("/api/preparations/{id}/cache", preparationId).asString(), sameJSONAs("{\"cacheAvailability\": true}"));
+
+    }
+
+    @Test
     public void shouldCopyPreparation() throws Exception {
         // given
         Folder destination = folderRepository.addFolder(home.getId(), "/destination");

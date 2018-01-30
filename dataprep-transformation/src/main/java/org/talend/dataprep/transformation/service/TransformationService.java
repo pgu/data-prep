@@ -43,7 +43,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.talend.daikon.exception.ExceptionContext;
@@ -92,6 +94,7 @@ import org.talend.dataprep.transformation.api.transformer.configuration.PreviewC
 import org.talend.dataprep.transformation.api.transformer.suggestion.Suggestion;
 import org.talend.dataprep.transformation.api.transformer.suggestion.SuggestionEngine;
 import org.talend.dataprep.transformation.cache.CacheKeyGenerator;
+import org.talend.dataprep.transformation.cache.TransformationCacheKey;
 import org.talend.dataprep.transformation.cache.TransformationMetadataCacheKey;
 import org.talend.dataprep.transformation.pipeline.ActionRegistry;
 import org.talend.dataprep.transformation.preview.api.PreviewParameters;
@@ -179,9 +182,26 @@ public class TransformationService extends BaseTransformationService {
     @ApiOperation(value = "Run the transformation given the provided export parameters",
             notes = "This operation transforms the dataset or preparation using parameters in export parameters.")
     @VolumeMetered
-    public StreamingResponseBody
+    public ResponseEntity<StreamingResponseBody>
             execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid final ExportParameters parameters) {
-        return executeSampleExportStrategy(parameters);
+
+//        TransformationCacheKey prepCacheKey = cacheKeyGenerator.generateContentKey(
+//                parameters.getDatasetId(), //
+//                parameters.getPreparationId(), //
+//                parameters.getStepId(),  //
+//                "JSON",  //
+//                parameters.getFrom(), //
+//                parameters.getFilter());
+//
+//        HttpStatus httpStatus = HttpStatus.OK;
+//
+//        if(!contentCache.has(prepCacheKey)) {
+//            httpStatus = HttpStatus.ACCEPTED;
+//        }
+//
+        StreamingResponseBody streamResult = executeSampleExportStrategy(parameters);
+
+        return new ResponseEntity<>(streamResult, HttpStatus.ACCEPTED);
     }
 
     @RequestMapping(value = "/apply/preparation/{preparationId}/{stepId}/metadata", method = GET)
@@ -504,6 +524,42 @@ public class TransformationService extends BaseTransformationService {
             evictCache(preparationId, sourceType);
         }
     }
+
+    /**
+     * Test if the preparation cache exist
+     *
+     * @param preparationId the preparation id.
+     * @return True if the cache is avaible, false otherwise
+     */
+    @RequestMapping(value = "/preparation/{preparationId}/cache", method = GET)
+    @ApiOperation(value = "Get preparation details", notes = "Test if the preparation cache exist")
+    @Timed
+    public ResponseEntity<Void> isCacheAvailable(
+        @PathVariable(value = "preparationId") @ApiParam(value = "the preparation id") final String preparationId, //
+        @RequestParam(value = "version", defaultValue = "head") @ApiParam(name = "version", value = "Version of the preparation (can be 'origin', 'head' or the version id). Defaults to 'head'.") final String version, //
+        @RequestParam(value = "from", defaultValue = "HEAD") @ApiParam(name = "from", value = "Where to get the data from") final  ExportParameters.SourceType from) {
+
+        final Preparation preparation = getPreparation(preparationId);
+
+        // get the step (in case of 'head', the real step id must be found)
+        final String stepId = StringUtils.equals("head", version) ? //
+                preparation.getSteps().get(preparation.getSteps().size() - 1).getId() : version;
+
+        final ContentCacheKey contentKey = cacheKeyGenerator.contentBuilder()
+                .preparationId(preparationId)
+                .datasetId(preparation.getDataSetId())
+                .stepId(stepId)
+                .sourceType(from)
+                .format("JSON")
+                .build();
+
+        if (contentCache.has(contentKey)) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 
     private void evictCache(final String preparationId, final ExportParameters.SourceType sourceType) {
         final ContentCacheKey metadataKey = cacheKeyGenerator.metadataBuilder()

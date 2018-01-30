@@ -18,6 +18,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyMap;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.talend.dataprep.api.export.ExportParameters.SourceType.FILTER;
 import static org.talend.dataprep.api.export.ExportParameters.SourceType.HEAD;
 import static org.talend.dataprep.cache.ContentCache.TimeToLive.PERMANENT;
@@ -179,6 +180,35 @@ public class TransformationServiceTest extends TransformationServiceBaseTest {
         String expectedContent = IOUtils.toString(this.getClass().getResourceAsStream("lowercase_filtered_expected.json"),
                 UTF_8);
         JSONAssert.assertEquals(expectedContent, transformedContent, false);
+    }
+
+    @Test
+    public void testIsCacheAvailable() throws Exception {
+        // given
+        String dataSetId = createDataset("input_dataset.csv", "lowercase", "text/csv");
+        String preparationId = createEmptyPreparationFromDataset(dataSetId, "lowercase prep");
+
+        // first we don't have cache
+        given() //
+                .expect().statusCode(NO_CONTENT.value()).log().ifError()//
+                .when() //
+                .get("/preparation/{preparationId}/cache", preparationId) //
+                .asString();
+
+        // when ask for the transformation
+        given() //
+                .expect().statusCode(200).log().ifError()//
+                .when() //
+                .get("/apply/preparation/{prepId}/dataset/{datasetId}/{format}", preparationId, dataSetId, "JSON") //
+                .asString();
+
+        // then cache is available
+        given() //
+                .expect().statusCode(200).log().ifError()//
+                .when() //
+                .get("/preparation/{preparationId}/cache", preparationId) //
+                .asString();
+
     }
 
     @Test
