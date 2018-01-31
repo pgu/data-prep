@@ -259,16 +259,20 @@ public class AsyncAspectTest {
     @Test
     public void testConditionalAsyncMethod(){
 
+        // this controller should execute the method asynchronously only if the param number is pair
+
         List<AsyncExecution> executionsBefore = repository.list().collect(toList());
         controller.asyncOnlyPairNumber(1);
         List<AsyncExecution> executionsAfter = repository.list().collect(toList());
 
+        // we sent 1. Method should not be executed asynchronously
         Assert.assertEquals(executionsBefore.size(), executionsAfter.size());
 
         executionsBefore = repository.list().collect(toList());
         controller.asyncOnlyPairNumber(2);
         executionsAfter = repository.list().collect(toList());
 
+        // we sent 2. Method should be executed asynchronously
         Assert.assertEquals(executionsBefore.size()+1, executionsAfter.size());
 
     }
