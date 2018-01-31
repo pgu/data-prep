@@ -34,6 +34,7 @@ import javax.validation.Valid;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.talend.dataprep.api.PreparationAddAction;
@@ -44,6 +45,8 @@ import org.talend.dataprep.api.service.api.*;
 import org.talend.dataprep.api.service.command.dataset.CompatibleDataSetList;
 import org.talend.dataprep.api.service.command.preparation.*;
 import org.talend.dataprep.api.service.command.transformation.GetPreparationColumnTypes;
+import org.talend.dataprep.async.AsyncExecutionMessage;
+import org.talend.dataprep.async.AsyncOperation;
 import org.talend.dataprep.command.CommandHelper;
 import org.talend.dataprep.command.GenericCommand;
 import org.talend.dataprep.command.dataset.DataSetGetMetadata;
@@ -263,6 +266,28 @@ public class PreparationAPI extends APIService {
             LOG.info("Preparation {} retrieved", preparationId);
         }
     }
+
+    @RequestMapping(value = "/api/preparations/{id}/apply", method = RequestMethod.POST, produces = APPLICATION_JSON_VALUE)
+    @Timed
+    public void applyPreparation( //
+         @PathVariable(value = "id") @ApiParam(name = "id", value = "Preparation id.") String preparationId, //
+         @RequestParam(value = "version", defaultValue = "head") @ApiParam(name = "version", value = "Version of the preparation (can be 'origin', 'head' or the version id). Defaults to 'head'.") String version,
+         @RequestParam(value = "from", defaultValue = "HEAD") @ApiParam(name = "from", value = "Where to get the data from") ExportParameters.SourceType from) {
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Retrieving preparation content for {}/{} (pool: {} )...", preparationId, version, getConnectionStats());
+        }
+
+        try {
+            HystrixCommand<Void> command = getCommand(PreparationApply.class, preparationId, version, from);
+            command.execute();
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Retrieved preparation content (pool: {} )...", getConnectionStats());
+            }
+        }
+    }
+
 
     @RequestMapping(value = "/api/preparations/{id}/content", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get preparation content by id and at a given version.", notes = "Returns the preparation content at version.")

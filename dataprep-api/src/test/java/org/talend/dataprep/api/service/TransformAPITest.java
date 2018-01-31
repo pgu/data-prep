@@ -40,8 +40,8 @@ import org.talend.dataprep.api.dataset.DataSetMetadata;
 import org.talend.dataprep.api.preparation.Preparation;
 import org.talend.dataprep.cache.ContentCache;
 import org.talend.dataprep.dataset.event.DataSetMetadataBeforeUpdateEvent;
-import org.talend.dataprep.transformation.cache.CacheKeyGenerator;
-import org.talend.dataprep.transformation.cache.TransformationCacheKey;
+import org.talend.dataprep.cache.CacheKeyGenerator;
+import org.talend.dataprep.cache.TransformationCacheKey;
 import org.talend.dataquality.semantic.broadcast.TdqCategories;
 
 import com.fasterxml.jackson.databind.JsonNode;
