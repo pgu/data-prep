@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -255,4 +256,20 @@ public class AsyncAspectTest {
         assertEquals(expectedGroupId, execution.getGroup());
     }
 
+    @Test
+    public void testConditionalAsyncMethod(){
+
+        List<AsyncExecution> executionsBefore = repository.list().collect(toList());
+        controller.asyncOnlyPairNumber(1);
+        List<AsyncExecution> executionsAfter = repository.list().collect(toList());
+
+        Assert.assertEquals(executionsBefore.size(), executionsAfter.size());
+
+        executionsBefore = repository.list().collect(toList());
+        controller.asyncOnlyPairNumber(2);
+        executionsAfter = repository.list().collect(toList());
+
+        Assert.assertEquals(executionsBefore.size()+1, executionsAfter.size());
+
+    }
 }

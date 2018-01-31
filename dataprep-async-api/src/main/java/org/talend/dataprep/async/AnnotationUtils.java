@@ -55,7 +55,7 @@ public class AnnotationUtils {
         return idParameterIndex;
     }
 
-    public static List<Integer> getAnnotatedParameterIndexes(ProceedingJoinPoint pjp, Class<ConditionalTest> annotationClass) {
+    public static List<Integer> getAnnotatedParameterIndexes(ProceedingJoinPoint pjp, Class<? extends Annotation> annotationClass) {
         MethodSignature ms = (MethodSignature) pjp.getSignature();
         Method m = ms.getMethod();
 

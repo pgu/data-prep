@@ -31,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.talend.daikon.exception.TalendRuntimeException;
+import org.talend.dataprep.async.conditional.ConditionalParam;
 import org.talend.dataprep.async.conditional.ConditionalTest;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
@@ -203,7 +204,7 @@ public class AsyncAspect {
     }
 
     private Object[] extractArgsForConditionTest(ProceedingJoinPoint pjp) {
-        List<Integer> conditionArgIndex = AnnotationUtils.getAnnotatedParameterIndexes(pjp, ConditionalTest.class);
+        List<Integer> conditionArgIndex = AnnotationUtils.getAnnotatedParameterIndexes(pjp, ConditionalParam.class);
 
         List<Object> conditionArg = new ArrayList<>();
 
