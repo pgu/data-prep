@@ -51,7 +51,7 @@ import org.talend.dataprep.preparation.service.UserPreparation;
 import org.talend.dataprep.security.Security;
 import org.talend.dataprep.transformation.actions.date.ComputeTimeSince;
 import org.talend.dataprep.transformation.actions.text.Trim;
-import org.talend.dataprep.transformation.cache.CacheKeyGenerator;
+import org.talend.dataprep.cache.CacheKeyGenerator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

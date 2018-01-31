@@ -13,7 +13,9 @@
 package org.talend.dataprep.async;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -29,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.talend.daikon.exception.TalendRuntimeException;
+import org.talend.dataprep.async.conditional.ConditionalTest;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
 import org.talend.dataprep.http.HttpResponseContext;
@@ -65,33 +68,41 @@ public class AsyncAspect {
     @Around(value = "@annotation(org.springframework.web.bind.annotation.RequestMapping) && @annotation(org.talend.dataprep.async.AsyncOperation)")
     public void runAsynchronously(final ProceedingJoinPoint pjp) {
 
-        if (LOGGER.isDebugEnabled()) {
-            final RequestMapping requestMapping = AspectHelper.getAnnotation(pjp, RequestMapping.class);
-            LOGGER.debug("Scheduling for execution of {} ({})", pjp.getSignature().toLongString(),
-                    Arrays.toString(requestMapping.path()));
-        }
+        if(executeAsynchronously(pjp)){
+            if (LOGGER.isDebugEnabled()) {
+                final RequestMapping requestMapping = AspectHelper.getAnnotation(pjp, RequestMapping.class);
+                LOGGER.debug("Scheduling for execution of {} ({})", pjp.getSignature().toLongString(),
+                        Arrays.toString(requestMapping.path()));
+            }
 
-        // schedule the execution in the managed task executor
-        @SuppressWarnings("unchecked")
-        final AsyncExecution future;
-        if (AnnotationUtils.getAnnotatedParameterIndex(pjp, AsyncExecutionId.class) >= 0) {
-            future = executor.resume(toCallable(pjp), getExecutionId(pjp));
+            // schedule the execution in the managed task executor
+            @SuppressWarnings("unchecked")
+            final AsyncExecution future;
+            if (AnnotationUtils.getAnnotatedParameterIndex(pjp, AsyncExecutionId.class) >= 0) {
+                future = executor.resume(toCallable(pjp), getExecutionId(pjp));
+            } else {
+                future = executor.queue(toCallable(pjp), getGroupId(pjp));
+            }
+
+            // return at once with an HTTP 202 + location to get the progress
+            LOGGER.debug("Scheduling done, Redirecting to execution queue...");
+            HttpResponseContext.status(HttpStatus.ACCEPTED);
+            final String statusCheckURL;
+            if (StringUtils.isEmpty(contextPath)) {
+                statusCheckURL = "/" + AsyncController.QUEUE_PATH + "/" + future.getId();
+            } else {
+                statusCheckURL = "/" + contextPath + "/" + AsyncController.QUEUE_PATH + "/" + future.getId();
+            }
+            HttpResponseContext.header("Location", statusCheckURL);
+
+            LOGGER.debug("Redirection done.");
         } else {
-            future = executor.queue(toCallable(pjp), getGroupId(pjp));
+            try {
+                pjp.proceed();
+            } catch (Throwable throwable) {
+                throw new TDPException(CommonErrorCodes.UNEXPECTED_EXCEPTION, throwable);
+            }
         }
-
-        // return at once with an HTTP 202 + location to get the progress
-        LOGGER.debug("Scheduling done, Redirecting to execution queue...");
-        HttpResponseContext.status(HttpStatus.ACCEPTED);
-        final String statusCheckURL;
-        if (StringUtils.isEmpty(contextPath)) {
-            statusCheckURL = "/" + AsyncController.QUEUE_PATH + "/" + future.getId();
-        } else {
-            statusCheckURL = "/" + contextPath + "/" + AsyncController.QUEUE_PATH + "/" + future.getId();
-        }
-        HttpResponseContext.header("Location", statusCheckURL);
-
-        LOGGER.debug("Redirection done.");
     }
 
     /**
@@ -143,7 +154,7 @@ public class AsyncAspect {
 
     /**
      * Return the async execution group id from the given proceeding join point.
-     * 
+     *
      * @param pjp the proceeding join point.
      * @return the async execution group id from the proceeding join point.
      */
@@ -178,4 +189,28 @@ public class AsyncAspect {
         return null;
     }
 
+
+    private Boolean executeAsynchronously(ProceedingJoinPoint pjp) {
+        MethodSignature ms = (MethodSignature) pjp.getSignature();
+        Method m = ms.getMethod();
+        final AsyncOperation asyncOperationAnnotation = m.getAnnotation(AsyncOperation.class);
+
+        Class<? extends ConditionalTest> conditionalTestGenerator = asyncOperationAnnotation.conditionalAsyncTestClass();
+
+        final ConditionalTest conditionalTest = applicationContext.getBean(conditionalTestGenerator);
+        Object[] args = extractArgsForConditionTest(pjp);
+        return conditionalTest.executeAsynchronously(args);
+    }
+
+    private Object[] extractArgsForConditionTest(ProceedingJoinPoint pjp) {
+        List<Integer> conditionArgIndex = AnnotationUtils.getAnnotatedParameterIndexes(pjp, ConditionalTest.class);
+
+        List<Object> conditionArg = new ArrayList<>();
+
+        conditionArgIndex.forEach( (i) -> {
+            conditionArg.add(pjp.getArgs()[i]);
+        });
+
+        return conditionArg.toArray(new Object[conditionArg.size()]);
+    }
 }

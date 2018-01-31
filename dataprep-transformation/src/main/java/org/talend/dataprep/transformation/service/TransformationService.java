@@ -28,7 +28,6 @@ import static org.talend.dataprep.transformation.format.JsonFormat.JSON;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
@@ -44,10 +43,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.talend.daikon.exception.ExceptionContext;
@@ -64,6 +61,7 @@ import org.talend.dataprep.api.preparation.Preparation;
 import org.talend.dataprep.api.preparation.Step;
 import org.talend.dataprep.api.preparation.StepDiff;
 import org.talend.dataprep.async.AsyncOperation;
+import org.talend.dataprep.async.conditional.ConditionalParam;
 import org.talend.dataprep.cache.ContentCache;
 import org.talend.dataprep.cache.ContentCacheKey;
 import org.talend.dataprep.command.dataset.DataSetGet;
@@ -96,9 +94,8 @@ import org.talend.dataprep.transformation.api.transformer.configuration.Configur
 import org.talend.dataprep.transformation.api.transformer.configuration.PreviewConfiguration;
 import org.talend.dataprep.transformation.api.transformer.suggestion.Suggestion;
 import org.talend.dataprep.transformation.api.transformer.suggestion.SuggestionEngine;
-import org.talend.dataprep.transformation.cache.CacheKeyGenerator;
-import org.talend.dataprep.transformation.cache.TransformationCacheKey;
-import org.talend.dataprep.transformation.cache.TransformationMetadataCacheKey;
+import org.talend.dataprep.cache.CacheKeyGenerator;
+import org.talend.dataprep.cache.TransformationMetadataCacheKey;
 import org.talend.dataprep.transformation.pipeline.ActionRegistry;
 import org.talend.dataprep.transformation.preview.api.PreviewParameters;
 import org.talend.dataquality.common.inference.Analyzer;
@@ -185,13 +182,23 @@ public class TransformationService extends BaseTransformationService {
     @ApiOperation(value = "Run the transformation given the provided export parameters",
             notes = "This operation transforms the dataset or preparation using parameters in export parameters.")
     @VolumeMetered
-    @AsyncOperation
-    public StreamingResponseBody execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid final ExportParameters parameters) {
+    @AsyncOperation()
+    public void execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid @ConditionalParam final ExportParameters parameters) {
 
-        StreamingResponseBody streamResult = executeSampleExportStrategy(parameters);
+        executeSampleExportStrategy(parameters);
 
-        return streamResult;
+//        return new AsyncExecutionResult();
     }
+
+    //TODO : Method should be GET
+    @RequestMapping(value = "/content", method = POST)
+    @VolumeMetered
+    public StreamingResponseBody content(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid final ExportParameters parameters) {
+
+        //TODO we should send 404 if we doesn't have the cache ?
+        return executeSampleExportStrategy(parameters);
+    }
+
 
     @RequestMapping(value = "/apply/preparation/{preparationId}/{stepId}/metadata", method = GET)
     @ApiOperation(value = "Run the transformation given the provided export parameters",

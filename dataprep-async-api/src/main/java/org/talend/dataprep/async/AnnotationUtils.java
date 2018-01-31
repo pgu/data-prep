@@ -14,9 +14,12 @@ package org.talend.dataprep.async;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.talend.dataprep.async.conditional.ConditionalTest;
 
 /**
  * A utility class for annotations.
@@ -50,5 +53,25 @@ public class AnnotationUtils {
             i++;
         }
         return idParameterIndex;
+    }
+
+    public static List<Integer> getAnnotatedParameterIndexes(ProceedingJoinPoint pjp, Class<ConditionalTest> annotationClass) {
+        MethodSignature ms = (MethodSignature) pjp.getSignature();
+        Method m = ms.getMethod();
+
+        Annotation[][] pa = m.getParameterAnnotations();
+        List<Integer> idParameterIndexes = new ArrayList<>();
+
+        int i = 0;
+        for (Annotation[] annotations : pa) {
+            for (Annotation annotation : annotations) {
+                if (annotation.annotationType().equals(annotationClass)) {
+                    idParameterIndexes.add(i);
+                }
+            }
+            i++;
+        }
+
+        return idParameterIndexes;
     }
 }

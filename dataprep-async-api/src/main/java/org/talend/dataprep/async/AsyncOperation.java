@@ -15,6 +15,8 @@ package org.talend.dataprep.async;
 import java.lang.annotation.*;
 
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.talend.dataprep.async.conditional.AlwaysTrueCondition;
+import org.talend.dataprep.async.conditional.ConditionalTest;
 
 /**
  * Annotation used to declare that the underlying operation should be ran using a asynchronous executor.
@@ -42,7 +44,7 @@ public @interface AsyncOperation {
 
     /**
      * Class used to get the async operation group id.
-     * 
+     *
      * @return The class used to get the async operation group id.
      */
     Class<? extends GroupIdGenerator> groupIdGeneratorClass() default AnnotationGroupIdGenerator.class;
@@ -53,6 +55,14 @@ public @interface AsyncOperation {
      * @return The class used to get the async operation id.
      */
     Class<? extends ExecutionIdGenerator> executionIdGeneratorClass() default AnnotationExecutionIdGenerator.class;
+
+    /**
+     * Class used to test if we need to execute the method asynchronously
+     *
+     * @return The class used to test if we need to execute the method asynchronously
+     */
+
+    Class<? extends ConditionalTest> conditionalAsyncTestClass() default AlwaysTrueCondition.class;
 
     /**
      * Default class needed to set a default value to the groupIdGeneratorBean.
