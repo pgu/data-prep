@@ -94,6 +94,7 @@ public class OnDemandManagedTaskExecutor implements ManagedTaskExecutor {
         final Callable task = tasks.get(execution.getId());
         try {
             // TODO how to set content URL
+            Object result = task.call();
 //            execution.setResult(task.call());
             execution.setContentUrl("http://www.bing.fr");
             execution.updateExecutionState(DONE);
