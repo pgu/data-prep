@@ -67,7 +67,7 @@ public class AsyncAspect {
      * @param pjp the proceeding join point.
      */
     @Around(value = "@annotation(org.springframework.web.bind.annotation.RequestMapping) && @annotation(org.talend.dataprep.async.AsyncOperation)")
-    public void runAsynchronously(final ProceedingJoinPoint pjp) {
+    public Object runAsynchronously(final ProceedingJoinPoint pjp) {
 
         if(executeAsynchronously(pjp)){
             if (LOGGER.isDebugEnabled()) {
@@ -97,9 +97,11 @@ public class AsyncAspect {
             HttpResponseContext.header("Location", statusCheckURL);
 
             LOGGER.debug("Redirection done.");
+            return null;
+
         } else {
             try {
-                pjp.proceed();
+                return pjp.proceed();
             } catch (Throwable throwable) {
                 throw new TDPException(CommonErrorCodes.UNEXPECTED_EXCEPTION, throwable);
             }

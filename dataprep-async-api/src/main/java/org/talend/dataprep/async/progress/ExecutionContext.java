@@ -18,7 +18,6 @@ import java.util.function.BiConsumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.dataprep.api.AsyncExecutionResult;
 import org.talend.dataprep.async.AsyncExecution;
 import org.talend.dataprep.async.repository.ManagedTaskRepository;
 import org.talend.dataprep.transformation.pipeline.Signal;
@@ -116,21 +115,21 @@ public class ExecutionContext {
         entry.repository.save(entry.execution);
 
     }
-    /**
-     * Result initialization entry point
-     *
-     * @param result Any Java bean (might even be null).
-     */
-    public void initResult(AsyncExecutionResult result) {
-        final ProgressEntry entry = currentProgress.get(Thread.currentThread());
-        //TODO what this code do ?
-        if(entry.execution.getResult() != null) {
-            LOGGER.warn("The result for execution #{} is already initialized", entry.execution.getId());
-            return;
-        }
-        entry.execution.setResult(result);
-        entry.repository.save(entry.execution);
-    }
+    // /**
+    // * Result initialization entry point
+    // *
+    // * @param result Any Java bean (might even be null).
+    // */
+    // public void initResult(AsyncExecutionResult result) {
+    // final ProgressEntry entry = currentProgress.get(Thread.currentThread());
+    // //TODO what this code do ?
+    // if(entry.execution.getResult() != null) {
+    // LOGGER.warn("The result for execution #{} is already initialized", entry.execution.getId());
+    // return;
+    // }
+    // entry.execution.setResult(result);
+    // entry.repository.save(entry.execution);
+    // }
 
     /**
      * @return The current {@link AsyncExecution execution} linked to current thread.

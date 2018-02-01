@@ -80,7 +80,7 @@ public class PreparationExportStrategy extends BaseSampleExportStrategy {
         return outputStream -> performPreparation(parameters, outputStream);
     }
 
-    private void performPreparation(final ExportParameters parameters, final OutputStream outputStream) {
+    public void performPreparation(final ExportParameters parameters, final OutputStream outputStream) {
         final String stepId = parameters.getStepId();
         final String preparationId = parameters.getPreparationId();
         final String formatName = parameters.getExportType();

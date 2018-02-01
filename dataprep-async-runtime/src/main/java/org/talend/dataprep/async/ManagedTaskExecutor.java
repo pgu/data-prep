@@ -22,7 +22,7 @@ import java.util.concurrent.CancellationException;
  *
  * @see org.talend.dataprep.async.repository.ManagedTaskRepository For query/update operations on execution results.
  */
-public interface ManagedTaskExecutor<T> {
+public interface ManagedTaskExecutor {
 
     /**
      * Resume a previously queued task with a new callable.
@@ -31,7 +31,7 @@ public interface ManagedTaskExecutor<T> {
      * @param executionId the execution id of the task to resume.
      * @return the AsyncExecution that enables caller to monitor the execution.
      */
-    AsyncExecution resume(ManagedTaskCallable<T> task, String executionId);
+    AsyncExecution resume(ManagedTaskCallable task, String executionId);
 
     /**
      * Queue a task to execute.
@@ -40,7 +40,7 @@ public interface ManagedTaskExecutor<T> {
      * @param groupId the task group id.
      * @return the AsyncExecution that enables caller to monitor the execution.
      */
-    AsyncExecution queue(ManagedTaskCallable<T> task, String groupId);
+    AsyncExecution queue(ManagedTaskCallable task, String groupId);
 
     /**
      * Cancel (stop) the task that matches the given task id.
