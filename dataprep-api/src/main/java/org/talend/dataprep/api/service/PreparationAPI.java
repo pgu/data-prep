@@ -308,31 +308,6 @@ public class PreparationAPI extends APIService {
         }
     }
 
-    @RequestMapping(value = "/api/preparations/{id}/cache", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get preparation cache status by id and at a given version.")
-    @Timed
-    public PreparationStatus getPreparationCacheAvailability( //
-        @PathVariable(value = "id") @ApiParam(name = "id", value = "Preparation id.") String preparationId, //
-        @RequestParam(value = "version", defaultValue = "head") @ApiParam(name = "version", value = "Version of the preparation (can be 'origin', 'head' or the version id). Defaults to 'head'.") String version) {
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Retrieving preparation cache status for {}/{} (pool: {} )...", preparationId, version, getConnectionStats());
-        }
-
-        try {
-            HystrixCommand<Boolean> command = getCommand(CheckPreparationCache.class, preparationId);
-
-            Boolean cacheAvailability = command.execute();
-
-            return new PreparationStatus(cacheAvailability);
-
-        } finally {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Retrieved preparation cache status (pool: {} )...", getConnectionStats());
-            }
-        }
-    }
-
     // TODO: this API should take a list of AppendStep.
     @RequestMapping(value = "/api/preparations/{id}/actions", method = POST, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Adds an action at the end of preparation.", notes = "Does not return any value, client may expect successful operation based on HTTP status code.")
