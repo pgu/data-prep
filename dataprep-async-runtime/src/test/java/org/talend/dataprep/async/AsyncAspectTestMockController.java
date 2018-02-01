@@ -112,7 +112,7 @@ public class AsyncAspectTestMockController {
         }
     }
 
-    @AsyncOperation(conditionalAsyncTestClass = PairConditionalAsyncTest.class)
+    @AsyncOperation(conditionalClass = PairConditionalAsyncTest.class)
     @RequestMapping(method = RequestMethod.GET, path = "/async/conditional/test/")
     public String asyncOnlyPairNumber(@ConditionalParam Integer nb) {
         return "ok";

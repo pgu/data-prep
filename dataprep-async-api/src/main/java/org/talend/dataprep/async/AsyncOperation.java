@@ -62,7 +62,7 @@ public @interface AsyncOperation {
      * @return The class used to test if we need to execute the method asynchronously
      */
 
-    Class<? extends ConditionalTest> conditionalAsyncTestClass() default AlwaysTrueCondition.class;
+    Class<? extends ConditionalTest> conditionalClass() default AlwaysTrueCondition.class;
 
     /**
      * Default class needed to set a default value to the groupIdGeneratorBean.

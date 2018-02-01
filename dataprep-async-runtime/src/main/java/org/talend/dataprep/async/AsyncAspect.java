@@ -198,7 +198,7 @@ public class AsyncAspect {
         Method m = ms.getMethod();
         final AsyncOperation asyncOperationAnnotation = m.getAnnotation(AsyncOperation.class);
 
-        Class<? extends ConditionalTest> conditionalTestGenerator = asyncOperationAnnotation.conditionalAsyncTestClass();
+        Class<? extends ConditionalTest> conditionalTestGenerator = asyncOperationAnnotation.conditionalClass();
 
         final ConditionalTest conditionalTest = applicationContext.getBean(conditionalTestGenerator);
         Object[] args = extractArgsForConditionTest(pjp);
