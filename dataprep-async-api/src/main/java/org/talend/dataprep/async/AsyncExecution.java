@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.daikon.exception.TalendRuntimeException;
 import org.talend.daikon.exception.error.ErrorCode;
-import org.talend.dataprep.api.fullrun.AsyncExecutionResult;
+import org.talend.dataprep.api.AsyncExecutionResult;
 import org.talend.dataprep.exception.ErrorCodeDto;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
 import org.talend.dataprep.exception.error.TransformationErrorCodes;
@@ -324,7 +324,7 @@ public class AsyncExecution {
                 ", id='" + id + '\'' + //
                 ", time=" + time + //
                 ", status=" + status + //
-                ", result=" + result + //
+//                ", result=" + result + //
                 ", error=" + error + //
                 ", progress=" + progress + //
                 '}';

@@ -15,6 +15,7 @@ package org.talend.dataprep.async;
 import static org.talend.daikon.exception.ExceptionContext.build;
 
 import java.util.concurrent.CancellationException;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,12 @@ public class AsyncController {
         LOGGER.debug("Get execution {}", id);
         return repository.get(id);
     }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/" + QUEUE_PATH )
+    public Stream<AsyncExecution> list() {
+        return repository.list();
+    }
+
 
     @RequestMapping(method = RequestMethod.DELETE, path = "/" + QUEUE_PATH + "/{id}")
     public AsyncExecution cancel(@PathVariable("id") String id) {

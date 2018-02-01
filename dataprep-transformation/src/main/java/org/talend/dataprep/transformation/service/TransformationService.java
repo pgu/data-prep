@@ -44,7 +44,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.talend.daikon.exception.ExceptionContext;
@@ -62,6 +61,7 @@ import org.talend.dataprep.api.preparation.Step;
 import org.talend.dataprep.api.preparation.StepDiff;
 import org.talend.dataprep.async.AsyncOperation;
 import org.talend.dataprep.async.conditional.ConditionalParam;
+import org.talend.dataprep.async.conditional.PreparationCacheCondition;
 import org.talend.dataprep.cache.ContentCache;
 import org.talend.dataprep.cache.ContentCacheKey;
 import org.talend.dataprep.command.dataset.DataSetGet;
@@ -182,30 +182,17 @@ public class TransformationService extends BaseTransformationService {
     @ApiOperation(value = "Run the transformation given the provided export parameters",
             notes = "This operation transforms the dataset or preparation using parameters in export parameters.")
     @VolumeMetered
-    @AsyncOperation()
-    public void execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid @ConditionalParam final ExportParameters parameters) {
-
-        executeSampleExportStrategy(parameters);
-
-//        return new AsyncExecutionResult();
-    }
-
-    //TODO : Method should be GET
-    @RequestMapping(value = "/content", method = POST)
-    @VolumeMetered
-    public StreamingResponseBody content(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid final ExportParameters parameters) {
-
-        //TODO we should send 404 if we doesn't have the cache ?
+    @AsyncOperation(conditionalAsyncTestClass = PreparationCacheCondition.class)
+    public StreamingResponseBody execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid @ConditionalParam final ExportParameters parameters) {
         return executeSampleExportStrategy(parameters);
     }
-
 
     @RequestMapping(value = "/apply/preparation/{preparationId}/{stepId}/metadata", method = GET)
     @ApiOperation(value = "Run the transformation given the provided export parameters",
             notes = "This operation transforms the dataset or preparation using parameters in export parameters.")
     @VolumeMetered
     public DataSetMetadata executeMetadata(@PathVariable("preparationId") String preparationId,
-            @PathVariable("stepId") String stepId) {
+                                           @PathVariable("stepId") String stepId) {
 
         LOG.debug("getting preparation metadata for #{}, step {}", preparationId, stepId);
 
@@ -420,8 +407,8 @@ public class TransformationService extends BaseTransformationService {
         );
 
         try (final InputStream metadata = contentCache.get(metadataKey); //
-                final InputStream content = contentCache.get(contentKey); //
-                final JsonParser contentParser = mapper.getFactory().createParser(content)) {
+             final InputStream content = contentCache.get(contentKey); //
+             final JsonParser contentParser = mapper.getFactory().createParser(content)) {
 
             // build metadata
             final RowMetadata rowMetadata = mapper.readerFor(RowMetadata.class).readValue(metadata);
@@ -454,7 +441,7 @@ public class TransformationService extends BaseTransformationService {
 
         // because of dataset records streaming, the dataset content must be within an auto closeable block
         try (final InputStream dataSetContent = dataSetGet.execute(); //
-                final JsonParser parser = mapper.getFactory().createParser(dataSetContent)) {
+             final JsonParser parser = mapper.getFactory().createParser(dataSetContent)) {
 
             securityProxy.releaseIdentity();
             identityReleased = true;
@@ -520,42 +507,6 @@ public class TransformationService extends BaseTransformationService {
             evictCache(preparationId, sourceType);
         }
     }
-
-    /**
-     * Test if the preparation cache exist
-     *
-     * @param preparationId the preparation id.
-     * @return True if the cache is avaible, false otherwise
-     */
-    @RequestMapping(value = "/preparation/{preparationId}/cache", method = GET)
-    @ApiOperation(value = "Get preparation details", notes = "Test if the preparation cache exist")
-    @Timed
-    public ResponseEntity<Void> isCacheAvailable(
-        @PathVariable(value = "preparationId") @ApiParam(value = "the preparation id") final String preparationId, //
-        @RequestParam(value = "version", defaultValue = "head") @ApiParam(name = "version", value = "Version of the preparation (can be 'origin', 'head' or the version id). Defaults to 'head'.") final String version, //
-        @RequestParam(value = "from", defaultValue = "HEAD") @ApiParam(name = "from", value = "Where to get the data from") final  ExportParameters.SourceType from) {
-
-        final Preparation preparation = getPreparation(preparationId);
-
-        // get the step (in case of 'head', the real step id must be found)
-        final String stepId = StringUtils.equals("head", version) ? //
-                preparation.getSteps().get(preparation.getSteps().size() - 1).getId() : version;
-
-        final ContentCacheKey contentKey = cacheKeyGenerator.contentBuilder()
-                .preparationId(preparationId)
-                .datasetId(preparation.getDataSetId())
-                .stepId(stepId)
-                .sourceType(from)
-                .format("JSON")
-                .build();
-
-        if (contentCache.has(contentKey)) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
 
     private void evictCache(final String preparationId, final ExportParameters.SourceType sourceType) {
         final ContentCacheKey metadataKey = cacheKeyGenerator.metadataBuilder()
@@ -894,7 +845,7 @@ public class TransformationService extends BaseTransformationService {
 
         // run the analyzer service on the cached content
         try (final InputStream metadataCache = contentCache.get(metadataKey);
-                final InputStream contentCache = this.contentCache.get(contentKey)) {
+             final InputStream contentCache = this.contentCache.get(contentKey)) {
             final DataSetMetadata metadata = mapper.readerFor(DataSetMetadata.class).readValue(metadataCache);
             final List<SemanticDomain> semanticDomains = getSemanticDomains(metadata, columnId, contentCache);
             LOG.debug("found {} for preparation #{}, column #{}", semanticDomains, preparationId, columnId);

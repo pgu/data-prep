@@ -16,15 +16,13 @@ import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 
-import org.talend.dataprep.api.fullrun.AsyncExecutionResult;
-
 /**
  * Interface for asynchronous managed task executor. This interface is responsible for the runtime part of asynchronous
  * execution (i.e. it does <b>not</b> store metric or information relative to the execution itself).
  *
  * @see org.talend.dataprep.async.repository.ManagedTaskRepository For query/update operations on execution results.
  */
-public interface ManagedTaskExecutor<T extends AsyncExecutionResult> {
+public interface ManagedTaskExecutor<T> {
 
     /**
      * Resume a previously queued task with a new callable.

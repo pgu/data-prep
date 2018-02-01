@@ -25,7 +25,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.talend.daikon.exception.ExceptionContext;
-import org.talend.dataprep.api.fullrun.AsyncExecutionResult;
+import org.talend.dataprep.api.AsyncExecutionResult;
 import org.talend.dataprep.async.progress.ExecutionContext;
 import org.talend.dataprep.async.repository.ManagedTaskRepository;
 import org.talend.dataprep.exception.TDPException;
