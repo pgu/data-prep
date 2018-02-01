@@ -56,6 +56,7 @@ import org.talend.dataprep.api.dataset.RowMetadata;
 import org.talend.dataprep.api.dataset.row.Flag;
 import org.talend.dataprep.api.dataset.statistics.SemanticDomain;
 import org.talend.dataprep.api.export.ExportParameters;
+import org.talend.dataprep.api.export.ExportParametersUtil;
 import org.talend.dataprep.api.preparation.Preparation;
 import org.talend.dataprep.api.preparation.Step;
 import org.talend.dataprep.api.preparation.StepDiff;
@@ -98,6 +99,7 @@ import org.talend.dataprep.cache.CacheKeyGenerator;
 import org.talend.dataprep.cache.TransformationMetadataCacheKey;
 import org.talend.dataprep.transformation.pipeline.ActionRegistry;
 import org.talend.dataprep.transformation.preview.api.PreviewParameters;
+import org.talend.dataprep.transformation.service.export.PreparationExportStrategy;
 import org.talend.dataquality.common.inference.Analyzer;
 import org.talend.dataquality.common.inference.Analyzers;
 import org.talend.dataquality.semantic.broadcast.TdqCategories;
@@ -178,13 +180,40 @@ public class TransformationService extends BaseTransformationService {
     @Autowired
     private StatisticsAdapter statisticsAdapter;
 
+    @Autowired
+    private PreparationExportStrategy preparationExportStrategy;
+
+    @Autowired
+    private ExportParametersUtil exportParametersUtil;
+
     @RequestMapping(value = "/apply", method = POST)
     @ApiOperation(value = "Run the transformation given the provided export parameters",
             notes = "This operation transforms the dataset or preparation using parameters in export parameters.")
     @VolumeMetered
     @AsyncOperation(conditionalAsyncTestClass = PreparationCacheCondition.class)
-    public StreamingResponseBody execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid @ConditionalParam final ExportParameters parameters) {
-        return executeSampleExportStrategy(parameters);
+    public StreamingResponseBody execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid @ConditionalParam final ExportParameters parameters) throws IOException {
+
+        ExportParameters completeParameters = exportParametersUtil.populateFromPreparationExportParameter(parameters);
+
+        ContentCacheKey cacheKey = cacheKeyGenerator.generateContentKey(completeParameters);
+        if(!contentCache.has(cacheKey)) {
+            preparationExportStrategy.performPreparation(completeParameters, new NullOutputStream());
+        }
+
+        return executeSampleExportStrategy(completeParameters);
+    }
+
+    /**
+     * Return the real step id in case of "head" or empty
+     * @param preparation The preparation
+     * @param stepId The step id
+     */
+    //TODO: factorize this code
+    protected String getCleanStepId(final Preparation preparation, final String stepId) {
+        if (StringUtils.equals("head", stepId) || StringUtils.isEmpty(stepId)) {
+            return preparation.getSteps().get(preparation.getSteps().size() - 1).id();
+        }
+        return stepId;
     }
 
     @RequestMapping(value = "/apply/preparation/{preparationId}/{stepId}/metadata", method = GET)

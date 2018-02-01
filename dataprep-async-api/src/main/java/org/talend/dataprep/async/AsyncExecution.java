@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.daikon.exception.TalendRuntimeException;
 import org.talend.daikon.exception.error.ErrorCode;
-import org.talend.dataprep.api.AsyncExecutionResult;
 import org.talend.dataprep.exception.ErrorCodeDto;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
 import org.talend.dataprep.exception.error.TransformationErrorCodes;
@@ -90,11 +89,15 @@ public class AsyncExecution {
     @JsonProperty("status")
     private Status status = Status.NEW;
 
-    /** The execution result (e.g. transformation / sampling...). */
-    @JsonProperty("result")
-    @JsonInclude(value = JsonInclude.Include.NON_NULL, content = JsonInclude.Include.NON_NULL)
-    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-    private AsyncExecutionResult result = new AsyncExecutionResult();
+//    /** The execution result (e.g. transformation / sampling...). */
+//    @JsonProperty("result")
+//    @JsonInclude(value = JsonInclude.Include.NON_NULL, content = JsonInclude.Include.NON_NULL)
+//    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+//    private AsyncExecutionResult result = new AsyncExecutionResult();
+
+    /** The Content url. It's the URL were result can be found. */
+    @JsonProperty("contentUrl")
+    private String contentUrl;
 
     /** The execution error code when it failed. */
     @JsonProperty("error")
@@ -287,17 +290,6 @@ public class AsyncExecution {
         }
     }
 
-    /**
-     * @return the execution result (null id not done).
-     */
-    public AsyncExecutionResult getResult() {
-        return result;
-    }
-
-    public void setResult(AsyncExecutionResult result) {
-        this.result = result;
-    }
-
     public void setException(Throwable error) {
         if (error instanceof TalendRuntimeException) {
             setError(((TalendRuntimeException) error).getCode());
@@ -314,6 +306,14 @@ public class AsyncExecution {
         this.userId = userId;
     }
 
+    public String getContentUrl() {
+        return contentUrl;
+    }
+
+    public void setContentUrl(String contentUrl) {
+        this.contentUrl = contentUrl;
+    }
+
     /**
      * @see Object#toString()
      */
@@ -324,7 +324,7 @@ public class AsyncExecution {
                 ", id='" + id + '\'' + //
                 ", time=" + time + //
                 ", status=" + status + //
-//                ", result=" + result + //
+                ", contentUrl=" + contentUrl + //
                 ", error=" + error + //
                 ", progress=" + progress + //
                 '}';

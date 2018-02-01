@@ -41,11 +41,10 @@ import org.talend.dataprep.transformation.pipeline.Signal;
 /**
  * Managed task executor based on a local thread pool.
  *
- * @param <T> the type of managed tasks.
  */
 @Component
 @ConditionalOnProperty(name = "execution.executor.local", matchIfMissing = true)
-public class SimpleManagedTaskExecutor<T> implements ManagedTaskExecutor<T> {
+public class SimpleManagedTaskExecutor implements ManagedTaskExecutor {
 
     /** This class' logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleManagedTaskExecutor.class);
@@ -63,10 +62,10 @@ public class SimpleManagedTaskExecutor<T> implements ManagedTaskExecutor<T> {
     private Security security;
 
     /** List of tasks to run. */
-    private final Map<String, ListenableFuture<T>> futures = new ConcurrentHashMap<>();
+    private final Map<String, ListenableFuture> futures = new ConcurrentHashMap<>();
 
     @Override
-    public AsyncExecution resume(ManagedTaskCallable<T> task, String executionId) {
+    public AsyncExecution resume(ManagedTaskCallable task, String executionId) {
         LOGGER.debug("Resuming execution '{}' from repository '{}'", executionId, repository);
         final AsyncExecution execution = repository.get(executionId);
         if (execution == null) {
@@ -81,9 +80,9 @@ public class SimpleManagedTaskExecutor<T> implements ManagedTaskExecutor<T> {
         }
 
         // Wrap callable to get the running status.
-        final Callable<T> wrapper = wrapTaskWithProgressInformation(task, execution);
+        final Callable wrapper = wrapTaskWithProgressInformation(task, execution);
 
-        ListenableFuture<T> future = delegate.submitListenable(wrapper);
+        ListenableFuture future = delegate.submitListenable(wrapper);
         future.addCallback(new AsyncListenableFutureCallback(execution));
         futures.put(execution.getId(), future);
 
@@ -95,7 +94,7 @@ public class SimpleManagedTaskExecutor<T> implements ManagedTaskExecutor<T> {
      * @see ManagedTaskExecutor#queue(ManagedTaskCallable, String)
      */
     @Override
-    public synchronized AsyncExecution queue(final ManagedTaskCallable<T> task, String groupId) {
+    public synchronized AsyncExecution queue(final ManagedTaskCallable task, String groupId) {
 
         // Create async execution
         final AsyncExecution asyncExecution =
@@ -105,9 +104,9 @@ public class SimpleManagedTaskExecutor<T> implements ManagedTaskExecutor<T> {
         repository.save(asyncExecution);
 
         // Wrap callable to get the running status.
-        final Callable<T> wrapper = wrapTaskWithProgressInformation(task, asyncExecution);
+        final Callable wrapper = wrapTaskWithProgressInformation(task, asyncExecution);
 
-        ListenableFuture<T> future = delegate.submitListenable(wrapper);
+        ListenableFuture future = delegate.submitListenable(wrapper);
         future.addCallback(new AsyncListenableFutureCallback(asyncExecution));
         futures.put(asyncExecution.getId(), future);
 
@@ -122,7 +121,7 @@ public class SimpleManagedTaskExecutor<T> implements ManagedTaskExecutor<T> {
      * @param asyncExecution the matching async execution monitor.
      * @return the tasks wrapped with progress information.
      */
-    private Callable<T> wrapTaskWithProgressInformation(Callable<T> task, AsyncExecution asyncExecution) {
+    private Callable wrapTaskWithProgressInformation(Callable task, AsyncExecution asyncExecution) {
         return () -> {
             asyncExecution.updateExecutionState(AsyncExecution.Status.RUNNING);
             repository.save(asyncExecution);
@@ -161,7 +160,7 @@ public class SimpleManagedTaskExecutor<T> implements ManagedTaskExecutor<T> {
                 LOGGER.error("Unable to call cancel in execution context.", e);
             }
             try {
-                final Optional<ListenableFuture<T>> futureToCancel = ofNullable(futures.get(id));
+                final Optional<ListenableFuture> futureToCancel = ofNullable(futures.get(id));
                 futureToCancel.ifPresent(tListenableFuture -> tListenableFuture.cancel(true));
             } catch (CancellationException e) {
                 LOGGER.debug("Cancel task {} exception.", id, e);
@@ -193,7 +192,7 @@ public class SimpleManagedTaskExecutor<T> implements ManagedTaskExecutor<T> {
     /**
      * ListenableFutureCallback for managed tasks to update the AsyncExecution status based on the tasks progress.
      */
-    private class AsyncListenableFutureCallback implements ListenableFutureCallback<T> {
+    private class AsyncListenableFutureCallback<T> implements ListenableFutureCallback<T> {
 
         /** The async execution. */
         private final AsyncExecution asyncExecution;
@@ -236,7 +235,8 @@ public class SimpleManagedTaskExecutor<T> implements ManagedTaskExecutor<T> {
             if (t != null) {
                 LOGGER.debug("Execution {} finished with success.", asyncExecution.getId());
                 try {
-                    // asyncExecution.setResult(t);
+                    //TODO
+                    asyncExecution.setContentUrl("http://www.google.fr");
                     asyncExecution.updateExecutionState(AsyncExecution.Status.DONE);
                 } finally {
                     futures.remove(asyncExecution.getId());
