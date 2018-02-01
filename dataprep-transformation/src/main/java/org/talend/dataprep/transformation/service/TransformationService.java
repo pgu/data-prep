@@ -190,7 +190,7 @@ public class TransformationService extends BaseTransformationService {
     @ApiOperation(value = "Run the transformation given the provided export parameters",
             notes = "This operation transforms the dataset or preparation using parameters in export parameters.")
     @VolumeMetered
-    @AsyncOperation(conditionalAsyncTestClass = PreparationCacheCondition.class)
+    @AsyncOperation(conditionalClass = PreparationCacheCondition.class)
     public StreamingResponseBody execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid @ConditionalParam final ExportParameters parameters) throws IOException {
 
         ExportParameters completeParameters = exportParametersUtil.populateFromPreparationExportParameter(parameters);
