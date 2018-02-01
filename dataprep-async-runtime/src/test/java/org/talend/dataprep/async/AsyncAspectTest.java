@@ -32,7 +32,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.security.access.intercept.RunAsManagerImpl;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.talend.dataprep.api.export.ExportParameters;
@@ -127,7 +126,6 @@ public class AsyncAspectTest {
         assertFalse(cancelled.get());
         assertFalse(stopped.get());
     }
-
 
     @Test
     public void shouldStop() throws Exception {
@@ -257,7 +255,7 @@ public class AsyncAspectTest {
     }
 
     @Test
-    public void testConditionalAsyncMethod(){
+    public void testConditionalAsyncMethod() {
 
         // this controller should execute the method asynchronously only if the param number is pair
 
@@ -273,7 +271,7 @@ public class AsyncAspectTest {
         executionsAfter = repository.list().collect(toList());
 
         // we sent 2. Method should be executed asynchronously
-        Assert.assertEquals(executionsBefore.size()+1, executionsAfter.size());
+        Assert.assertEquals(executionsBefore.size() + 1, executionsAfter.size());
 
     }
 }

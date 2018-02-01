@@ -31,7 +31,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.talend.daikon.exception.ExceptionContext;
-import org.talend.dataprep.api.fullrun.AsyncExecutionResult;
 import org.talend.dataprep.async.progress.ExecutionContext;
 import org.talend.dataprep.async.repository.ManagedTaskRepository;
 import org.talend.dataprep.exception.TDPException;
@@ -46,7 +45,7 @@ import org.talend.dataprep.transformation.pipeline.Signal;
  */
 @Component
 @ConditionalOnProperty(name = "execution.executor.local", matchIfMissing = true)
-public class SimpleManagedTaskExecutor<T extends AsyncExecutionResult> implements ManagedTaskExecutor<T> {
+public class SimpleManagedTaskExecutor<T> implements ManagedTaskExecutor<T> {
 
     /** This class' logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleManagedTaskExecutor.class);
@@ -72,11 +71,13 @@ public class SimpleManagedTaskExecutor<T extends AsyncExecutionResult> implement
         final AsyncExecution execution = repository.get(executionId);
         if (execution == null) {
             LOGGER.error("Execution #{} can be resumed (not found).", executionId);
-            throw new TDPException(TransformationErrorCodes.UNABLE_TO_RESUME_EXECUTION, ExceptionContext.withBuilder().put("id", executionId).build());
+            throw new TDPException(TransformationErrorCodes.UNABLE_TO_RESUME_EXECUTION,
+                    ExceptionContext.withBuilder().put("id", executionId).build());
         } else if (execution.getStatus() != AsyncExecution.Status.RUNNING) {
             // Execution is expected to be created as "RUNNING" before the dispatcher resumes it.
             LOGGER.error("Execution #{} can be resumed (status is {}).", execution.getStatus());
-            throw new TDPException(TransformationErrorCodes.UNABLE_TO_RESUME_EXECUTION, ExceptionContext.withBuilder().put("id", executionId).build());
+            throw new TDPException(TransformationErrorCodes.UNABLE_TO_RESUME_EXECUTION,
+                    ExceptionContext.withBuilder().put("id", executionId).build());
         }
 
         // Wrap callable to get the running status.
@@ -97,7 +98,8 @@ public class SimpleManagedTaskExecutor<T extends AsyncExecutionResult> implement
     public synchronized AsyncExecution queue(final ManagedTaskCallable<T> task, String groupId) {
 
         // Create async execution
-        final AsyncExecution asyncExecution = ofNullable(groupId).map(s -> new AsyncExecution(groupId)).orElseGet(AsyncExecution::new);
+        final AsyncExecution asyncExecution =
+                ofNullable(groupId).map(s -> new AsyncExecution(groupId)).orElseGet(AsyncExecution::new);
         asyncExecution.setUserId(security.getUserId());
         asyncExecution.setTenantId(security.getTenantId());
         repository.save(asyncExecution);
@@ -234,7 +236,7 @@ public class SimpleManagedTaskExecutor<T extends AsyncExecutionResult> implement
             if (t != null) {
                 LOGGER.debug("Execution {} finished with success.", asyncExecution.getId());
                 try {
-                    asyncExecution.setResult((AsyncExecutionResult) t);
+                    // asyncExecution.setResult(t);
                     asyncExecution.updateExecutionState(AsyncExecution.Status.DONE);
                 } finally {
                     futures.remove(asyncExecution.getId());

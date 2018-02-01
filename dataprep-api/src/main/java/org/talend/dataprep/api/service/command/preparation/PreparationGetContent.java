@@ -14,10 +14,15 @@
 package org.talend.dataprep.api.service.command.preparation;
 
 import static org.talend.dataprep.api.export.ExportParameters.SourceType.HEAD;
+import static org.talend.dataprep.command.Defaults.emptyStream;
 import static org.talend.dataprep.command.Defaults.pipeStream;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URI;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -68,7 +73,7 @@ public class PreparationGetContent extends GenericCommand<InputStream> {
                 parameters.setFrom(from);
 
                 final String parametersAsString = objectMapper.writerFor(ExportParameters.class).writeValueAsString(parameters);
-                final HttpPost post = new HttpPost(transformationServiceUrl + "/content");
+                final HttpPost post = new HttpPost(transformationServiceUrl + "/apply");
                 post.setEntity(new StringEntity(parametersAsString, ContentType.APPLICATION_JSON));
                 return post;
             } catch (Exception e) {
@@ -76,6 +81,6 @@ public class PreparationGetContent extends GenericCommand<InputStream> {
             }
         });
         on(HttpStatus.OK).then(pipeStream());
+        on(HttpStatus.ACCEPTED).then(emptyStream());
     }
-
 }
