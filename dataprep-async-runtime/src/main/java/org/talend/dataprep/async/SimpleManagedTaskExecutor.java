@@ -65,22 +65,22 @@ public class SimpleManagedTaskExecutor implements ManagedTaskExecutor {
     private final Map<String, ListenableFuture> futures = new ConcurrentHashMap<>();
 
     @Override
-    public AsyncExecution resume(ManagedTaskCallable task, String executionId) {
+    public AsyncExecution resume(ManagedTaskCallable task, String executionId, String resultUrl) {
         LOGGER.debug("Resuming execution '{}' from repository '{}'", executionId, repository);
         final AsyncExecution execution = repository.get(executionId);
         if (execution == null) {
             LOGGER.error("Execution #{} can be resumed (not found).", executionId);
-            throw new TDPException(TransformationErrorCodes.UNABLE_TO_RESUME_EXECUTION,
-                    ExceptionContext.withBuilder().put("id", executionId).build());
+            throw new TDPException(TransformationErrorCodes.UNABLE_TO_RESUME_EXECUTION, ExceptionContext.withBuilder().put("id", executionId).build());
         } else if (execution.getStatus() != AsyncExecution.Status.RUNNING) {
             // Execution is expected to be created as "RUNNING" before the dispatcher resumes it.
             LOGGER.error("Execution #{} can be resumed (status is {}).", execution.getStatus());
-            throw new TDPException(TransformationErrorCodes.UNABLE_TO_RESUME_EXECUTION,
-                    ExceptionContext.withBuilder().put("id", executionId).build());
+            throw new TDPException(TransformationErrorCodes.UNABLE_TO_RESUME_EXECUTION, ExceptionContext.withBuilder().put("id", executionId).build());
         }
 
         // Wrap callable to get the running status.
         final Callable wrapper = wrapTaskWithProgressInformation(task, execution);
+
+        execution.setResultUrl(resultUrl);
 
         ListenableFuture future = delegate.submitListenable(wrapper);
         future.addCallback(new AsyncListenableFutureCallback(execution));
@@ -91,10 +91,10 @@ public class SimpleManagedTaskExecutor implements ManagedTaskExecutor {
     }
 
     /**
-     * @see ManagedTaskExecutor#queue(ManagedTaskCallable, String)
+     * @see ManagedTaskExecutor#queue(ManagedTaskCallable, String, String)
      */
     @Override
-    public synchronized AsyncExecution queue(final ManagedTaskCallable task, String groupId) {
+    public synchronized AsyncExecution queue(final ManagedTaskCallable task, String groupId, String resultUrl) {
 
         // Create async execution
         final AsyncExecution asyncExecution =
@@ -105,6 +105,8 @@ public class SimpleManagedTaskExecutor implements ManagedTaskExecutor {
 
         // Wrap callable to get the running status.
         final Callable wrapper = wrapTaskWithProgressInformation(task, asyncExecution);
+
+        asyncExecution.setResultUrl(resultUrl);
 
         ListenableFuture future = delegate.submitListenable(wrapper);
         future.addCallback(new AsyncListenableFutureCallback(asyncExecution));
@@ -235,8 +237,7 @@ public class SimpleManagedTaskExecutor implements ManagedTaskExecutor {
             if (t != null) {
                 LOGGER.debug("Execution {} finished with success.", asyncExecution.getId());
                 try {
-                    //TODO
-                    asyncExecution.setContentUrl("http://www.google.fr");
+                    asyncExecution.setResult(t);
                     asyncExecution.updateExecutionState(AsyncExecution.Status.DONE);
                 } finally {
                     futures.remove(asyncExecution.getId());

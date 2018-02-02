@@ -61,8 +61,9 @@ import org.talend.dataprep.api.preparation.Preparation;
 import org.talend.dataprep.api.preparation.Step;
 import org.talend.dataprep.api.preparation.StepDiff;
 import org.talend.dataprep.async.AsyncOperation;
-import org.talend.dataprep.async.conditional.ConditionalParam;
+import org.talend.dataprep.async.AsyncParameter;
 import org.talend.dataprep.async.conditional.PreparationCacheCondition;
+import org.talend.dataprep.async.result.PreparationGetContentUrlGenerator;
 import org.talend.dataprep.cache.ContentCache;
 import org.talend.dataprep.cache.ContentCacheKey;
 import org.talend.dataprep.command.dataset.DataSetGet;
@@ -190,8 +191,8 @@ public class TransformationService extends BaseTransformationService {
     @ApiOperation(value = "Run the transformation given the provided export parameters",
             notes = "This operation transforms the dataset or preparation using parameters in export parameters.")
     @VolumeMetered
-    @AsyncOperation(conditionalClass = PreparationCacheCondition.class)
-    public StreamingResponseBody execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid @ConditionalParam final ExportParameters parameters) throws IOException {
+    @AsyncOperation(conditionalClass = PreparationCacheCondition.class, resultUrlGenerator = PreparationGetContentUrlGenerator.class)
+    public StreamingResponseBody execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid @AsyncParameter final ExportParameters parameters) throws IOException {
 
         ExportParameters completeParameters = exportParametersUtil.populateFromPreparationExportParameter(parameters);
 

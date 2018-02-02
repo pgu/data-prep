@@ -31,8 +31,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.talend.daikon.exception.TalendRuntimeException;
-import org.talend.dataprep.async.conditional.ConditionalParam;
 import org.talend.dataprep.async.conditional.ConditionalTest;
+import org.talend.dataprep.async.result.ResultUrlGenerator;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
 import org.talend.dataprep.http.HttpResponseContext;
@@ -80,9 +80,9 @@ public class AsyncAspect {
             @SuppressWarnings("unchecked")
             final AsyncExecution future;
             if (AnnotationUtils.getAnnotatedParameterIndex(pjp, AsyncExecutionId.class) >= 0) {
-                future = executor.resume(toCallable(pjp), getExecutionId(pjp));
+                future = executor.resume(toCallable(pjp), getExecutionId(pjp), getResultUrl(pjp));
             } else {
-                future = executor.queue(toCallable(pjp), getGroupId(pjp));
+                future = executor.queue(toCallable(pjp), getGroupId(pjp), getResultUrl(pjp));
             }
 
             // return at once with an HTTP 202 + location to get the progress
@@ -193,6 +193,12 @@ public class AsyncAspect {
     }
 
 
+    /**
+     * Return if we need to execute the method asynchronously by calling the conditionalClass definined on the annotation.
+     * By Default call the AlwaysTrueCondtion
+     * @param pjp pjp the proceeding join point.
+     * @return true if we need to execute the method asynchronously. False otherwise
+     */
     private Boolean executeAsynchronously(ProceedingJoinPoint pjp) {
         MethodSignature ms = (MethodSignature) pjp.getSignature();
         Method m = ms.getMethod();
@@ -201,12 +207,30 @@ public class AsyncAspect {
         Class<? extends ConditionalTest> conditionalTestGenerator = asyncOperationAnnotation.conditionalClass();
 
         final ConditionalTest conditionalTest = applicationContext.getBean(conditionalTestGenerator);
-        Object[] args = extractArgsForConditionTest(pjp);
+        Object[] args = extractAsyncParameter(pjp);
         return conditionalTest.executeAsynchronously(args);
     }
 
-    private Object[] extractArgsForConditionTest(ProceedingJoinPoint pjp) {
-        List<Integer> conditionArgIndex = AnnotationUtils.getAnnotatedParameterIndexes(pjp, ConditionalParam.class);
+    /**
+     * Return the URL used to get the result of the asynchronous method
+     * @param pjp pjp the proceeding join point.
+     * @return the URL used to get the result of the asynchronous method
+     */
+    private String getResultUrl(ProceedingJoinPoint pjp) {
+        MethodSignature ms = (MethodSignature) pjp.getSignature();
+        Method m = ms.getMethod();
+        final AsyncOperation asyncOperationAnnotation = m.getAnnotation(AsyncOperation.class);
+
+        Class<? extends ResultUrlGenerator> resultUrlClass = asyncOperationAnnotation.resultUrlGenerator();
+
+        final ResultUrlGenerator resultUrlGenerator = applicationContext.getBean(resultUrlClass);
+        Object[] args = extractAsyncParameter(pjp);
+        return resultUrlGenerator.generateResultUrl(args);
+    }
+
+
+    private Object[] extractAsyncParameter(ProceedingJoinPoint pjp) {
+        List<Integer> conditionArgIndex = AnnotationUtils.getAnnotatedParameterIndexes(pjp, AsyncParameter.class);
 
         List<Object> conditionArg = new ArrayList<>();
 

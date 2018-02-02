@@ -46,7 +46,7 @@ public class OnDemandManagedTaskExecutor implements ManagedTaskExecutor {
     private ManagedTaskRepository repository;
 
     @Override
-    public AsyncExecution resume(ManagedTaskCallable task, String executionId) {
+    public AsyncExecution resume(ManagedTaskCallable task, String executionId, String resultUrl) {
         final AsyncExecution execution = repository.get(executionId);
         if (execution == null) {
             throw new TDPException(TransformationErrorCodes.UNABLE_TO_RESUME_EXECUTION, ExceptionContext.withBuilder().put("id", executionId).build());
@@ -54,6 +54,7 @@ public class OnDemandManagedTaskExecutor implements ManagedTaskExecutor {
             throw new TDPException(TransformationErrorCodes.UNABLE_TO_RESUME_EXECUTION, ExceptionContext.withBuilder().put("id", executionId).build());
         }
 
+        execution.setResultUrl(resultUrl);
         tasks.put(execution.getId(), task);
         repository.save(execution);
 
@@ -61,15 +62,16 @@ public class OnDemandManagedTaskExecutor implements ManagedTaskExecutor {
     }
 
     /**
-     * @see ManagedTaskExecutor#queue(ManagedTaskCallable, String)
+     * @see ManagedTaskExecutor#queue(ManagedTaskCallable, String, String)
      */
     @Override
-    public AsyncExecution queue(ManagedTaskCallable task, String groupId) {
+    public AsyncExecution queue(ManagedTaskCallable task, String groupId, String resultUrl) {
 
         final Optional<String> optional = Optional.ofNullable(groupId);
         final AsyncExecution asyncExecution = optional.isPresent() ? new AsyncExecution(groupId) : new AsyncExecution();
         asyncExecution.updateExecutionState(AsyncExecution.Status.NEW);
 
+        asyncExecution.setResultUrl(resultUrl);
         tasks.put(asyncExecution.getId(), task);
         repository.save(asyncExecution);
 
@@ -93,10 +95,7 @@ public class OnDemandManagedTaskExecutor implements ManagedTaskExecutor {
 
         final Callable task = tasks.get(execution.getId());
         try {
-            // TODO how to set content URL
-            Object result = task.call();
-//            execution.setResult(task.call());
-            execution.setContentUrl("http://www.bing.fr");
+            execution.setResult(task.call());
             execution.updateExecutionState(DONE);
         } catch (Exception e) {
             execution.updateExecutionState(FAILED);

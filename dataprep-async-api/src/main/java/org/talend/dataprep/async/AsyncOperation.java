@@ -17,6 +17,8 @@ import java.lang.annotation.*;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.talend.dataprep.async.conditional.AlwaysTrueCondition;
 import org.talend.dataprep.async.conditional.ConditionalTest;
+import org.talend.dataprep.async.result.EmptyUrlGenerator;
+import org.talend.dataprep.async.result.ResultUrlGenerator;
 
 /**
  * Annotation used to declare that the underlying operation should be ran using a asynchronous executor.
@@ -63,6 +65,12 @@ public @interface AsyncOperation {
      */
 
     Class<? extends ConditionalTest> conditionalClass() default AlwaysTrueCondition.class;
+
+    /**
+     * Class used to generate the URL used to get the final result
+     * @return The class used to generate the URL used to get the final result
+     */
+    Class<? extends ResultUrlGenerator> resultUrlGenerator() default EmptyUrlGenerator.class;
 
     /**
      * Default class needed to set a default value to the groupIdGeneratorBean.
