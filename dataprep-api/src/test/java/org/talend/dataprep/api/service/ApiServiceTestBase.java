@@ -92,6 +92,13 @@ public abstract class ApiServiceTestBase extends ServiceBaseTest {
         return mapper.readValue(parametersInput, AggregationParameters.class);
     }
 
+    protected Response getPreparation(String preparationId) throws IOException, InterruptedException {
+        return getPreparation(preparationId,"head","HEAD");
+    }
+
+    protected Response getPreparation(String preparationId, String versionId) throws IOException, InterruptedException {
+        return getPreparation(preparationId,versionId,"HEAD");
+    }
     /**
      * Method handling 202/200 status to get the transformation content
      * @param preparationId prepartionId
@@ -99,10 +106,11 @@ public abstract class ApiServiceTestBase extends ServiceBaseTest {
      * @throws IOException
      * @throws InterruptedException
      */
-    protected String getPreparation(String preparationId) throws IOException, InterruptedException {
+    protected Response getPreparation(String preparationId, String version, String stepId) throws IOException, InterruptedException {
         // when
         Response transformedResponse = given().when() //
-                .get("/api/preparations/{id}/content?version=head", preparationId);
+                .get("/api/preparations/{prepId}/content?version={version}&from={stepId}", preparationId, version, stepId);
+
 
         if(HttpStatus.ACCEPTED.value() == transformedResponse.getStatusCode()) {
             // first time we have a 202 with a Location to see asynchronous method status
@@ -130,6 +138,6 @@ public abstract class ApiServiceTestBase extends ServiceBaseTest {
                     .get("/api/preparations/{id}/content?version=head", preparationId);
         }
 
-        return transformedResponse.asString();
+        return transformedResponse;
     }
 }

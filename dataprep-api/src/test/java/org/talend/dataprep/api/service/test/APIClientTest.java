@@ -214,7 +214,10 @@ public class APIClientTest {
      *
      * @param id preparation ID
      * @return metadata produced by the application of the preparation
+     * @see org.talend.dataprep.api.service.ApiServiceTestBase#getPreparation
+     *
      */
+    @Deprecated
     public RowMetadata getPreparationContent(String id) throws IOException {
         InputStream inputStream = given().get("/api/preparations/{prepId}/content?version={version}&from={stepId}", id, "head",
                 "HEAD").asInputStream();
@@ -226,5 +229,7 @@ public class APIClientTest {
     private static class Data {
         public RowMetadata metadata;
     }
+
+
 
 }

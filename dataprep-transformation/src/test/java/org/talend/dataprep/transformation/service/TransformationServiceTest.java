@@ -297,8 +297,6 @@ public class TransformationServiceTest extends TransformationServiceBaseTest {
         // then
         // (failed actions are ignored so the response should be 200)
         assertEquals(200, response.getStatusCode());
-        // String result = '\'' + response.asString() + '\'';
-        // System.out.println("\n\n\net voila le résultat de la transformation : " + result + "\n\n\n");
 
         // (make sure the result was not cached)
         final TransformationCacheKey key = cacheKeyGenerator.generateContentKey( //
@@ -310,7 +308,6 @@ public class TransformationServiceTest extends TransformationServiceBaseTest {
                 "" // no filter
         );
 
-        // Thread.sleep(500L);
         Assert.assertFalse("content cache '" + key.getKey() + "' was not evicted from the cache", contentCache.has(key));
     }
 
