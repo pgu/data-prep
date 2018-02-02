@@ -95,7 +95,9 @@ public class OnDemandManagedTaskExecutor implements ManagedTaskExecutor {
 
         final Callable task = tasks.get(execution.getId());
         try {
-            execution.setResult(task.call());
+            Object result = task.call();
+            //TODO: We can't set result now
+//            execution.setResult();
             execution.updateExecutionState(DONE);
         } catch (Exception e) {
             execution.updateExecutionState(FAILED);

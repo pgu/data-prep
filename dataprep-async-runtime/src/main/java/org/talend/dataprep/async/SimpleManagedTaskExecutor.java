@@ -237,7 +237,8 @@ public class SimpleManagedTaskExecutor implements ManagedTaskExecutor {
             if (t != null) {
                 LOGGER.debug("Execution {} finished with success.", asyncExecution.getId());
                 try {
-                    asyncExecution.setResult(t);
+                    //TODO: a voir ce qu'on fait du résultat
+//                    asyncExecution.setResult(t);
                     asyncExecution.updateExecutionState(AsyncExecution.Status.DONE);
                 } finally {
                     futures.remove(asyncExecution.getId());

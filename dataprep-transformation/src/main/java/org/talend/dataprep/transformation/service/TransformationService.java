@@ -194,6 +194,8 @@ public class TransformationService extends BaseTransformationService {
     @AsyncOperation(conditionalClass = PreparationCacheCondition.class, resultUrlGenerator = PreparationGetContentUrlGenerator.class)
     public StreamingResponseBody execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid @AsyncParameter final ExportParameters parameters) throws IOException {
 
+        //TODO: Gérer le cas d'un pipeline déjà lancé
+
         ExportParameters completeParameters = exportParametersUtil.populateFromPreparationExportParameter(parameters);
 
         ContentCacheKey cacheKey = cacheKeyGenerator.generateContentKey(completeParameters);
@@ -202,19 +204,6 @@ public class TransformationService extends BaseTransformationService {
         }
 
         return executeSampleExportStrategy(completeParameters);
-    }
-
-    /**
-     * Return the real step id in case of "head" or empty
-     * @param preparation The preparation
-     * @param stepId The step id
-     */
-    //TODO: factorize this code
-    protected String getCleanStepId(final Preparation preparation, final String stepId) {
-        if (StringUtils.equals("head", stepId) || StringUtils.isEmpty(stepId)) {
-            return preparation.getSteps().get(preparation.getSteps().size() - 1).id();
-        }
-        return stepId;
     }
 
     @RequestMapping(value = "/apply/preparation/{preparationId}/{stepId}/metadata", method = GET)
