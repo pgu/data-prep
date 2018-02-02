@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.talend.dataprep.api.export.ExportParameters;
-import org.talend.dataprep.async.conditional.ConditionalParam;
 import org.talend.dataprep.async.progress.ExecutionContext;
 
 /**
@@ -114,7 +113,13 @@ public class AsyncAspectTestMockController {
 
     @AsyncOperation(conditionalClass = PairConditionalAsyncTest.class)
     @RequestMapping(method = RequestMethod.GET, path = "/async/conditional/test/")
-    public String asyncOnlyPairNumber(@ConditionalParam Integer nb) {
+    public String asyncOnlyPairNumber(@AsyncParameter Integer nb) {
+        return "ok";
+    }
+
+    @AsyncOperation(resultUrlGenerator = MockResultUrlGenerator.class)
+    @RequestMapping(method = RequestMethod.GET, path = "/async/url/generate")
+    public String generateResultUrl(@AsyncParameter Integer nb) {
         return "ok";
     }
 }

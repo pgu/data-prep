@@ -10,18 +10,15 @@
 //
 // ============================================================================
 
-package org.talend.dataprep.async.conditional;
+package org.talend.dataprep.async.result;
 
-import java.lang.annotation.*;
+import org.springframework.stereotype.Component;
 
-/**
- * Annotation to indicate parameters use for @ConditionalTest
- *
- * @see ConditionalParam
- */
-@Target(ElementType.PARAMETER)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface ConditionalParam {
+@Component
+public class EmptyUrlGenerator implements ResultUrlGenerator {
 
+    @Override
+    public String generateResultUrl(Object... args) {
+        return "";
+    }
 }

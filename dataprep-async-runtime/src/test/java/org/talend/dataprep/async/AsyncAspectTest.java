@@ -274,4 +274,16 @@ public class AsyncAspectTest {
         Assert.assertEquals(executionsBefore.size() + 1, executionsAfter.size());
 
     }
+
+    @Test
+    public void testResultUrlGenerator(){
+
+        controller.generateResultUrl(1);
+
+        final List<AsyncExecution> executions = repository.list().collect(toList());
+        assertEquals(1, executions.size());
+        final AsyncExecution execution = executions.get(0);
+
+        assertEquals("/url/result/1", execution.getResultUrl());
+    }
 }

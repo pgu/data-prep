@@ -89,15 +89,15 @@ public class AsyncExecution {
     @JsonProperty("status")
     private Status status = Status.NEW;
 
-//    /** The execution result (e.g. transformation / sampling...). */
-//    @JsonProperty("result")
-//    @JsonInclude(value = JsonInclude.Include.NON_NULL, content = JsonInclude.Include.NON_NULL)
-//    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-//    private AsyncExecutionResult result = new AsyncExecutionResult();
+    /** The execution result (e.g. transformation / sampling...). */
+    @JsonProperty("result")
+    @JsonInclude(value = JsonInclude.Include.NON_NULL, content = JsonInclude.Include.NON_NULL)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+    private Object result;
 
     /** The Content url. It's the URL were result can be found. */
-    @JsonProperty("contentUrl")
-    private String contentUrl;
+    @JsonProperty("resultUrl")
+    private String resultUrl;
 
     /** The execution error code when it failed. */
     @JsonProperty("error")
@@ -306,12 +306,20 @@ public class AsyncExecution {
         this.userId = userId;
     }
 
-    public String getContentUrl() {
-        return contentUrl;
+    public String getResultUrl() {
+        return resultUrl;
     }
 
-    public void setContentUrl(String contentUrl) {
-        this.contentUrl = contentUrl;
+    public void setResultUrl(String resultUrl) {
+        this.resultUrl = resultUrl;
+    }
+
+    public Object getResult() {
+        return result;
+    }
+
+    public void setResult(Object result) {
+        this.result = result;
     }
 
     /**
@@ -324,7 +332,8 @@ public class AsyncExecution {
                 ", id='" + id + '\'' + //
                 ", time=" + time + //
                 ", status=" + status + //
-                ", contentUrl=" + contentUrl + //
+                ", result=" + result + //
+                ", resultUrl=" + resultUrl + //
                 ", error=" + error + //
                 ", progress=" + progress + //
                 '}';

@@ -31,7 +31,7 @@ public interface ManagedTaskExecutor {
      * @param executionId the execution id of the task to resume.
      * @return the AsyncExecution that enables caller to monitor the execution.
      */
-    AsyncExecution resume(ManagedTaskCallable task, String executionId);
+    AsyncExecution resume(ManagedTaskCallable task, String executionId, String resultUrl);
 
     /**
      * Queue a task to execute.
@@ -40,7 +40,7 @@ public interface ManagedTaskExecutor {
      * @param groupId the task group id.
      * @return the AsyncExecution that enables caller to monitor the execution.
      */
-    AsyncExecution queue(ManagedTaskCallable task, String groupId);
+    AsyncExecution queue(ManagedTaskCallable task, String groupId, String resultUrl);
 
     /**
      * Cancel (stop) the task that matches the given task id.
