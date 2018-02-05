@@ -167,6 +167,9 @@ public class TransformAPITest extends ApiServiceTestBase {
                 .toString(this.getClass()
                         .getResourceAsStream("transformation/expected_cluster_params_soundex.json"), UTF_8);
 
+        // update cache preparation
+        getPreparation(preparationId);
+
         // when
         final String actualClusterParameters = given().formParam("preparationId", preparationId)
                 .formParam("columnId", "0001").when().get("/api/transform/suggest/textclustering/params").asString();
