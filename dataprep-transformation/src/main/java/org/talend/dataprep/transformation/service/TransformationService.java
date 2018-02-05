@@ -62,7 +62,9 @@ import org.talend.dataprep.api.preparation.Step;
 import org.talend.dataprep.api.preparation.StepDiff;
 import org.talend.dataprep.async.AsyncOperation;
 import org.talend.dataprep.async.AsyncParameter;
+import org.talend.dataprep.async.conditional.AlwaysTrueCondition;
 import org.talend.dataprep.async.conditional.PreparationCacheCondition;
+import org.talend.dataprep.async.conditional.PreparationExportNotInCacheCondition;
 import org.talend.dataprep.async.result.PreparationGetContentUrlGenerator;
 import org.talend.dataprep.cache.ContentCache;
 import org.talend.dataprep.cache.ContentCacheKey;
@@ -191,16 +193,20 @@ public class TransformationService extends BaseTransformationService {
     @ApiOperation(value = "Run the transformation given the provided export parameters",
             notes = "This operation transforms the dataset or preparation using parameters in export parameters.")
     @VolumeMetered
-    @AsyncOperation(conditionalClass = PreparationCacheCondition.class, resultUrlGenerator = PreparationGetContentUrlGenerator.class)
+    @AsyncOperation(conditionalClass = PreparationExportNotInCacheCondition.class, resultUrlGenerator = PreparationGetContentUrlGenerator.class)
     public StreamingResponseBody execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid @AsyncParameter final ExportParameters parameters) throws IOException {
 
         //TODO: Gérer le cas d'un pipeline déjà lancé
 
-        ExportParameters completeParameters = exportParametersUtil.populateFromPreparationExportParameter(parameters);
+        ExportParameters completeParameters = parameters;
 
-        ContentCacheKey cacheKey = cacheKeyGenerator.generateContentKey(completeParameters);
-        if(!contentCache.has(cacheKey)) {
-            preparationExportStrategy.performPreparation(completeParameters, new NullOutputStream());
+        if(StringUtils.isNotEmpty(completeParameters.getPreparationId())) {
+            // we deal with preparation transformation (not dataset)
+            completeParameters = exportParametersUtil.populateFromPreparationExportParameter(parameters);
+            ContentCacheKey cacheKey = cacheKeyGenerator.generateContentKey(completeParameters);
+            if(!contentCache.has(cacheKey)) {
+                preparationExportStrategy.performPreparation(completeParameters, new NullOutputStream());
+            }
         }
 
         return executeSampleExportStrategy(completeParameters);

@@ -53,8 +53,9 @@ public class CacheKeyGenerator {
         final String dataSetId = parameters.getDatasetId();
         final String filter = parameters.getFilter();
         final SourceType sourceType = parameters.getFrom();
+        final Map<String, String> arguments = parameters.getArguments();
 
-        return this.generateContentKey(dataSetId, preparationId, stepId, format, sourceType, Collections.emptyMap(), filter);
+        return this.generateContentKey(dataSetId, preparationId, stepId, format, sourceType, arguments, filter);
     }
 
 

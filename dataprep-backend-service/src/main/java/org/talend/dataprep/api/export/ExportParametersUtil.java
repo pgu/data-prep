@@ -57,15 +57,21 @@ public class ExportParametersUtil {
         result.setContent(exportParam.getContent());
         result.setArguments(exportParam.getArguments());
         result.setExportName(exportParam.getExportName());
+        result.setDatasetId(exportParam.getDatasetId());
 
         if (StringUtils.isNotEmpty(exportParam.getFilter())) {
             result.setFilter(mapper.readTree(exportParam.getFilter()));
         }
 
-        Preparation prep = getPreparation(exportParam.getPreparationId(), exportParam.getStepId());
-
-        result.setStepId(getCleanStepId(prep, exportParam.getStepId()));
-        result.setDatasetId(prep.getDataSetId());
+        // we deal with a preparation export parameter. We need to populate stepId and datasetId
+        if(StringUtils.isNotEmpty(exportParam.getPreparationId())){
+            Preparation prep = getPreparation(exportParam.getPreparationId(), exportParam.getStepId());
+            result.setStepId(getCleanStepId(prep, exportParam.getStepId()));
+            result.setDatasetId(prep.getDataSetId());
+        } else{
+            // it'w a dataset export parameter. We need to switch stepId to empty
+            result.setStepId("");
+        }
 
         return result;
     }
