@@ -788,7 +788,7 @@ public class PreparationAPITest extends ApiServiceTestBase {
         final InputStream expected = PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_with_columns.json");
 
         // when
-        final String content = getPreparation(preparationId).asString();
+        final String content = when().get("/api/preparations/{id}/content", preparationId).asString();
 
         // then
         assertThat(content, sameJSONAsFile(expected));
@@ -835,33 +835,28 @@ public class PreparationAPITest extends ApiServiceTestBase {
         assertThat(steps.get(0), is(Step.ROOT_STEP.id()));
 
         // Request preparation content at different versions (preparation has 2 steps -> Root + Upper Case).
-        assertThat(getPreparation(preparationId).asString(), sameJSONAsFile(
+        assertThat(when().get("/api/preparations/{id}/content", preparationId).asString(), sameJSONAsFile(
                 PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_firstname_uppercase_with_column.json")));
-
-        assertThat(getPreparation(preparationId).asString(), sameJSONAsFile(
+        assertThat(when().get("/api/preparations/{id}/content?version=head", preparationId).asString(), sameJSONAsFile(
                 PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_firstname_uppercase_with_column.json")));
-
-        assertThat(getPreparation(preparationId, steps.get(0)).asString(),
+        assertThat(when().get("/api/preparations/{id}/content?version=" + steps.get(0), preparationId).asString(),
                 sameJSONAsFile(PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_with_columns.json")));
-
-        assertThat(getPreparation(preparationId, steps.get(1)).asString(), sameJSONAsFile(
+        assertThat(when().get("/api/preparations/{id}/content?version=" + steps.get(1), preparationId).asString(), sameJSONAsFile(
                 PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_firstname_uppercase_with_column.json")));
-
-        assertThat(getPreparation(preparationId, "origin").asString(),
+        assertThat(when().get("/api/preparations/{id}/content?version=origin", preparationId).asString(),
                 sameJSONAsFile(PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_with_columns.json")));
-
-        assertThat(getPreparation(preparationId, Step.ROOT_STEP.id()).asString(),
+        assertThat(when().get("/api/preparations/{id}/content?version=" + Step.ROOT_STEP.id(), preparationId).asString(),
                 sameJSONAsFile(PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_with_columns.json")));
     }
 
     @Test
-    public void shouldGetPreparationContent() throws IOException, InterruptedException {
+    public void shouldGetPreparationContent() throws IOException {
         // given
         final String preparationId = testClient.createPreparationFromFile("t-shirt_100.csv", "testPreparationContentGet",
                 home.getId());
 
         // when
-        String preparationContent = getPreparation(preparationId).asString();
+        String preparationContent = given().get("/api/preparations/{preparation}/content", preparationId).asString();
 
         // then
         assertThat(preparationContent,
@@ -869,13 +864,14 @@ public class PreparationAPITest extends ApiServiceTestBase {
     }
 
     @Test
-    public void shouldGetPreparationContentWhenInvalidSample() throws IOException, InterruptedException {
+    public void shouldGetPreparationContentWhenInvalidSample() throws IOException {
         // given
         final String preparationId = testClient.createPreparationFromFile("t-shirt_100.csv", "testPreparationContentGet",
                 home.getId());
 
         // when
-        String preparationContent = getPreparation(preparationId).asString();
+        String preparationContent = given().get("/api/preparations/{preparation}/content?sample=mdljshf", preparationId)
+                .asString();
 
         // then
         ObjectMapper mapper = new ObjectMapper();
@@ -986,73 +982,6 @@ public class PreparationAPITest extends ApiServiceTestBase {
 
         // then
         assertThat(preview, sameJSONAsFile(expectedPreviewStream));
-    }
-
-    /**
-     * Verify a calculate time until preview after a trim step on a preparation
-     * see <a href="https://jira.talendforge.org/browse/TDP-5057">TDP-5057</a>
-     */
-    @Test
-    public void testPreparationPreviewOnPreparationWithTrimAction_TDP_5057() throws IOException, InterruptedException {
-        //Create a dataset from csv
-        final String datasetId = testClient.createDataset("preview/best_sad_songs_of_all_time.csv", "testPreview");
-        // Create a preparation
-        String preparationId = testClient.createPreparationFromDataset(datasetId, "testPrep", home.getId());
-
-        // apply trim action on the 8nd column to make this column date valid
-        Map<String, String> trimParameters = new HashMap<>();
-        trimParameters.put("create_new_column", "false");
-        trimParameters.put("padding_character", "whitespace");
-        trimParameters.put("scope", "column");
-        trimParameters.put("column_id", "0008");
-        trimParameters.put("column_name", "Added At");
-        trimParameters.put("row_id", "null");
-
-        testClient.applyAction(preparationId, Trim.TRIM_ACTION_NAME, trimParameters);
-
-        // check column is date valid after trim action
-
-        InputStream inputStream = getPreparation(preparationId).asInputStream();
-        mapper.getDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        RowMetadata preparationContent = mapper.readValue(inputStream, RowMetadata.class);
-
-        List<PatternFrequency> patternFrequencies =
-                preparationContent.getColumns().get(8).getStatistics().getPatternFrequencies();
-
-        assertTrue(patternFrequencies.stream() //
-                .map(PatternFrequency::getPattern) //
-                .anyMatch("yyyy-MM-dd"::equals));
-
-        // create a preview of calculate time until action
-        PreviewAddParameters previewAddParameters = new PreviewAddParameters();
-        previewAddParameters.setDatasetId(datasetId);
-        previewAddParameters.setPreparationId(preparationId);
-        previewAddParameters.setTdpIds(Arrays.asList(1, 2, 3, 4, 5, 6, 7));
-
-        Action calculateTimeUntilAction = new Action();
-        calculateTimeUntilAction.setName(ComputeTimeSince.TIME_SINCE_ACTION_NAME);
-        MixedContentMap actionParameters = new MixedContentMap();
-        actionParameters.put("create_new_column", "true");
-        actionParameters.put("time_unit", "HOURS");
-        actionParameters.put("since_when", "now_server_side");
-        actionParameters.put("scope", "column");
-        actionParameters.put("column_id", "0008");
-        actionParameters.put("column_name", "Added At");
-        calculateTimeUntilAction.setParameters(actionParameters);
-        previewAddParameters.setActions(Collections.singletonList(calculateTimeUntilAction));
-
-        JsonPath jsonPath = given().contentType(ContentType.JSON) //
-                .body(previewAddParameters) //
-                .expect().statusCode(200).log() .ifError() //
-                .when() //
-                .post("/api/preparations/preview/add") //
-                .jsonPath();
-
-        // check non empty value for the new column
-        assertEquals("new preview column should contains values according to calculate time until action", //
-                0, //
-                jsonPath.getList("records.0009").stream().map(String::valueOf).filter(StringUtils::isBlank).count());
-
     }
 
     @Test
@@ -1213,10 +1142,7 @@ public class PreparationAPITest extends ApiServiceTestBase {
         copyIdParameters.put("scope", "column");
         testClient.applyAction(preparationId, "copy", copyIdParameters);
 
-        InputStream inputStream = getPreparation(preparationId).asInputStream();
-        mapper.getDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        RowMetadata preparationContent = mapper.readValue(inputStream, RowMetadata.class);
-
+        RowMetadata preparationContent = testClient.getPreparationContent(preparationId);
         ColumnMetadata idCopyColumn = getColumnByName(preparationContent, "id_copy");
 
         Map<String, String> deleteIdCopyParameters = new HashMap<>();

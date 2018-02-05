@@ -20,6 +20,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.talend.daikon.exception.ExceptionContext;
+import org.talend.dataprep.api.fullrun.AsyncExecutionResult;
+import org.talend.dataprep.api.service.command.preparation.PreparationApply;
 import org.talend.dataprep.conversions.BeanConversionService;
 import org.talend.dataprep.exception.TDPException;
 import org.talend.dataprep.exception.error.APIErrorCodes;

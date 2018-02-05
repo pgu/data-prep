@@ -280,18 +280,6 @@
             </dependency>
             <dependency>
                 <groupId>org.talend.dataprep</groupId>
-                <artifactId>dataprep-async-runtime</artifactId>
-                <version>${project.version}</version>
-                <classifier>lib</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.talend.dataprep</groupId>
-                <artifactId>dataprep-async-api</artifactId>
-                <version>${project.version}</version>
-                <classifier>lib</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.talend.dataprep</groupId>
                 <artifactId>dataprep-transformation</artifactId>
                 <version>${project.version}</version>
                 <classifier>lib</classifier>
@@ -318,11 +306,6 @@
                 <groupId>org.talend.dataprep</groupId>
                 <artifactId>dataprep-backend-common</artifactId>
                 <version>${dataprep.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.talend.dataprep</groupId>
-                <artifactId>dataprep-upgrade-common</artifactId>
-                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.talend.daikon</groupId>
@@ -635,13 +618,6 @@
             </dependency>
             <dependency>
                 <groupId>org.talend.dataprep</groupId>
-                <artifactId>dataprep-upgrade-common</artifactId>
-                <version>${project.version}</version>
-                <type>test-jar</type>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.talend.dataprep</groupId>
                 <artifactId>dataprep-transformation</artifactId>
                 <type>test-jar</type>
                 <version>${project.version}</version>
@@ -667,18 +643,6 @@
                 <version>${httpclient.tests.version}</version>
                 <classifier>tests</classifier>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.lordofthejars</groupId>
-                <artifactId>nosqlunit-mongodb</artifactId>
-                <version>0.10.0</version>
-                <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.github.fakemongo</groupId>
-                        <artifactId>fongo</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>

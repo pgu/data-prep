@@ -21,7 +21,6 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.api.export.ExportParameters;
 import org.talend.dataprep.api.export.ExportParameters.SourceType;
 import org.talend.dataprep.security.Security;
 

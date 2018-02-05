@@ -183,6 +183,35 @@ public class TransformationServiceTest extends TransformationServiceBaseTest {
     }
 
     @Test
+    public void testIsCacheAvailable() throws Exception {
+        // given
+        String dataSetId = createDataset("input_dataset.csv", "lowercase", "text/csv");
+        String preparationId = createEmptyPreparationFromDataset(dataSetId, "lowercase prep");
+
+        // first we don't have cache
+        given() //
+                .expect().statusCode(NO_CONTENT.value()).log().ifError()//
+                .when() //
+                .get("/preparation/{preparationId}/cache", preparationId) //
+                .asString();
+
+        // when ask for the transformation
+        given() //
+                .expect().statusCode(200).log().ifError()//
+                .when() //
+                .get("/apply/preparation/{prepId}/dataset/{datasetId}/{format}", preparationId, dataSetId, "JSON") //
+                .asString();
+
+        // then cache is available
+        given() //
+                .expect().statusCode(200).log().ifError()//
+                .when() //
+                .get("/preparation/{preparationId}/cache", preparationId) //
+                .asString();
+
+    }
+
+    @Test
     public void testCache() throws Exception {
         // given
         String dsId = createDataset("input_dataset.csv", "uppercase", "text/csv");
