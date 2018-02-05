@@ -841,9 +841,6 @@ public class PreparationAPITest extends ApiServiceTestBase {
         assertThat(getPreparation(preparationId, "head").asString(), sameJSONAsFile(
                 PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_firstname_uppercase_with_column.json")));
 
-        System.out.println("steps.get(0)).asString() = " + steps.get(0));
-        System.out.println("steps.get(1)).asString() = " + steps.get(1));
-
         assertThat(getPreparation(preparationId, steps.get(0)).asString(),
                 sameJSONAsFile(PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_with_columns.json")));
 
@@ -1151,7 +1148,7 @@ public class PreparationAPITest extends ApiServiceTestBase {
 
         InputStream inputStream = getPreparation(preparationId).asInputStream();
         mapper.getDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        RowMetadata preparationContent = mapper.readValue(inputStream, RowMetadata.class);
+        RowMetadata preparationContent = mapper.readValue(inputStream, Data.class).metadata;
 
         ColumnMetadata idCopyColumn = getColumnByName(preparationContent, "id_copy");
 
@@ -1161,8 +1158,9 @@ public class PreparationAPITest extends ApiServiceTestBase {
         deleteIdCopyParameters.put("scope", "column");
         testClient.applyAction(preparationId, "delete_column", deleteIdCopyParameters);
 
+
         // force export to update cache
-        testClient.getPreparationContent(preparationId);
+        getPreparation(preparationId);
 
         // when
         Map<String, String> copyFirstNameParameters = new HashMap<>();
@@ -1172,7 +1170,10 @@ public class PreparationAPITest extends ApiServiceTestBase {
         testClient.applyAction(preparationId, "copy", copyFirstNameParameters);
 
         // then
-        preparationContent = testClient.getPreparationContent(preparationId);
+        inputStream = getPreparation(preparationId).asInputStream();
+        mapper.getDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        preparationContent = mapper.readValue(inputStream, Data.class).metadata;
+
         assertNotNull(preparationContent);
         ColumnMetadata firstNameColumn = getColumnByName(preparationContent, "first_name_copy");
         assertNotEquals(idCopyColumn.getId(), firstNameColumn.getId());
@@ -1183,6 +1184,10 @@ public class PreparationAPITest extends ApiServiceTestBase {
                 .filter(c -> columnName.equals(c.getName())).findAny();
         assertTrue(firstNameColumn.isPresent());
         return firstNameColumn.get();
+    }
+
+    private static class Data {
+        public RowMetadata metadata;
     }
 
 }

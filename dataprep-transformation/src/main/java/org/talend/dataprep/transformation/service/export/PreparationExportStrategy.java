@@ -119,9 +119,6 @@ public class PreparationExportStrategy extends BaseSampleExportStrategy {
                         parameters.getFilter() //
                 );
 
-                System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-                System.out.println("key = " + key);
-                System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                 LOGGER.debug("Cache key: " + key.getKey());
                 LOGGER.debug("Cache key details: " + key.toString());
 

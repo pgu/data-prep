@@ -118,8 +118,6 @@ public class ExportAPITest extends ApiServiceTestBase {
         // when
         final String export = exportDataset(datasetId, "").asString();
 
-        System.out.println("export = " + export);
-        System.out.println("expectedExport = " + expectedExport);
         // then
         assertEquals(expectedExport, export);
     }
@@ -323,7 +321,6 @@ public class ExportAPITest extends ApiServiceTestBase {
 
         // then
         String contentDispositionHeaderValue = export.getHeader("Content-Disposition");
-        System.out.println("contentDispositionHeaderValue = " + contentDispositionHeaderValue);
 
         Assertions.assertThat(contentDispositionHeaderValue).contains("filename*=UTF-8''" + fileName);
 
