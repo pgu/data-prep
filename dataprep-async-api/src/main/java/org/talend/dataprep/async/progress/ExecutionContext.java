@@ -88,6 +88,24 @@ public class ExecutionContext {
         currentProgress.remove(thread);
     }
 
+//     /**
+//     * Result initialization entry point
+//     *
+//     * @param result Any Java bean (might even be null).
+//     */
+//     public void initResult(AsyncExecutionResult result) {
+//        final ProgressEntry entry = currentProgress.get(Thread.currentThread());
+//
+//        //TODO what this code do ?
+//        if(entry.execution.getResult() != null) {
+//            LOGGER.warn("The result for execution #{} is already initialized", entry.execution.getId());
+//            return;
+//        }
+//        entry.execution.setResult(result);
+//        entry.repository.save(entry.execution);
+//     }
+
+
     /**
      * Push an arbitrary object as a "progress" notification. The object should a Java bean and may contain all getters / setters
      * that give information about the current running task.

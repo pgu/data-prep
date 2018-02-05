@@ -12,6 +12,8 @@
 
 package org.talend.dataprep.async.result;
 
+import org.talend.dataprep.async.AsyncExecutionResult;
+
 /**
  * Interface to generate url where we need to redirect when AsyncExecution is DONE
  *
@@ -19,5 +21,5 @@ package org.talend.dataprep.async.result;
  */
 public interface ResultUrlGenerator {
 
-    String generateResultUrl(Object... args);
+    AsyncExecutionResult generateResultUrl(Object... args);
 }

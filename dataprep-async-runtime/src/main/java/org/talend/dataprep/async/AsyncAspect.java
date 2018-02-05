@@ -216,7 +216,7 @@ public class AsyncAspect {
      * @param pjp pjp the proceeding join point.
      * @return the URL used to get the result of the asynchronous method
      */
-    private String getResultUrl(ProceedingJoinPoint pjp) {
+    private AsyncExecutionResult getResultUrl(ProceedingJoinPoint pjp) {
         MethodSignature ms = (MethodSignature) pjp.getSignature();
         Method m = ms.getMethod();
         final AsyncOperation asyncOperationAnnotation = m.getAnnotation(AsyncOperation.class);

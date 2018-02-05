@@ -14,12 +14,13 @@ package org.talend.dataprep.async.result;
 
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.export.ExportParameters;
+import org.talend.dataprep.async.AsyncExecutionResult;
 
 @Component
 public class PreparationGetContentUrlGenerator implements ResultUrlGenerator {
 
     @Override
-    public String generateResultUrl(Object... args) {
+    public AsyncExecutionResult generateResultUrl(Object... args) {
 
         // check pre-condition
         assert args != null;
@@ -28,6 +29,6 @@ public class PreparationGetContentUrlGenerator implements ResultUrlGenerator {
 
         ExportParameters param = (ExportParameters) args[0];
 
-        return "/api/preparations/" + param.getPreparationId() + "/content";
+        return new AsyncExecutionResult("/api/preparations/" + param.getPreparationId() + "/content");
     }
 }

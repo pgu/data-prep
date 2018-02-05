@@ -93,11 +93,7 @@ public class AsyncExecution {
     @JsonProperty("result")
     @JsonInclude(value = JsonInclude.Include.NON_NULL, content = JsonInclude.Include.NON_NULL)
     @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-    private Object result;
-
-    /** The Content url. It's the URL were result can be found. */
-    @JsonProperty("resultUrl")
-    private String resultUrl;
+    private AsyncExecutionResult result;
 
     /** The execution error code when it failed. */
     @JsonProperty("error")
@@ -306,20 +302,12 @@ public class AsyncExecution {
         this.userId = userId;
     }
 
-    public String getResultUrl() {
-        return resultUrl;
-    }
-
-    public void setResultUrl(String resultUrl) {
-        this.resultUrl = resultUrl;
-    }
-
-    public Object getResult() {
-        return result;
-    }
-
-    public void setResult(Object result) {
+    public void setResult(AsyncExecutionResult result) {
         this.result = result;
+    }
+
+    public AsyncExecutionResult getResult() {
+        return result;
     }
 
     /**
@@ -333,7 +321,6 @@ public class AsyncExecution {
                 ", time=" + time + //
                 ", status=" + status + //
                 ", result=" + result + //
-                ", resultUrl=" + resultUrl + //
                 ", error=" + error + //
                 ", progress=" + progress + //
                 '}';

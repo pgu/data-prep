@@ -1,14 +1,14 @@
-//  ============================================================================
-//  Copyright (C) 2006-2018 Talend Inc. - www.talend.com
+// ============================================================================
+// Copyright (C) 2006-2018 Talend Inc. - www.talend.com
 //
-//  This source code is available under agreement available at
-//  https://github.com/Talend/data-prep/blob/master/LICENSE
+// This source code is available under agreement available at
+// https://github.com/Talend/data-prep/blob/master/LICENSE
 //
-//  You should have received a copy of the agreement
-//  along with this program; if not, write to Talend SA
-//  9 rue Pages 92150 Suresnes, France
+// You should have received a copy of the agreement
+// along with this program; if not, write to Talend SA
+// 9 rue Pages 92150 Suresnes, France
 //
-//  ============================================================================
+// ============================================================================
 
 package org.talend.dataprep.async;
 
@@ -19,7 +19,7 @@ import org.talend.dataprep.async.result.ResultUrlGenerator;
 public class MockResultUrlGenerator implements ResultUrlGenerator {
 
     @Override
-    public String generateResultUrl(Object... args) {
+    public AsyncExecutionResult generateResultUrl(Object... args) {
 
         // check pre-condition
         assert args != null;
@@ -29,6 +29,6 @@ public class MockResultUrlGenerator implements ResultUrlGenerator {
 
         Integer index = (Integer) args[0];
 
-        return "/url/result/"+index;
+        return new AsyncExecutionResult("/url/result/" + index);
     }
 }

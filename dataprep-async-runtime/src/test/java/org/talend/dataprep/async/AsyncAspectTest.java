@@ -284,6 +284,6 @@ public class AsyncAspectTest {
         assertEquals(1, executions.size());
         final AsyncExecution execution = executions.get(0);
 
-        assertEquals("/url/result/1", execution.getResultUrl());
+        assertEquals("/url/result/1", execution.getResult().getDownloadUrl());
     }
 }

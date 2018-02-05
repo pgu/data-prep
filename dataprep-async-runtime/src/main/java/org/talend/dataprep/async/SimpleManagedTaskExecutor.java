@@ -65,7 +65,7 @@ public class SimpleManagedTaskExecutor implements ManagedTaskExecutor {
     private final Map<String, ListenableFuture> futures = new ConcurrentHashMap<>();
 
     @Override
-    public AsyncExecution resume(ManagedTaskCallable task, String executionId, String resultUrl) {
+    public AsyncExecution resume(ManagedTaskCallable task, String executionId, AsyncExecutionResult resultUrl) {
         LOGGER.debug("Resuming execution '{}' from repository '{}'", executionId, repository);
         final AsyncExecution execution = repository.get(executionId);
         if (execution == null) {
@@ -80,7 +80,7 @@ public class SimpleManagedTaskExecutor implements ManagedTaskExecutor {
         // Wrap callable to get the running status.
         final Callable wrapper = wrapTaskWithProgressInformation(task, execution);
 
-        execution.setResultUrl(resultUrl);
+        execution.setResult(resultUrl);
 
         ListenableFuture future = delegate.submitListenable(wrapper);
         future.addCallback(new AsyncListenableFutureCallback(execution));
@@ -91,10 +91,10 @@ public class SimpleManagedTaskExecutor implements ManagedTaskExecutor {
     }
 
     /**
-     * @see ManagedTaskExecutor#queue(ManagedTaskCallable, String, String)
+     * @see ManagedTaskExecutor#queue(ManagedTaskCallable, String, AsyncExecutionResult)
      */
     @Override
-    public synchronized AsyncExecution queue(final ManagedTaskCallable task, String groupId, String resultUrl) {
+    public synchronized AsyncExecution queue(final ManagedTaskCallable task, String groupId, AsyncExecutionResult resultUrl) {
 
         // Create async execution
         final AsyncExecution asyncExecution =
@@ -106,7 +106,7 @@ public class SimpleManagedTaskExecutor implements ManagedTaskExecutor {
         // Wrap callable to get the running status.
         final Callable wrapper = wrapTaskWithProgressInformation(task, asyncExecution);
 
-        asyncExecution.setResultUrl(resultUrl);
+        asyncExecution.setResult(resultUrl);
 
         ListenableFuture future = delegate.submitListenable(wrapper);
         future.addCallback(new AsyncListenableFutureCallback(asyncExecution));
@@ -237,8 +237,10 @@ public class SimpleManagedTaskExecutor implements ManagedTaskExecutor {
             if (t != null) {
                 LOGGER.debug("Execution {} finished with success.", asyncExecution.getId());
                 try {
-                    //TODO: a voir ce qu'on fait du résultat
-//                    asyncExecution.setResult(t);
+                    if( t instanceof AsyncExecutionResult) {
+                        // if the async method result an asyncExecutionResult then we override basic Url Result
+                        asyncExecution.setResult((AsyncExecutionResult) t);
+                    }
                     asyncExecution.updateExecutionState(AsyncExecution.Status.DONE);
                 } finally {
                     futures.remove(asyncExecution.getId());

@@ -13,12 +13,13 @@
 package org.talend.dataprep.async.result;
 
 import org.springframework.stereotype.Component;
+import org.talend.dataprep.async.AsyncExecutionResult;
 
 @Component
 public class EmptyUrlGenerator implements ResultUrlGenerator {
 
     @Override
-    public String generateResultUrl(Object... args) {
-        return "";
+    public AsyncExecutionResult generateResultUrl(Object... args) {
+        return null;
     }
 }
