@@ -186,16 +186,7 @@ public class ExportAPITest extends ApiServiceTestBase {
                 this.getClass().getResourceAsStream("export/expected_export_preparation_header_uppercase_firstname.csv"), UTF_8);
 
         // when
-        final String export = given() //
-                .formParam("exportType", "CSV") //
-                .formParam(ExportFormat.PREFIX + CSVFormat.ParametersCSV.ENCLOSURE_MODE,
-                        CSVFormat.ParametersCSV.ENCLOSURE_ALL_FIELDS) //
-                .formParam("preparationId", preparationId) //
-                .formParam("stepId", "") //
-                .when() //
-                .expect().statusCode(200).log().ifError() //
-                .get("/api/export") //
-                .asString();
+        final String export = exportPreparation(preparationId, "").asString();
 
         // then
         assertEquals(expectedExport, export);
@@ -215,14 +206,7 @@ public class ExportAPITest extends ApiServiceTestBase {
                 UTF_8);
 
         // when
-        final String export = given() //
-                .formParam("exportType", "CSV") //
-                .formParam("preparationId", preparationId) //
-                .formParam("stepId", "") //
-                .when() //
-                .expect().statusCode(200).log().ifError() //
-                .get("/api/export") //
-                .asString();
+        final String export = exportPreparation(preparationId, "").asString();
 
         // then
         assertFalse(expectedExport.isEmpty());
@@ -339,6 +323,8 @@ public class ExportAPITest extends ApiServiceTestBase {
 
         // then
         String contentDispositionHeaderValue = export.getHeader("Content-Disposition");
+        System.out.println("contentDispositionHeaderValue = " + contentDispositionHeaderValue);
+
         Assertions.assertThat(contentDispositionHeaderValue).contains("filename*=UTF-8''" + fileName);
 
     }

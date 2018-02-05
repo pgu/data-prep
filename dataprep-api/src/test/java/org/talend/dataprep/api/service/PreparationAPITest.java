@@ -788,7 +788,7 @@ public class PreparationAPITest extends ApiServiceTestBase {
         final InputStream expected = PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_with_columns.json");
 
         // when
-        final String content = when().get("/api/preparations/{id}/content", preparationId).asString();
+        final String content = getPreparation(preparationId).asString();
 
         // then
         assertThat(content, sameJSONAsFile(expected));
@@ -835,28 +835,36 @@ public class PreparationAPITest extends ApiServiceTestBase {
         assertThat(steps.get(0), is(Step.ROOT_STEP.id()));
 
         // Request preparation content at different versions (preparation has 2 steps -> Root + Upper Case).
-        assertThat(when().get("/api/preparations/{id}/content", preparationId).asString(), sameJSONAsFile(
+        assertThat(getPreparation(preparationId).asString(), sameJSONAsFile(
                 PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_firstname_uppercase_with_column.json")));
-        assertThat(when().get("/api/preparations/{id}/content?version=head", preparationId).asString(), sameJSONAsFile(
+
+        assertThat(getPreparation(preparationId, "head").asString(), sameJSONAsFile(
                 PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_firstname_uppercase_with_column.json")));
-        assertThat(when().get("/api/preparations/{id}/content?version=" + steps.get(0), preparationId).asString(),
+
+        System.out.println("steps.get(0)).asString() = " + steps.get(0));
+        System.out.println("steps.get(1)).asString() = " + steps.get(1));
+
+        assertThat(getPreparation(preparationId, steps.get(0)).asString(),
                 sameJSONAsFile(PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_with_columns.json")));
-        assertThat(when().get("/api/preparations/{id}/content?version=" + steps.get(1), preparationId).asString(), sameJSONAsFile(
+
+        assertThat(getPreparation(preparationId, steps.get(1)).asString(), sameJSONAsFile(
                 PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_firstname_uppercase_with_column.json")));
-        assertThat(when().get("/api/preparations/{id}/content?version=origin", preparationId).asString(),
+
+        assertThat(getPreparation(preparationId, "origin").asString(),
                 sameJSONAsFile(PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_with_columns.json")));
-        assertThat(when().get("/api/preparations/{id}/content?version=" + Step.ROOT_STEP.id(), preparationId).asString(),
+
+        assertThat(getPreparation(preparationId, Step.ROOT_STEP.id()).asString(),
                 sameJSONAsFile(PreparationAPITest.class.getResourceAsStream("dataset/expected_dataset_with_columns.json")));
     }
 
     @Test
-    public void shouldGetPreparationContent() throws IOException {
+    public void shouldGetPreparationContent() throws IOException, InterruptedException {
         // given
         final String preparationId = testClient.createPreparationFromFile("t-shirt_100.csv", "testPreparationContentGet",
                 home.getId());
 
         // when
-        String preparationContent = given().get("/api/preparations/{preparation}/content", preparationId).asString();
+        String preparationContent = getPreparation(preparationId).asString();
 
         // then
         assertThat(preparationContent,
@@ -864,14 +872,13 @@ public class PreparationAPITest extends ApiServiceTestBase {
     }
 
     @Test
-    public void shouldGetPreparationContentWhenInvalidSample() throws IOException {
+    public void shouldGetPreparationContentWhenInvalidSample() throws IOException, InterruptedException {
         // given
         final String preparationId = testClient.createPreparationFromFile("t-shirt_100.csv", "testPreparationContentGet",
                 home.getId());
 
         // when
-        String preparationContent = given().get("/api/preparations/{preparation}/content?sample=mdljshf", preparationId)
-                .asString();
+        String preparationContent = getPreparation(preparationId).asString();
 
         // then
         ObjectMapper mapper = new ObjectMapper();
@@ -1142,7 +1149,10 @@ public class PreparationAPITest extends ApiServiceTestBase {
         copyIdParameters.put("scope", "column");
         testClient.applyAction(preparationId, "copy", copyIdParameters);
 
-        RowMetadata preparationContent = testClient.getPreparationContent(preparationId);
+        InputStream inputStream = getPreparation(preparationId).asInputStream();
+        mapper.getDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        RowMetadata preparationContent = mapper.readValue(inputStream, RowMetadata.class);
+
         ColumnMetadata idCopyColumn = getColumnByName(preparationContent, "id_copy");
 
         Map<String, String> deleteIdCopyParameters = new HashMap<>();

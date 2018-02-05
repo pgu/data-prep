@@ -132,7 +132,7 @@ public abstract class ApiServiceTestBase extends ServiceBaseTest {
                     .statusCode(200)
                     .log()
                     .ifError() //
-                    .get("/api/preparations/{id}/content?version=head", preparationId);
+                    .get("/api/preparations/{prepId}/content?version={version}&from={stepId}", preparationId, version, stepId);
         }
 
         return transformedResponse;
@@ -192,6 +192,21 @@ public abstract class ApiServiceTestBase extends ServiceBaseTest {
     protected Response export(String preparationId, String datasetId, String stepId, String csvDelimiter, String fileName)
             throws IOException, InterruptedException {
         // when
+        Response export = getExportResponse(preparationId, datasetId, stepId, csvDelimiter, fileName, null);
+
+        if (HttpStatus.ACCEPTED.value() == export.getStatusCode()) {
+            // first time we have a 202 with a Location to see asynchronous method status
+            final String asyncMethodStatusUrl = export.getHeader("Location");
+
+            waitForAsynchronousMethodTofinish(asyncMethodStatusUrl);
+
+            export = getExportResponse(preparationId, datasetId, stepId, csvDelimiter, fileName, 200);
+        }
+
+        return export;
+    }
+
+    private Response getExportResponse(String preparationId, String datasetId, String stepId, String csvDelimiter, String fileName, Integer expectedStatus) {
         RequestSpecification exportRequest = given() //
                 .formParam("exportType", "CSV") //
                 .formParam(ExportFormat.PREFIX + CSVFormat.ParametersCSV.ENCLOSURE_MODE,
@@ -208,33 +223,15 @@ public abstract class ApiServiceTestBase extends ServiceBaseTest {
             exportRequest.formParam(ExportFormat.PREFIX + "fileName", fileName);
         }
 
-        Response export = exportRequest
-                .when() //
-                .get("/api/export");
-
-        if (HttpStatus.ACCEPTED.value() == export.getStatusCode()) {
-            // first time we have a 202 with a Location to see asynchronous method status
-            final String asyncMethodStatusUrl = export.getHeader("Location");
-
-            waitForAsynchronousMethodTofinish(asyncMethodStatusUrl);
-
-            export = given() //
-                    .formParam("exportType", "CSV") //
-                    .formParam(ExportFormat.PREFIX + CSVFormat.ParametersCSV.ENCLOSURE_MODE,
-                            CSVFormat.ParametersCSV.ENCLOSURE_ALL_FIELDS) //
-                    .formParam(ExportFormat.PREFIX + CSVFormat.ParametersCSV.FIELDS_DELIMITER, csvDelimiter) //
-                    .formParam(ExportFormat.PREFIX + "fileName", fileName) //
-                    .formParam("preparationId", preparationId) //
-                    .formParam("stepId", stepId) //
-                    .formParam("datasetId", datasetId) //
-                    .when() //
-                    .expect()
-                    .statusCode(200)
-                    .log()
-                    .ifError() //
-                    .get("/api/export");
+        if(expectedStatus != null) {
+            exportRequest.when() //
+                    .expect() //
+                    .statusCode(expectedStatus) //
+                    .log() //
+                    .ifError();
         }
 
-        return export;
+        return exportRequest
+                .get("/api/export");
     }
 }
