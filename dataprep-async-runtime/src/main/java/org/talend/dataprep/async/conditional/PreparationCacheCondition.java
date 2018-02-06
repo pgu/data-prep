@@ -50,11 +50,7 @@ public class PreparationCacheCondition implements ConditionalTest {
             ExportParameters exportParameters =
                     exportParametersUtil.populateFromPreparationExportParameter((ExportParameters) args[0]);
 
-            System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-
             TransformationCacheKey cacheKey = cacheKeyGenerator.generateContentKey(exportParameters);
-            System.out.println("cacheKey = " + cacheKey);
-            System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
             return !contentCache.has(cacheKey);
         } catch (IOException e) {

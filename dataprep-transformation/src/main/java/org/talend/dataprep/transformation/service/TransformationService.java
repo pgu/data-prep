@@ -62,8 +62,6 @@ import org.talend.dataprep.api.preparation.Step;
 import org.talend.dataprep.api.preparation.StepDiff;
 import org.talend.dataprep.async.AsyncOperation;
 import org.talend.dataprep.async.AsyncParameter;
-import org.talend.dataprep.async.conditional.AlwaysTrueCondition;
-import org.talend.dataprep.async.conditional.PreparationCacheCondition;
 import org.talend.dataprep.async.conditional.PreparationExportNotInCacheCondition;
 import org.talend.dataprep.async.result.PreparationGetContentUrlGenerator;
 import org.talend.dataprep.cache.ContentCache;
@@ -204,6 +202,7 @@ public class TransformationService extends BaseTransformationService {
             // we deal with preparation transformation (not dataset)
             completeParameters = exportParametersUtil.populateFromPreparationExportParameter(parameters);
             ContentCacheKey cacheKey = cacheKeyGenerator.generateContentKey(completeParameters);
+
             if(!contentCache.has(cacheKey)) {
                 preparationExportStrategy.performPreparation(completeParameters, new NullOutputStream());
             }

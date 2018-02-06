@@ -90,6 +90,7 @@ public abstract class BaseTransformationService {
                     .findFirst();
             if (electedStrategy.isPresent()) {
                 LOG.debug("Strategy for execution: {}", electedStrategy.get().getClass());
+
                 return electedStrategy.get().execute(parameters);
             } else {
                 throw new IllegalArgumentException("Not valid export parameters (no preparation id nor data set id).");

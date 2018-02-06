@@ -32,12 +32,7 @@
         <!-- UNIT TEST DEPENDENCIES -->
         <dependency>
             <groupId>org.talend.dataprep</groupId>
-            <artifactId>dataprep-backend-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.talend.dataprep</groupId>
             <artifactId>dataprep-async-runtime</artifactId>
-            <classifier>lib</classifier>
         </dependency>
         <dependency>
             <groupId>org.talend.dataprep</groupId>

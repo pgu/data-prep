@@ -282,13 +282,11 @@
                 <groupId>org.talend.dataprep</groupId>
                 <artifactId>dataprep-async-runtime</artifactId>
                 <version>${project.version}</version>
-                <classifier>lib</classifier>
             </dependency>
             <dependency>
                 <groupId>org.talend.dataprep</groupId>
                 <artifactId>dataprep-async-api</artifactId>
                 <version>${project.version}</version>
-                <classifier>lib</classifier>
             </dependency>
             <dependency>
                 <groupId>org.talend.dataprep</groupId>
