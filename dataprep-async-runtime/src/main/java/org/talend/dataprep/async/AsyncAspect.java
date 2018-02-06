@@ -13,6 +13,7 @@
 package org.talend.dataprep.async;
 
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.talend.daikon.exception.TalendRuntimeException;
 import org.talend.dataprep.async.conditional.ConditionalTest;
 import org.talend.dataprep.async.result.ResultUrlGenerator;
@@ -88,12 +90,8 @@ public class AsyncAspect {
             // return at once with an HTTP 202 + location to get the progress
             LOGGER.debug("Scheduling done, Redirecting to execution queue...");
             HttpResponseContext.status(HttpStatus.ACCEPTED);
-            final String statusCheckURL;
-            if (StringUtils.isEmpty(contextPath)) {
-                statusCheckURL = "/" + AsyncController.QUEUE_PATH + "/" + future.getId();
-            } else {
-                statusCheckURL = "/" + contextPath + "/" + AsyncController.QUEUE_PATH + "/" + future.getId();
-            }
+
+            String statusCheckURL = generateLocationUrl(future);
             HttpResponseContext.header("Location", statusCheckURL);
 
             LOGGER.debug("Redirection done.");
@@ -107,6 +105,21 @@ public class AsyncAspect {
             }
         }
     }
+
+    private String generateLocationUrl(AsyncExecution future) {
+        ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestUri();
+        URI uri  = builder.build().toUri();
+
+        String statusCheckURL;
+        if (StringUtils.isEmpty(contextPath)) {
+            statusCheckURL = "/" + AsyncController.QUEUE_PATH + "/" + future.getId();
+        } else {
+            statusCheckURL = "/" + contextPath + "/" + AsyncController.QUEUE_PATH + "/" + future.getId();
+        }
+        statusCheckURL = uri.getScheme() + "://" + uri.getAuthority() + statusCheckURL;
+        return statusCheckURL;
+    }
+
 
     /**
      * Wrap the pjp result into a callable to be able to store the latter in a task executor.
