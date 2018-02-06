@@ -1,10 +1,10 @@
 package org.talend.services.tdp.dataset;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.talend.daikon.annotation.Service;
@@ -86,7 +86,7 @@ public interface IDataSetService {
             @RequestParam(name = "tag", defaultValue = "") String tag, //
             @RequestParam(name = "size", defaultValue = "0") long size, //
             @RequestHeader(name = CONTENT_TYPE) String contentType, //
-            InputStream content) throws IOException;
+            @RequestBody Resource content) throws IOException;
 
     /**
      * Returns the <b>full</b> data set content for given id.
@@ -148,7 +148,7 @@ public interface IDataSetService {
             @PathVariable(name = "id") String dataSetId, //
             @RequestParam(name = "name", required = false) String name, //
             @RequestParam(name = "size", required = false, defaultValue = "0") long size, //
-            InputStream dataSetContent);
+            @RequestBody Resource dataSetContent);
 
     /**
      * List all dataset related error codes.

@@ -23,14 +23,14 @@
     <parent>
         <groupId>org.talend.daikon</groupId>
         <artifactId>service-parent</artifactId>
-        <version>0.21.0-SNAPSHOT</version>
+        <version>0.22.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
     <groupId>org.talend.dataprep</groupId>
     <name>dataprep-backend-service-parent</name>
     <packaging>pom</packaging>
     <artifactId>dataprep-backend-service-parent</artifactId>
-    <version>2.4.0-SNAPSHOT</version>
+    <version>2.6.0-SNAPSHOT</version>
     <dependencies>
         <dependency>
             <groupId>org.talend.dataprep</groupId>
