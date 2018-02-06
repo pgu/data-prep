@@ -12,9 +12,14 @@
 
 package org.talend.dataprep.async.result;
 
+import com.sun.jndi.toolkit.url.Uri;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.export.ExportParameters;
 import org.talend.dataprep.async.AsyncExecutionResult;
+
+import java.net.URI;
 
 @Component
 public class PreparationGetContentUrlGenerator implements ResultUrlGenerator {
@@ -29,6 +34,17 @@ public class PreparationGetContentUrlGenerator implements ResultUrlGenerator {
 
         ExportParameters param = (ExportParameters) args[0];
 
-        return new AsyncExecutionResult("/api/preparations/" + param.getPreparationId() + "/content");
+        URIBuilder builder = new URIBuilder();
+        builder.setPath("/api/preparations/" + param.getPreparationId() + "/content");
+
+        if(StringUtils.isNotEmpty(param.getStepId())){
+            builder.setParameter("version", param.getStepId());
+        }
+
+        if(param.getFrom() != null){
+            builder.setParameter("from", param.getFrom().name());
+        }
+
+        return new AsyncExecutionResult(builder.toString());
     }
 }

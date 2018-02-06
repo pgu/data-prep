@@ -74,6 +74,9 @@ public class GenericCommand<T> extends HystrixCommand<T> {
     /** Hystrix group used for transformation related commands. */
     public static final HystrixCommandGroupKey FULLRUN_GROUP = HystrixCommandGroupKey.Factory.asKey("fullrun");
 
+    /** Hystrix group used for async related commands */
+    public static final HystrixCommandGroupKey ASYNC_GROUP = HystrixCommandGroupKey.Factory.asKey("async");
+
     /** This class' logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericCommand.class);
 

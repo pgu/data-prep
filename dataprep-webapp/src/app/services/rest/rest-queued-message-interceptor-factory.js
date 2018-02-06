@@ -52,7 +52,7 @@ export default function RestQueuedMessageHandler($q, $injector, $timeout, RestUR
 			const { headers, status } = response;
 
 			if (status === ACCEPTED_STATUS) {
-				return loop(headers('Location'))
+				return loop(`${RestURLs.serverUrl}${headers('Location')}`)
 					.then((data) => {
 						const $http = $injector.get('$http');
 						return $http.get(`${RestURLs.serverUrl}${data.result.downloadUrl}`);

@@ -92,6 +92,7 @@ public class AsyncAspect {
             HttpResponseContext.status(HttpStatus.ACCEPTED);
 
             String statusCheckURL = generateLocationUrl(future);
+
             HttpResponseContext.header("Location", statusCheckURL);
 
             LOGGER.debug("Redirection done.");
@@ -107,16 +108,14 @@ public class AsyncAspect {
     }
 
     private String generateLocationUrl(AsyncExecution future) {
-        ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestUri();
-        URI uri  = builder.build().toUri();
 
-        String statusCheckURL;
+        final String statusCheckURL;
         if (StringUtils.isEmpty(contextPath)) {
             statusCheckURL = "/" + AsyncController.QUEUE_PATH + "/" + future.getId();
         } else {
-            statusCheckURL = "/" + contextPath + "/" + AsyncController.QUEUE_PATH + "/" + future.getId();
+            String subContextPath = contextPath.startsWith("/") ? contextPath.substring(1) : contextPath;
+            statusCheckURL = "/" + subContextPath + "/" + AsyncController.QUEUE_PATH + "/" + future.getId();
         }
-        statusCheckURL = uri.getScheme() + "://" + uri.getAuthority() + statusCheckURL;
         return statusCheckURL;
     }
 

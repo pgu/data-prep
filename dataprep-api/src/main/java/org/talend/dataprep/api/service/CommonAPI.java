@@ -13,6 +13,7 @@
 package org.talend.dataprep.api.service;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.talend.dataprep.api.service.command.error.ErrorList.ServiceType.*;
 
 import java.io.IOException;
@@ -22,13 +23,17 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.talend.daikon.exception.error.ErrorCode;
+import org.talend.dataprep.api.service.command.QueueStatusCommand;
 import org.talend.dataprep.api.service.command.error.ErrorList;
 import org.talend.dataprep.api.type.Type;
+import org.talend.dataprep.async.AsyncExecutionMessage;
 import org.talend.dataprep.command.GenericCommand;
 import org.talend.dataprep.exception.error.APIErrorCodes;
 import org.talend.dataprep.exception.error.CommonErrorCodes;
@@ -109,6 +114,19 @@ public class CommonAPI extends APIService {
                 .filter(type -> type != Type.UTC_DATETIME) //
                 .collect(Collectors.toList()) //
                 .toArray(new Type[0]);
+    }
+
+    /**
+     * Get the async method status
+     */
+    @RequestMapping(value = "/api/{service}/queue/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get async method status.")
+    @Timed
+    public AsyncExecutionMessage getQueue(
+            @PathVariable(value = "service") @ApiParam(name = "service", value = "service name") String service,
+            @PathVariable(value = "id") @ApiParam(name = "id", value = "queue id.") String id) {
+        HystrixCommand<AsyncExecutionMessage> queueStatusCommand = getCommand(QueueStatusCommand.class, service, id);
+        return queueStatusCommand.execute();
     }
 
     /**
