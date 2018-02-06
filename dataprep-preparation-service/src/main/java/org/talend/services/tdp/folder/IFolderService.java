@@ -29,8 +29,8 @@ public interface IFolderService {
 @RequestMapping(value = "/folders", method = RequestMethod.GET, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
     @Timed
     Stream<UserFolder> list(@RequestParam(name = "parentId", required = false) String parentId, //
-                        @RequestParam(name = "sort", defaultValue = "lastModificationDate") Sort sort, //
-                        @RequestParam(name = "order", defaultValue = "desc") Order order);
+                            @RequestParam(name = "sort", defaultValue = "lastModificationDate") Sort sort, //
+                            @RequestParam(name = "order", defaultValue = "desc") Order order);
 
     /**
      * Get a folder metadata with its hierarchy

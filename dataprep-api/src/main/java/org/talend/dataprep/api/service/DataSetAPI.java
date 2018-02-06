@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.IterableUtils;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.talend.daikon.annotation.Client;
@@ -82,7 +83,7 @@ public class DataSetAPI extends APIService {
         return () -> {
             LOG.debug("Creating dataset...");
             try {
-                return dataSetService.create(name, tag, size, contentType, dataSetContent);
+                return dataSetService.create(name, tag, size, contentType, new InputStreamResource(dataSetContent));
             } finally {
                 LOG.debug("Dataset creation done.");
             }
@@ -101,7 +102,7 @@ public class DataSetAPI extends APIService {
             @ApiParam(value = "content") InputStream dataSetContent) {
         return () -> {
             LOG.debug("Creating or updating dataset #{}...", id);
-            dataSetService.updateRawDataSet(name, id, size, dataSetContent);
+            dataSetService.updateRawDataSet(name, id, size, new InputStreamResource(dataSetContent));
             return id;
         };
     }
@@ -142,7 +143,7 @@ public class DataSetAPI extends APIService {
             @ApiParam(value = "content") InputStream dataSetContent) {
         return () -> {
             LOG.debug("Creating or updating dataset #{}...", id);
-            dataSetService.updateRawDataSet(id, "", 0, dataSetContent);
+            dataSetService.updateRawDataSet(id, "", 0, new InputStreamResource(dataSetContent));
             LOG.debug("Dataset creation or update for #{} done.", id);
             return id;
         };

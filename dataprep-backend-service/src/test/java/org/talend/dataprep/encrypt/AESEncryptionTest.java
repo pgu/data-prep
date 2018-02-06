@@ -26,6 +26,15 @@ public class AESEncryptionTest {
 
     public static final String ENCRYPTED_URI = "mongodb://toto:qxjQWF%2FZsuzzeLzKIop2pQ==@dataprep.org/dataprep-db?ssl=toto&truc=machin";
 
+    public static void main(String[] args) {
+        try {
+            final String decrypt = AESEncryption.decrypt("gpsMQ8+aIfGTtKEKuAWw8Q==");
+            System.out.println("decrypt = " + decrypt);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Test
     public void should_get_the_same_string_after_encrypt_then_decrypt() throws Exception {
         // given

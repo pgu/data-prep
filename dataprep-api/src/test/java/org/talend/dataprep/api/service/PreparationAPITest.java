@@ -35,13 +35,7 @@ import static uk.co.datumedge.hamcrest.json.SameJSONAs.sameJSONAs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,12 +51,7 @@ import org.talend.dataprep.api.dataset.RowMetadata;
 import org.talend.dataprep.api.dataset.statistics.PatternFrequency;
 import org.talend.dataprep.api.folder.Folder;
 import org.talend.dataprep.api.folder.FolderEntry;
-import org.talend.dataprep.api.preparation.Action;
-import org.talend.dataprep.api.preparation.AppendStep;
-import org.talend.dataprep.api.preparation.MixedContentMap;
-import org.talend.dataprep.api.preparation.Preparation;
-import org.talend.dataprep.api.preparation.PreparationSummary;
-import org.talend.dataprep.api.preparation.Step;
+import org.talend.dataprep.api.preparation.*;
 import org.talend.dataprep.api.service.api.EnrichedPreparation;
 import org.talend.dataprep.api.service.api.PreviewAddParameters;
 import org.talend.dataprep.cache.ContentCache;
@@ -79,37 +68,6 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 
-import static com.jayway.restassured.RestAssured.expect;
-import static com.jayway.restassured.RestAssured.given;
-import static com.jayway.restassured.RestAssured.when;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.emptyMap;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.OK;
-import static org.talend.dataprep.api.export.ExportParameters.SourceType.FILTER;
-import static org.talend.dataprep.api.folder.FolderContentType.PREPARATION;
-import static org.talend.dataprep.api.service.EntityBuilder.buildAction;
-import static org.talend.dataprep.api.service.EntityBuilder.buildParametersMap;
-import static org.talend.dataprep.api.service.PreparationAPITestClient.appendStepsToPrep;
-import static org.talend.dataprep.api.service.PreparationAPITestClient.changePreparationStepsOrder;
-import static org.talend.dataprep.cache.ContentCache.TimeToLive.PERMANENT;
-import static org.talend.dataprep.test.SameJSONFile.sameJSONAsFile;
-import static org.talend.dataprep.transformation.format.JsonFormat.JSON;
-import static uk.co.datumedge.hamcrest.json.SameJSONAs.sameJSONAs;
-
 public class PreparationAPITest extends ApiServiceTestBase {
 
     @Autowired
@@ -125,7 +83,7 @@ public class PreparationAPITest extends ApiServiceTestBase {
     // -----------------------------------------------------GETTER-------------------------------------------------------
     // ------------------------------------------------------------------------------------------------------------------
     @Test
-    public void testEmptyPreparationList() throws Exception {
+    public void testEmptyPreparationList() {
         assertThat(when().get("/api/preparations").asString(), sameJSONAs("[]"));
         assertThat(when().get("/api/preparations/?format=short").asString(), sameJSONAs("[]"));
         assertThat(when().get("/api/preparations/?format=long").asString(), sameJSONAs("[]"));
@@ -338,7 +296,7 @@ public class PreparationAPITest extends ApiServiceTestBase {
     }
 
     @Test
-    public void copyPreparationShouldForwardExceptions() throws Exception {
+    public void copyPreparationShouldForwardExceptions() {
 
         // when
         final Response response = given() //
@@ -383,7 +341,7 @@ public class PreparationAPITest extends ApiServiceTestBase {
     }
 
     @Test
-    public void movePreparationShouldForwardExceptions() throws Exception {
+    public void movePreparationShouldForwardExceptions() {
 
         // when
         final Response response = given() //
@@ -664,7 +622,7 @@ public class PreparationAPITest extends ApiServiceTestBase {
     }
 
     @Test
-    public void should_throw_error_when_preparation_does_not_exist_on_delete() throws Exception {
+    public void should_throw_error_when_preparation_does_not_exist_on_delete() {
         // when : delete unknown preparation action
         final Response response = given().delete("/api/preparations/{preparation}/actions/{action}", "unknown_prep",
                 "unkown_step");
@@ -788,7 +746,7 @@ public class PreparationAPITest extends ApiServiceTestBase {
         assertThat(entries.size(), is(0));
         String dataSetId = testClient.createDataset("dataset/dataset.csv", "testCreatePreparation");
 
-        final Response response = given() //
+        given() //
                 .contentType(ContentType.JSON) //
                 .body("{ \"name\": \"" + "my_preparation" + "\", \"dataSetId\": \"" + dataSetId + "\"}")
                 .queryParam("folder", home.getId()) //

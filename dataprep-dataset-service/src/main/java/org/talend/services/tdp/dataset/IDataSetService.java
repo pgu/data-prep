@@ -148,7 +148,7 @@ public interface IDataSetService {
             @PathVariable(name = "id") String dataSetId, //
             @RequestParam(name = "name", required = false) String name, //
             @RequestParam(name = "size", required = false, defaultValue = "0") long size, //
-            @RequestBody Resource dataSetContent);
+            @RequestBody Resource dataSetContent) throws IOException;
 
     /**
      * List all dataset related error codes.

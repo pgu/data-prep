@@ -232,8 +232,7 @@ public class DataSetService extends BaseDataSetService implements IDataSetServic
     }
 
     @Override
-    public String create(String name, String tag, long size, String contentType, InputStream content)
-            throws IOException {
+    public String create(String name, String tag, long size, String contentType, org.springframework.core.io.Resource content) throws IOException {
         //@formatter:on
         checkDataSetName(name);
 
@@ -253,7 +252,7 @@ public class DataSetService extends BaseDataSetService implements IDataSetServic
         // get the location out of the content type and the request body
         final DataSetLocation location;
         try {
-            location = datasetLocator.getDataSetLocation(contentType, content);
+            location = datasetLocator.getDataSetLocation(contentType, content.getInputStream());
         } catch (IOException e) {
             throw new TDPException(DataSetErrorCodes.UNABLE_TO_READ_DATASET_LOCATION, e);
         }
@@ -282,7 +281,7 @@ public class DataSetService extends BaseDataSetService implements IDataSetServic
             LOG.debug(marker, "Storing content...");
             final long maxDataSetSizeAllowed = getMaxDataSetSizeAllowed();
             final StrictlyBoundedInputStream sizeCalculator =
-                    new StrictlyBoundedInputStream(content, maxDataSetSizeAllowed);
+                    new StrictlyBoundedInputStream(content.getInputStream(), maxDataSetSizeAllowed);
             contentStore.storeAsRaw(dataSetMetadata, sizeCalculator);
             dataSetMetadata.setDataSetSize(sizeCalculator.getTotal());
             LOG.debug(marker, "Content stored.");
@@ -308,7 +307,7 @@ public class DataSetService extends BaseDataSetService implements IDataSetServic
             // might end up in a 'connection reset' or a 'broken pipe' error in API.
             //
             // So, let's read fully the request content before closing the connection.
-            dataSetContentToNull(content);
+            dataSetContentToNull(content.getInputStream());
         }
         dataSetMetadataRepository.remove(id);
         if (dataSetMetadata != null) {
@@ -473,7 +472,7 @@ public class DataSetService extends BaseDataSetService implements IDataSetServic
     }
 
     @Override
-    public void updateRawDataSet(String dataSetId, String name, long size, InputStream dataSetContent) {
+    public void updateRawDataSet(String dataSetId, String name, long size, org.springframework.core.io.Resource dataSetContent) throws IOException {
 
         LOG.debug("updating dataset content #{}", dataSetId);
 
@@ -519,7 +518,7 @@ public class DataSetService extends BaseDataSetService implements IDataSetServic
             // Save data set content into cache to make sure there's enough space in the content store
             final long maxDataSetSizeAllowed = getMaxDataSetSizeAllowed();
             final StrictlyBoundedInputStream sizeCalculator =
-                    new StrictlyBoundedInputStream(dataSetContent, maxDataSetSizeAllowed);
+                    new StrictlyBoundedInputStream(dataSetContent.getInputStream(), maxDataSetSizeAllowed);
             try (OutputStream cacheEntry = cacheManager.put(cacheKey, TimeToLive.DEFAULT)) {
                 IOUtils.copy(sizeCalculator, cacheEntry);
             }
@@ -557,7 +556,7 @@ public class DataSetService extends BaseDataSetService implements IDataSetServic
             LOG.error("Error updating the dataset", e);
             throw new TDPException(UNABLE_TO_CREATE_OR_UPDATE_DATASET, e);
         } finally {
-            dataSetContentToNull(dataSetContent);
+            dataSetContentToNull(dataSetContent.getInputStream());
             // whatever the outcome the cache needs to be cleaned
             if (cacheManager.has(cacheKey)) {
                 cacheManager.evict(cacheKey);
@@ -759,7 +758,7 @@ public class DataSetService extends BaseDataSetService implements IDataSetServic
     }
 
     @Override
-    public void setFavorites( boolean unset, String dataSetId) {
+    public void setFavorites(boolean unset, String dataSetId) {
         String userId = security.getUserId();
         // check that dataset exists
         DataSetMetadata dataSetMetadata = dataSetMetadataRepository.get(dataSetId);

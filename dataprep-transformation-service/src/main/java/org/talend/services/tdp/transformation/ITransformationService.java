@@ -15,16 +15,17 @@ import org.talend.dataprep.api.action.ActionForm;
 import org.talend.dataprep.api.dataset.ColumnMetadata;
 import org.talend.dataprep.api.dataset.DataSetMetadata;
 import org.talend.dataprep.api.dataset.statistics.SemanticDomain;
-import org.talend.dataprep.api.export.ExportParameters;
 import org.talend.dataprep.api.preparation.StepDiff;
 import org.talend.dataprep.exception.json.JsonErrorCodeDescription;
-import org.talend.dataprep.format.export.ExportFormatMessage;
 import org.talend.dataprep.metrics.Timed;
 import org.talend.dataprep.metrics.VolumeMetered;
 import org.talend.dataprep.security.PublicAPI;
-import org.talend.dataprep.transformation.aggregation.api.AggregationParameters;
+import org.talend.dataprep.services.api.AggregationParameters;
+import org.talend.dataprep.services.transformation.AggregationResult;
+import org.talend.dataprep.services.transformation.ExportFormatMessage;
+import org.talend.dataprep.services.transformation.ExportParameters;
+import org.talend.dataprep.services.transformation.PreviewParameters;
 import org.talend.dataprep.transformation.api.action.dynamic.GenericParameter;
-import org.talend.dataprep.transformation.preview.api.PreviewParameters;
 
 /**
  *
