@@ -28,28 +28,25 @@ export default function RestQueuedMessageHandler($q, $injector, $timeout, RestUR
 
 		return new Promise((resolve, reject) => {
 			$http.get(url)
-			.then(({ data }) => {
-				(data.status === RUNNING_STATUS ? reject : resolve)(data);
-			});
+				.then(({ data }) => (data.status === RUNNING_STATUS ? reject : resolve)(data));
 		});
 	}
 
 	function loop(url) {
-		const checker = function (url) {
+		function checker(url) {
 			return checkStatus(url)
 				.catch(() => $timeout(LOOP_DELAY).then(() => checker(url)));
-		};
-
+		}
 		return checker(url);
 	}
 
 	return {
 		/**
 		 * @ngdoc method
-		 * @name responseQueued
+		 * @name response
 		 * @methodOf data-prep.services.rest.service:RestQueuedMessageHandler
-		 * @param {object} rejection - the rejected promise
-		 * @description Display the error message depending on the error status and error code
+		 * @param {object} response - the catched response
+		 * @description If a 202 occurs, loop until the status change from RUNNING to anything else
 		 */
 		response(response) {
 			const { headers, status } = response;
@@ -61,6 +58,7 @@ export default function RestQueuedMessageHandler($q, $injector, $timeout, RestUR
 						return $http.get(`${RestURLs.serverUrl}${data.result.downloadUrl}`);
 					});
 			}
+
 			return $q.resolve(response);
 		},
 	};
