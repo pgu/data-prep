@@ -16,7 +16,7 @@ public interface ExportSampleStep {
      * @param params the step parameters
      * @throws IOException if needed
      */
-    void exportSample(@NotNull Map<String, String> params) throws IOException;
+    void exportSample(@NotNull Map<String, String> params) throws IOException, InterruptedException;
 
     /**
      * Extract all parameters needed for a sample export from a Cucumber DataTable.
