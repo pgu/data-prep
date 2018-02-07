@@ -84,6 +84,7 @@ public class UpgradeService {
         LOG.info("process the need upgrade method. Current version is {}", VERSION.name());
         int appliedTasks = repository.countUpgradeTask(VERSION.name());
         int availableTasks = (int) tasks.stream().filter(task -> Objects.equals(task.getTarget(), VERSION)).count();
+        tasks.stream().forEach(task -> LOG.info("Task id {}", task.getId()));
         if (appliedTasks > availableTasks) {
             LOG.warn("It seems that more upgrade tasks have been applied than the available ones.");
             return true;
