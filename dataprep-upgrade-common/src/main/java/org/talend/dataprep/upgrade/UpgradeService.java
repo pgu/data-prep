@@ -25,6 +25,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.talend.daikon.multitenant.context.TenancyContextHolder;
 import org.talend.dataprep.upgrade.model.UpgradeTask;
 import org.talend.dataprep.upgrade.model.UpgradeTaskId;
 import org.talend.dataprep.upgrade.repository.UpgradeTaskRepository;
