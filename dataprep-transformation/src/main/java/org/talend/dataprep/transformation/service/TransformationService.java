@@ -29,6 +29,7 @@ import static org.talend.dataprep.transformation.format.JsonFormat.JSON;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
@@ -61,8 +62,7 @@ import org.talend.dataprep.api.export.ExportParametersUtil;
 import org.talend.dataprep.api.preparation.Preparation;
 import org.talend.dataprep.api.preparation.Step;
 import org.talend.dataprep.api.preparation.StepDiff;
-import org.talend.dataprep.async.AsyncOperation;
-import org.talend.dataprep.async.AsyncParameter;
+import org.talend.dataprep.async.*;
 import org.talend.dataprep.async.conditional.PreparationExportNotInCacheCondition;
 import org.talend.dataprep.async.result.PreparationGetContentUrlGenerator;
 import org.talend.dataprep.cache.ContentCache;
@@ -192,10 +192,10 @@ public class TransformationService extends BaseTransformationService {
     @ApiOperation(value = "Run the transformation given the provided export parameters",
             notes = "This operation transforms the dataset or preparation using parameters in export parameters.")
     @VolumeMetered
-    @AsyncOperation(conditionalClass = PreparationExportNotInCacheCondition.class, resultUrlGenerator = PreparationGetContentUrlGenerator.class)
-    public StreamingResponseBody execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid @AsyncParameter final ExportParameters parameters) throws IOException {
-
-        //TODO: Gérer le cas d'un pipeline déjà lancé
+    @AsyncOperation(conditionalClass = PreparationExportNotInCacheCondition.class, //
+            resultUrlGenerator = PreparationGetContentUrlGenerator.class, //
+            executionIdGeneratorClass = ExportParametersExecutionIdGenerator.class)
+    public StreamingResponseBody execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid @AsyncParameter @AsyncExecutionId final ExportParameters parameters) throws IOException {
 
         ExportParameters completeParameters = parameters;
 

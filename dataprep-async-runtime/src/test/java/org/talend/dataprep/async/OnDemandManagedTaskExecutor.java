@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
@@ -61,15 +62,19 @@ public class OnDemandManagedTaskExecutor implements ManagedTaskExecutor {
     }
 
     /**
-     * @see ManagedTaskExecutor#queue(ManagedTaskCallable, String, AsyncExecutionResult)
+     * @see ManagedTaskExecutor#queue(ManagedTaskCallable, String, String, AsyncExecutionResult)
      */
     @Override
-    public AsyncExecution queue(ManagedTaskCallable task, String groupId, AsyncExecutionResult result) {
+    public AsyncExecution queue(ManagedTaskCallable task, String executionId, String groupId, AsyncExecutionResult result) {
 
         final Optional<String> optional = Optional.ofNullable(groupId);
         final AsyncExecution asyncExecution = optional.isPresent() ? new AsyncExecution(groupId) : new AsyncExecution();
-        asyncExecution.updateExecutionState(AsyncExecution.Status.NEW);
 
+        if(StringUtils.isNotEmpty(executionId)){
+            asyncExecution.setId(executionId);
+        }
+
+        asyncExecution.updateExecutionState(AsyncExecution.Status.NEW);
         asyncExecution.setResult(result);
         tasks.put(asyncExecution.getId(), task);
         repository.save(asyncExecution);

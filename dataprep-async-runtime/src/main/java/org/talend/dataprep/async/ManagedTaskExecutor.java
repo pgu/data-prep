@@ -37,10 +37,11 @@ public interface ManagedTaskExecutor {
      * Queue a task to execute.
      *
      * @param task the task to execute.
+     * @param executionId the execution id to used in order to register the task
      * @param groupId the task group id.
      * @return the AsyncExecution that enables caller to monitor the execution.
      */
-    AsyncExecution queue(ManagedTaskCallable task, String groupId, AsyncExecutionResult result);
+    AsyncExecution queue(ManagedTaskCallable task, String executionId, String groupId, AsyncExecutionResult result);
 
     /**
      * Cancel (stop) the task that matches the given task id.

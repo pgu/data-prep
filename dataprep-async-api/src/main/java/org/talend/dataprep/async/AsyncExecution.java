@@ -134,6 +134,11 @@ public class AsyncExecution {
         this.id = group + '-' + UUID.randomUUID().toString();
     }
 
+    public AsyncExecution(String group, String id) {
+        this.group = group;
+        this.id = id;
+    }
+
     /**
      * The comparator to use to make sure the last started is first.
      */

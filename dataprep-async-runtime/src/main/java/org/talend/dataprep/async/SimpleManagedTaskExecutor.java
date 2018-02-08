@@ -21,6 +21,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,14 +92,19 @@ public class SimpleManagedTaskExecutor implements ManagedTaskExecutor {
     }
 
     /**
-     * @see ManagedTaskExecutor#queue(ManagedTaskCallable, String, AsyncExecutionResult)
+     * @see ManagedTaskExecutor#queue(ManagedTaskCallable, String, String, AsyncExecutionResult)
      */
     @Override
-    public synchronized AsyncExecution queue(final ManagedTaskCallable task, String groupId, AsyncExecutionResult resultUrl) {
+    public synchronized AsyncExecution queue(final ManagedTaskCallable task, String executionId, String groupId, AsyncExecutionResult resultUrl) {
 
         // Create async execution
         final AsyncExecution asyncExecution =
                 ofNullable(groupId).map(s -> new AsyncExecution(groupId)).orElseGet(AsyncExecution::new);
+
+        if(StringUtils.isNotEmpty(executionId)){
+            asyncExecution.setId(executionId);
+        }
+
         asyncExecution.setUserId(security.getUserId());
         asyncExecution.setTenantId(security.getTenantId());
         repository.save(asyncExecution);

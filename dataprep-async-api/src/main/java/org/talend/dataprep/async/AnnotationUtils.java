@@ -74,4 +74,16 @@ public class AnnotationUtils {
 
         return idParameterIndexes;
     }
+
+    public static Object[] extractAsyncParameter(ProceedingJoinPoint pjp) {
+        List<Integer> conditionArgIndex = AnnotationUtils.getAnnotatedParameterIndexes(pjp, AsyncParameter.class);
+
+        List<Object> conditionArg = new ArrayList<>();
+
+        conditionArgIndex.forEach( (i) -> {
+            conditionArg.add(pjp.getArgs()[i]);
+        });
+
+        return conditionArg.toArray(new Object[conditionArg.size()]);
+    }
 }

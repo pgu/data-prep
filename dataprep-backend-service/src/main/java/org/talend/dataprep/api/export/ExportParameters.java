@@ -213,4 +213,8 @@ public class ExportParameters implements AsyncGroupKey {
                 ", filter=" + filter + //
                 '}';
     }
+
+    public String generateUniqueId(){
+        return preparationId +"_" + stepId + "_" + datasetId + "_" + from +"_" + filter;
+    }
 }

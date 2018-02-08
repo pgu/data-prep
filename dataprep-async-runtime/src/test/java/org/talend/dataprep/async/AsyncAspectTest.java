@@ -214,18 +214,6 @@ public class AsyncAspectTest {
     }
 
     @Test
-    public void shouldNotResumeAsyncExecution() throws Exception {
-        // when
-        final String executionId = "execution-1234";
-        try {
-            controller.executionIdFromPath(executionId);
-            fail("Execution does not exist, should have thrown an exception.");
-        } catch (TDPException e) {
-            assertEquals(TransformationErrorCodes.UNABLE_TO_RESUME_EXECUTION, e.getCode());
-        }
-    }
-
-    @Test
     public void shouldDealWithAsyncExecutionIdGenerator() throws Exception {
         // when
         final String executionId = "execution-1234";
