@@ -46,7 +46,7 @@ import org.talend.dataprep.exception.error.TransformationErrorCodes;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-@TestPropertySource(properties = { "test.managed.tasks=onDemand" })
+@TestPropertySource(properties = { "test.managed.tasks=onDemand", "execution.executor.local=false" })
 public class AsyncAspectTest {
 
     @Autowired
