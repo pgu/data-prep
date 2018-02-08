@@ -67,7 +67,9 @@ public class ExportParametersUtil {
         if(StringUtils.isNotEmpty(exportParam.getPreparationId())){
             Preparation prep = getPreparation(exportParam.getPreparationId(), exportParam.getStepId());
             result.setStepId(getCleanStepId(prep, exportParam.getStepId()));
-            result.setDatasetId(prep.getDataSetId());
+            if(exportParam.getFrom() != ExportParameters.SourceType.FILTER){
+                result.setDatasetId(prep.getDataSetId());
+            }
         } else{
             // it'w a dataset export parameter. We need to switch stepId to empty
             result.setStepId("");

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.export.ExportParameters;
 
 /**
- * Return TRUE if export deal with preparation (there is a preparationId and export parameters)
+ * Return TRUE if export deal with preparation (there is a preparationId and export parameters) and not a FILTER
  */
 @Component
 public class PreparationExportCondition implements ConditionalTest {
@@ -30,7 +30,9 @@ public class PreparationExportCondition implements ConditionalTest {
         assert args.length == 1;
         assert args[0] instanceof ExportParameters;
 
-        return StringUtils.isNotEmpty(((ExportParameters) args[0]).getPreparationId());
+        //TODO: FILTER maybe need to be asynchrone ?
+
+        return StringUtils.isNotEmpty(((ExportParameters) args[0]).getPreparationId()) && ((ExportParameters) args[0]).getFrom() != ExportParameters.SourceType.FILTER;
     }
 
 }

@@ -34,9 +34,10 @@ import org.talend.dataprep.transformation.pipeline.Signal;
 /**
  * Managed task executor that run tasks on demand and synchronously.
  */
-@Component
-@ConditionalOnProperty(name = "test.managed.tasks", havingValue = "onDemand", matchIfMissing = true)
-@Primary
+//@Component
+//@ConditionalOnProperty(name = "test.managed.tasks", havingValue = "onDemand2", matchIfMissing = true)
+//@Primary
+    //TODO A SUPPRIMER ?
 public class OnDemandManagedTaskExecutor implements ManagedTaskExecutor {
 
     private final Map<String, Callable> tasks = new HashMap<>();

@@ -16,6 +16,7 @@ import static com.jayway.restassured.RestAssured.given;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
@@ -138,6 +139,7 @@ public abstract class ApiServiceTestBase extends ServiceBaseTest {
         return transformedResponse;
     }
 
+
     /**
      * Ping (100 times max) async method status url in order to wait the end of the execution
      *
@@ -145,7 +147,7 @@ public abstract class ApiServiceTestBase extends ServiceBaseTest {
      * @throws IOException
      * @throws InterruptedException
      */
-    private void waitForAsynchronousMethodTofinish(String asyncMethodStatusUrl) throws IOException, InterruptedException {
+    protected void waitForAsynchronousMethodTofinish(String asyncMethodStatusUrl) throws IOException, InterruptedException {
         boolean isAsyncMethodRunning = true;
         int nbLoop = 0;
 
@@ -163,9 +165,10 @@ public abstract class ApiServiceTestBase extends ServiceBaseTest {
             AsyncExecutionMessage asyncExecutionMessage =
                     mapper.readerFor(AsyncExecutionMessage.class).readValue(statusAsyncMethod);
 
-            isAsyncMethodRunning = asyncExecutionMessage.getStatus().equals(AsyncExecution.Status.RUNNING);
+            AsyncExecution.Status asyncStatus = asyncExecutionMessage.getStatus();
+            isAsyncMethodRunning = asyncStatus.equals(AsyncExecution.Status.RUNNING) || asyncStatus.equals(AsyncExecution.Status.NEW);
 
-            Thread.sleep(50);
+            TimeUnit.MILLISECONDS.sleep(50);
 
             nbLoop++;
         }
