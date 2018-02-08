@@ -31,7 +31,8 @@ export default class ExportCtrl {
 		StepUtilsService,
 		ExportService,
 		StorageService,
-		PreparationService
+		PreparationService,
+		PlaygroundService
 	) {
 		'ngInject';
 
@@ -42,6 +43,7 @@ export default class ExportCtrl {
 		this.StorageService = StorageService;
 		this.StepUtilsService = StepUtilsService;
 		this.PreparationService = PreparationService;
+		this.PlaygroundService = PlaygroundService;
 
 		this.exportParams = this.state.export.defaultExportType;
 		this.selectedType = ExportService.getType(this.exportParams.exportType);
@@ -94,6 +96,7 @@ export default class ExportCtrl {
 	launchExport() {
 		this.exportParams = this._extractParameters(this.selectedType);
 
+		this.PlaygroundService.startLoader();
 		this.PreparationService.isExportPossible({
 			...this.exportParams,
 			preparationId: this.state.playground.preparation.id,
@@ -109,7 +112,8 @@ export default class ExportCtrl {
 				0,
 				false
 			);
-		});
+		})
+		.finally(this.PlaygroundService.stopLoader);
 	}
 
 	/**
