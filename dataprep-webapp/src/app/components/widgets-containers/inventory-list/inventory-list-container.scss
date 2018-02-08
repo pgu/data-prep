@@ -73,8 +73,10 @@ button[id^="datasets-list-"][id$="dataset:favorite"] {
 }
 
 .tc-list-item {
-	&:hover, &.list-item-favorite {
+	&.list-item-favorite,
+	> div:hover {
 		button[id^="datasets-list-"][id$="dataset:favorite"] {
+			transition: opacity 0.15s ease-in;
 			opacity: 1;
 		}
 	}
