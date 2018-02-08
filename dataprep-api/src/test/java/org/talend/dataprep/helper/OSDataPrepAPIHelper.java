@@ -216,7 +216,6 @@ public class OSDataPrepAPIHelper {
                 .when() //
                 .queryParam("name", datasetName) //
                 .put("/api/datasets/" + datasetId);
-
     }
 
     /**
@@ -518,7 +517,7 @@ public class OSDataPrepAPIHelper {
      * @throws IOException
      * @throws InterruptedException
      */
-    private void waitForAsynchronousMethodTofinish(String asyncMethodStatusUrl) throws IOException, InterruptedException {
+    protected void waitForAsynchronousMethodTofinish(String asyncMethodStatusUrl) throws IOException, InterruptedException {
         boolean not_finished = true;
         LocalDateTime timeout = LocalDateTime.now().plusSeconds(asyncTimeOut);
 
@@ -527,7 +526,7 @@ public class OSDataPrepAPIHelper {
                     .baseUri(apiBaseUrl) //
                     .when() //
                     .expect().statusCode(200) //
-                    .log().all() //
+                    .log().ifError() //
                     .get(asyncMethodStatusUrl).asString();
 
             AsyncExecutionMessage asyncExecutionMessage = mapper.readerFor(AsyncExecutionMessage.class)
