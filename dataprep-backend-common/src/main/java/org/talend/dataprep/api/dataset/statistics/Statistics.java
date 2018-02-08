@@ -86,6 +86,7 @@ public class Statistics implements Cloneable, Serializable {
         this.min = original.min;
         this.mean = original.mean;
         this.variance = original.variance;
+        this.distinctCount = original.distinctCount;
         this.duplicateCount = original.duplicateCount;
         this.dataFrequencies = new LinkedList(original.dataFrequencies);
         this.patternFrequencies = new LinkedList(original.patternFrequencies);
