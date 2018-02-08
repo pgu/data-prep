@@ -14,6 +14,7 @@
 const ACCEPTED_STATUS = 202;
 const LOOP_DELAY = 1000;
 const RUNNING_STATUS = 'RUNNING';
+const ALLOWED_METHODS = ['GET', 'HEAD'];
 
 /**
  * @ngdoc service
@@ -45,17 +46,20 @@ export default function RestQueuedMessageHandler($q, $injector, $timeout, RestUR
 		 * @ngdoc method
 		 * @name response
 		 * @methodOf data-prep.services.rest.service:RestQueuedMessageHandler
-		 * @param {object} response - the catched response
+		 * @param {object} response - the intercepted response
 		 * @description If a 202 occurs, loop until the status change from RUNNING to anything else
 		 */
 		response(response) {
-			const { headers, status } = response;
+			const { headers, config, status } = response;
 
-			if (status === ACCEPTED_STATUS) {
+			if (status === ACCEPTED_STATUS && ALLOWED_METHODS.includes(config.method)) {
 				return loop(`${RestURLs.serverUrl}${headers('Location')}`)
 					.then((data) => {
 						const $http = $injector.get('$http');
-						return $http.get(`${RestURLs.serverUrl}${data.result.downloadUrl}`);
+						return $http({
+							method: config.method,
+							url: `${RestURLs.serverUrl}${data.result.downloadUrl}`,
+						});
 					});
 			}
 
