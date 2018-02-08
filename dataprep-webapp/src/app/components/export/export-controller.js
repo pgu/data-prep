@@ -30,7 +30,8 @@ export default class ExportCtrl {
 		RestURLs,
 		StepUtilsService,
 		ExportService,
-		StorageService
+		StorageService,
+		PreparationService
 	) {
 		'ngInject';
 
@@ -40,6 +41,7 @@ export default class ExportCtrl {
 		this.ExportService = ExportService;
 		this.StorageService = StorageService;
 		this.StepUtilsService = StepUtilsService;
+		this.PreparationService = PreparationService;
 
 		this.exportParams = this.state.export.defaultExportType;
 		this.selectedType = ExportService.getType(this.exportParams.exportType);
@@ -92,14 +94,22 @@ export default class ExportCtrl {
 	launchExport() {
 		this.exportParams = this._extractParameters(this.selectedType);
 
-		this.$timeout(
-			() => {
-				this.form.action = this.RestURLs.exportUrl;
-				this.form.submit();
-			},
-			0,
-			false
-		);
+		this.PreparationService.isExportPossible({
+			...this.exportParams,
+			preparationId: this.state.playground.preparation.id,
+			stepId: this.stepId,
+			datasetId: this.state.playground.dataset.id,
+		})
+		.then(() => {
+			this.$timeout(
+				() => {
+					this.form.action = this.RestURLs.exportUrl;
+					this.form.submit();
+				},
+				0,
+				false
+			);
+		});
 	}
 
 	/**
