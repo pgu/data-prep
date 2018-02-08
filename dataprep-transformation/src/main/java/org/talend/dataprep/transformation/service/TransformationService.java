@@ -245,7 +245,8 @@ public class TransformationService extends BaseTransformationService {
             // Return transformation cached content (after sanity check)
             if (!contentCache.has(cacheKey)) {
                 // Not expected: We've just ran a transformation, yet no metadata cached?
-                throw new TDPException(TransformationErrorCodes.METADATA_NOT_FOUND);
+//                throw new TDPException(TransformationErrorCodes.METADATA_NOT_FOUND);
+                return null;
             }
             try (InputStream stream = contentCache.get(cacheKey)) {
                 return mapper.readerFor(DataSetMetadata.class).readValue(stream);
