@@ -24,7 +24,9 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FilenameUtils;
@@ -51,6 +53,14 @@ import com.jayway.restassured.specification.RequestSpecification;
 public class OSDataPrepAPIHelper {
 
     private static final ObjectMapper mapper = new ObjectMapper();
+
+    /** Set of normal running status for asynch execution. */
+    private static final Set<AsyncExecution.Status> activeAsyncStatus = new HashSet<>();
+
+    static {
+        activeAsyncStatus.add(AsyncExecution.Status.NEW);
+        activeAsyncStatus.add(AsyncExecution.Status.RUNNING);
+    }
 
     @Value("${backend.api.url:http://localhost:8888}")
     private String apiBaseUrl;
@@ -509,19 +519,21 @@ public class OSDataPrepAPIHelper {
      * @throws InterruptedException
      */
     private void waitForAsynchronousMethodTofinish(String asyncMethodStatusUrl) throws IOException, InterruptedException {
-        boolean not_finished;
+        boolean not_finished = true;
         LocalDateTime timeout = LocalDateTime.now().plusSeconds(asyncTimeOut);
 
         do {
-            String statusAsyncMethod = given().when() //
-                    .expect().statusCode(200).log().ifError() //
+            String statusAsyncMethod = given() //
+                    .baseUri(apiBaseUrl) //
+                    .when() //
+                    .expect().statusCode(200) //
+                    .log().all() //
                     .get(asyncMethodStatusUrl).asString();
 
             AsyncExecutionMessage asyncExecutionMessage = mapper.readerFor(AsyncExecutionMessage.class)
                     .readValue(statusAsyncMethod);
 
-            not_finished = LocalDateTime.now().isBefore(timeout)
-                    && asyncExecutionMessage.getStatus().equals(AsyncExecution.Status.RUNNING);
+            not_finished = LocalDateTime.now().isBefore(timeout) && activeAsyncStatus.contains(asyncExecutionMessage.getStatus());
 
             if (not_finished) {
                 TimeUnit.MILLISECONDS.sleep(500);
