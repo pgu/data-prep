@@ -95,13 +95,14 @@ export default class ExportCtrl {
      */
 	launchExport() {
 		this.exportParams = this._extractParameters(this.selectedType);
+		const { preparation, dataset } = this.state.playground;
 
 		this.PlaygroundService.startLoader();
 		this.PreparationService.isExportPossible({
 			...this.exportParams,
-			preparationId: this.state.playground.preparation.id,
+			preparationId: preparation && preparation.id,
 			stepId: this.stepId,
-			datasetId: this.state.playground.dataset.id,
+			datasetId: dataset.id,
 		})
 		.then(() => {
 			this.$timeout(
