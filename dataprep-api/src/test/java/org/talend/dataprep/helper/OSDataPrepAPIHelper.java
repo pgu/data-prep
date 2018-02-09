@@ -531,10 +531,11 @@ public class OSDataPrepAPIHelper {
      * @throws IOException
      * @throws InterruptedException
      */
-    protected void waitForAsynchronousMethodTofinish(String asyncMethodStatusUrl) throws IOException, InterruptedException {
+    protected AsyncExecutionMessage waitForAsynchronousMethodTofinish(String asyncMethodStatusUrl)
+            throws IOException, InterruptedException {
         boolean not_finished = true;
         LocalDateTime timeout = LocalDateTime.now().plusSeconds(asyncTimeOut);
-
+        AsyncExecutionMessage asyncExecutionMessage;
         do {
             String statusAsyncMethod = given() //
                     .baseUri(apiBaseUrl) //
@@ -543,8 +544,7 @@ public class OSDataPrepAPIHelper {
                     .log().ifError() //
                     .get(asyncMethodStatusUrl).asString();
 
-            AsyncExecutionMessage asyncExecutionMessage = mapper.readerFor(AsyncExecutionMessage.class)
-                    .readValue(statusAsyncMethod);
+            asyncExecutionMessage = mapper.readerFor(AsyncExecutionMessage.class).readValue(statusAsyncMethod);
 
             not_finished = LocalDateTime.now().isBefore(timeout) && activeAsyncStatus.contains(asyncExecutionMessage.getStatus());
 
@@ -552,5 +552,6 @@ public class OSDataPrepAPIHelper {
                 TimeUnit.MILLISECONDS.sleep(500);
             }
         } while (not_finished);
+        return asyncExecutionMessage;
     }
 }
