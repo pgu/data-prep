@@ -10,24 +10,26 @@
 //
 //  ============================================================================
 
-package org.talend.dataprep.async;
+package org.talend.dataprep.async.conditional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.async.conditional.ConditionalTest;
 
+/**
+ * Return TRUE if metadata are not in cache and prep have more than one step
+ */
 @Component
-public class PairConditionalAsyncTest implements ConditionalTest {
+public class GetPrepMetadataAsyncCondition implements ConditionalTest {
+
+    @Autowired
+    private PrepMetadataCacheCondition cacheCondition;
+
+    @Autowired
+    private PrepHasStepCondition exportCondition;
+
     @Override
     public boolean apply(Object... args) {
 
-        // check pre-condition
-        assert args != null;
-
-        assert args.length == 1;
-        assert args[0] instanceof Integer;
-
-        Integer index = (Integer) args[0];
-
-        return (index & 1) == 0;
+        return !cacheCondition.apply(args) && exportCondition.apply(args);
     }
 }

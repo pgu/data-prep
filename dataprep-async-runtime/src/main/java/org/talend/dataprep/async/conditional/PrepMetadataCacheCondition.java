@@ -19,20 +19,22 @@ import org.springframework.stereotype.Component;
 import org.talend.dataprep.api.export.ExportParameters;
 import org.talend.dataprep.api.export.ExportParametersUtil;
 import org.talend.dataprep.cache.CacheKeyGenerator;
-import org.talend.dataprep.cache.ContentCache;
 import org.talend.dataprep.cache.TransformationMetadataCacheKey;
 
 import java.io.IOException;
 
 import static org.talend.dataprep.api.export.ExportParameters.SourceType.HEAD;
 
+/**
+ * Return TRUE if preparation metadata is in cache
+ */
 @Component
-public class PrepMetadataNotInCacheCondition implements ConditionalTest {
+public class PrepMetadataCacheCondition implements ConditionalTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PrepMetadataNotInCacheCondition.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrepMetadataCacheCondition.class);
 
     @Autowired
-    private ContentCache contentCache;
+    private CacheCondition cacheCondition;
 
     @Autowired
     private CacheKeyGenerator cacheKeyGenerator;
@@ -41,7 +43,7 @@ public class PrepMetadataNotInCacheCondition implements ConditionalTest {
     private ExportParametersUtil exportParametersUtil;
 
     @Override
-    public boolean executeAsynchronously(Object... args) {
+    public boolean apply(Object... args) {
 
         // check pre-condition
         assert args != null;
@@ -60,7 +62,7 @@ public class PrepMetadataNotInCacheCondition implements ConditionalTest {
 
             final TransformationMetadataCacheKey cacheKey = cacheKeyGenerator.generateMetadataKey(exportParameters.getPreparationId(), exportParameters.getStepId(), HEAD);
 
-            return !contentCache.has(cacheKey);
+            return cacheCondition.apply(cacheKey);
 
         } catch (IOException e) {
             LOGGER.error("Cannot get all information from export parameters", e);

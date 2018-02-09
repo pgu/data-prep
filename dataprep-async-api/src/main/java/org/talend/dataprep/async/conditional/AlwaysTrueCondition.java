@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 public class AlwaysTrueCondition implements ConditionalTest {
 
     @Override
-    public boolean executeAsynchronously(Object... args) {
+    public boolean apply(Object... args) {
         return true;
     }
 }

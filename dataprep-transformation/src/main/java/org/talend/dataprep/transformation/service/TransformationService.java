@@ -62,8 +62,8 @@ import org.talend.dataprep.api.preparation.Preparation;
 import org.talend.dataprep.api.preparation.Step;
 import org.talend.dataprep.api.preparation.StepDiff;
 import org.talend.dataprep.async.*;
-import org.talend.dataprep.async.conditional.PrepMetadataNotInCacheCondition;
-import org.talend.dataprep.async.conditional.PreparationExportNotInCacheCondition;
+import org.talend.dataprep.async.conditional.GetPrepMetadataAsyncCondition;
+import org.talend.dataprep.async.conditional.GetPrepContentAsyncCondition;
 import org.talend.dataprep.async.generator.ExportParametersExecutionIdGenerator;
 import org.talend.dataprep.async.generator.PrepMetadataExecutionIdGenerator;
 import org.talend.dataprep.async.result.PrepMetadataGetContentUrlGenerator;
@@ -195,7 +195,7 @@ public class TransformationService extends BaseTransformationService {
     @ApiOperation(value = "Run the transformation given the provided export parameters",
             notes = "This operation transforms the dataset or preparation using parameters in export parameters.")
     @VolumeMetered
-    @AsyncOperation(conditionalClass = PreparationExportNotInCacheCondition.class, //
+    @AsyncOperation(conditionalClass = GetPrepContentAsyncCondition.class, //
             resultUrlGenerator = PreparationGetContentUrlGenerator.class, //
             executionIdGeneratorClass = ExportParametersExecutionIdGenerator.class //
     )
@@ -222,7 +222,7 @@ public class TransformationService extends BaseTransformationService {
             notes = "This operation transforms the dataset or preparation using parameters in export parameters.")
     @VolumeMetered
     @AsyncOperation(
-            conditionalClass = PrepMetadataNotInCacheCondition.class, //
+            conditionalClass = GetPrepMetadataAsyncCondition.class, //
             resultUrlGenerator = PrepMetadataGetContentUrlGenerator.class, //
             executionIdGeneratorClass = PrepMetadataExecutionIdGenerator.class
     )

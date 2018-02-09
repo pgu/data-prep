@@ -12,27 +12,25 @@
 
 package org.talend.dataprep.async.conditional;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.api.export.ExportParameters;
 import org.talend.dataprep.api.export.ExportParametersUtil;
+import org.talend.dataprep.api.preparation.Preparation;
 import org.talend.dataprep.cache.CacheKeyGenerator;
-import org.talend.dataprep.cache.TransformationCacheKey;
+import org.talend.dataprep.cache.ContentCache;
 
 /**
- * Return TRUE if a preparation is on cache
+ * Return True if a preparation has more than the initial step
  */
 @Component
-public class PreparationCacheCondition implements ConditionalTest {
+public class PrepHasStepCondition implements ConditionalTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PreparationCacheCondition.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrepHasStepCondition.class);
 
     @Autowired
-    private CacheCondition cacheCondition;
+    private ContentCache contentCache;
 
     @Autowired
     private CacheKeyGenerator cacheKeyGenerator;
@@ -45,21 +43,15 @@ public class PreparationCacheCondition implements ConditionalTest {
 
         // check pre-condition
         assert args != null;
-        assert args.length == 1;
-        assert args[0] instanceof ExportParameters;
+        assert args.length == 2;
+        assert args[0] instanceof String;
+        assert args[1] instanceof String;
 
-        try {
-            ExportParameters exportParameters =
-                    exportParametersUtil.populateFromPreparationExportParameter((ExportParameters) args[0]);
+        String preparationId = (String) args[0];
+        String headId = (String) args[1];
 
-            TransformationCacheKey cacheKey = cacheKeyGenerator.generateContentKey(exportParameters);
+        Preparation prep = exportParametersUtil.getPreparation(preparationId, headId);
 
-            return cacheCondition.apply(cacheKey);
-        } catch (IOException e) {
-            LOGGER.error("Cannot get all information from export parameters", e);
-            return false;
-        }
-
+        return prep.getSteps().size() > 1;
     }
-
 }

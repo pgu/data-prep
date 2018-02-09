@@ -14,5 +14,5 @@ package org.talend.dataprep.async.conditional;
 
 public interface ConditionalTest {
 
-    boolean executeAsynchronously(Object... args);
+    boolean apply(Object... args);
 }

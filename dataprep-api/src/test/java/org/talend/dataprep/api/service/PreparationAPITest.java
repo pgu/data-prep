@@ -801,7 +801,7 @@ public class PreparationAPITest extends ApiServiceTestBase {
         final String preparationId = testClient.createPreparationFromFile("dataset/dataset.csv", preparationName, home.getId());
 
         // when
-        final String content = when().get("/api/preparations/{id}/metadata", preparationId).asString();
+        final String content = getPrepMetadata(preparationId).asString();
 
         // then
         final DataSetMetadata actual = mapper.readerFor(DataSetMetadata.class).readValue(content);

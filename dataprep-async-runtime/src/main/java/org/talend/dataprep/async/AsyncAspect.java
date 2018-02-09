@@ -238,7 +238,7 @@ public class AsyncAspect {
 
         final ConditionalTest conditionalTest = applicationContext.getBean(conditionalTestGenerator);
         Object[] args = AnnotationUtils.extractAsyncParameter(pjp);
-        return conditionalTest.executeAsynchronously(args);
+        return conditionalTest.apply(args);
     }
 
     /**

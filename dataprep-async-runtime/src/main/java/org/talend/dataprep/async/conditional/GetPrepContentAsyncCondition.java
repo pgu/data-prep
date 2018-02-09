@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  * Return TRUE if preparation are not in cache and export deals with preparation
  */
 @Component
-public class PreparationExportNotInCacheCondition implements ConditionalTest {
+public class GetPrepContentAsyncCondition implements ConditionalTest {
 
     @Autowired
     private PreparationCacheCondition cacheCondition;
@@ -28,8 +28,8 @@ public class PreparationExportNotInCacheCondition implements ConditionalTest {
     private PreparationExportCondition exportCondition;
 
     @Override
-    public boolean executeAsynchronously(Object... args) {
+    public boolean apply(Object... args) {
 
-        return cacheCondition.executeAsynchronously(args) && exportCondition.executeAsynchronously(args);
+        return !cacheCondition.apply(args) && exportCondition.apply(args);
     }
 }

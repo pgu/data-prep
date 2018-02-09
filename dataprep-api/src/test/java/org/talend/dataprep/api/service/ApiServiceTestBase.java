@@ -237,4 +237,28 @@ public abstract class ApiServiceTestBase extends ServiceBaseTest {
         return exportRequest
                 .get("/api/export");
     }
+
+    public Response getPrepMetadata(String preparationId) throws IOException, InterruptedException {
+
+        // when
+        Response transformedResponse = given().when().get("/api/preparations/{id}/metadata", preparationId);
+
+        if (HttpStatus.ACCEPTED.value() == transformedResponse.getStatusCode()) {
+            // first time we have a 202 with a Location to see asynchronous method status
+            final String asyncMethodStatusUrl = transformedResponse.getHeader("Location");
+
+            waitForAsynchronousMethodTofinish(asyncMethodStatusUrl);
+
+            transformedResponse = given()
+                    .when()
+                    .expect()
+                    .statusCode(200)
+                    .log()
+                    .ifError() //
+                    .get("/api/preparations/{id}/metadata", preparationId);
+        }
+
+        return transformedResponse;
+
+    }
 }
