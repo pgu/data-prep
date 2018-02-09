@@ -289,13 +289,28 @@ public class OSDataPrepAPIHelper {
      * @param from
      * @return the response.
      */
-    public Response getPreparationContent(String preparationId, String version, String from) {
-        return given() //
+    public Response getPreparationContent(String preparationId, String version, String from) throws IOException, InterruptedException {
+        Response response = given() //
                 .baseUri(getApiBaseUrl()) //
                 .queryParam("version", version) //
                 .queryParam("from", from) //
                 .when() //
                 .get("/api/preparations/" + preparationId + "/content");
+
+        if (HttpStatus.ACCEPTED.value() == response.getStatusCode()) {
+            // first time we have a 202 with a Location to see asynchronous method status
+            final String asyncMethodStatusUrl = response.getHeader("Location");
+
+            waitForAsynchronousMethodTofinish(asyncMethodStatusUrl);
+
+            response = given() //
+                    .baseUri(getApiBaseUrl()) //
+                    .queryParam("version", version) //
+                    .queryParam("from", from) //
+                    .when() //
+                    .get("/api/preparations/" + preparationId + "/content");
+        }
+        return response;
     }
 
     /**
