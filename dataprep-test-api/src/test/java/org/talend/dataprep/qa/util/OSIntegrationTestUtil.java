@@ -1,5 +1,6 @@
 package org.talend.dataprep.qa.util;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.talend.dataprep.helper.api.ActionParamEnum.FILTER;
 import static org.talend.dataprep.helper.api.ActionParamEnum.SCOPE;
 
@@ -10,15 +11,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import org.talend.dataprep.helper.api.Action;
 import org.talend.dataprep.helper.api.ActionFilterEnum;
-import org.talend.dataprep.helper.api.ActionParamEnum;
 import org.talend.dataprep.helper.api.Filter;
 import org.talend.dataprep.qa.dto.Folder;
 
@@ -63,25 +63,21 @@ public class OSIntegrationTestUtil {
     }
 
     /**
-     * Map parameters from a Cucumber step to an {@link Action}.
-     *
+     * Map parameters from a Cucumber step to an Action parameters.
+     * <p>add default scope column</p>
      * @param params the parameters to map.
-     * @param action the {@link Action} that will receive the parameters.
      * @return the given {@link Action} updated.
      */
     @NotNull
-    public Action mapParamsToAction(@NotNull Map<String, String> params, @NotNull Action action) {
-        action.action = params.get(ACTION_NAME) == null ? action.action : params.get(ACTION_NAME);
-        params.forEach((k, v) -> {
-            ActionParamEnum ape = ActionParamEnum.getActionParamEnum(k);
-            if (ape != null) {
-                action.parameters.put(ape, StringUtils.isEmpty(v) ? null : v);
-            }
-        });
+    public Map<String, Object> mapParamsToActionParameters(@NotNull Map<String, String> params) {
+        Map<String, Object> actionParameters = params.entrySet().stream() //
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> isEmpty(e.getValue()) ? null : e.getValue()));
+
         Filter filter = mapParamsToFilter(params);
-        action.parameters.put(FILTER, filter);
-        action.parameters.putIfAbsent(SCOPE, "column");
-        return action;
+        actionParameters.put(FILTER.getName(), filter);
+
+        actionParameters.putIfAbsent(SCOPE.getName(), "column");
+        return actionParameters;
     }
 
     /**

@@ -185,7 +185,8 @@ public class OSIntegrationTestUtilTest {
     @Test
     public void mapParamsToAction_Empty() {
         Action action = new Action();
-        Action result = util.mapParamsToAction(new HashMap<String, String>(), action);
+        Action result = new Action();
+        result.parameters = util.mapParamsToActionParameters(new HashMap<>());
         Assert.assertEquals(action, result);
     }
 
@@ -196,7 +197,8 @@ public class OSIntegrationTestUtilTest {
         map.put("key1", "value1");
         map.put("key2", "value2");
         map.put("key3", "value3");
-        Action result = util.mapParamsToAction(map, action);
+        Action result = new Action();
+        result.parameters = util.mapParamsToActionParameters(map);
         Assert.assertEquals(action, result);
     }
 
@@ -208,20 +210,10 @@ public class OSIntegrationTestUtilTest {
         map.put("key1", "value1");
         map.put("key2", "value2");
         map.put("key3", "value3");
-        Action result = util.mapParamsToAction(map, action);
+        Action result = new Action();
+        result.parameters = util.mapParamsToActionParameters(map);
         Assert.assertEquals(action, result);
         Assert.assertEquals(result.action, "testName");
-    }
-
-    @Test
-    public void mapParamsToAction_WithActionNameParam() {
-        Action action = new Action();
-        action.action = "testName";
-        Map<String, String> map = new HashMap<>();
-        map.put(ACTION_NAME, "newName");
-        Action result = util.mapParamsToAction(map, action);
-        Assert.assertEquals(action, result);
-        Assert.assertEquals(result.action, "newName");
     }
 
     @Test
@@ -236,7 +228,8 @@ public class OSIntegrationTestUtilTest {
         map.put(START.getName(), "50000");
         map.put(TYPE.getName(), "type");
         map.put(ROW_ID.getName(), "");
-        Action result = util.mapParamsToAction(map, action);
+        Action result = new Action();
+        result.parameters = util.mapParamsToActionParameters(map);
         Assert.assertNotNull(result);
         Assert.assertEquals(action.action, "newName");
         Assert.assertEquals(action.parameters.get(COLUMN_ID), "0000");
