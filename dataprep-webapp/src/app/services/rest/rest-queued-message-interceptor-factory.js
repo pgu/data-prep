@@ -21,6 +21,7 @@ const METHODS = {
 	HEAD: 'HEAD',
 };
 const ALLOWED_METHODS = [METHODS.POST, METHODS.GET, METHODS.HEAD];
+const NOOP = () => {};
 
 /**
  * @ngdoc service
@@ -39,10 +40,14 @@ export default function RestQueuedMessageHandler($q, $injector, $timeout, RestUR
 		});
 	}
 
-	function loop(url) {
+	function loop(url, callback) {
 		function checker(url) {
 			return checkStatus(url)
-				.catch(() => $timeout(LOOP_DELAY).then(() => checker(url)));
+				.then(callback || NOOP)
+				.catch((data) => {
+					(callback || NOOP)(data);
+					return $timeout(LOOP_DELAY).then(() => checker(url));
+				});
 		}
 		return checker(url);
 	}
@@ -59,7 +64,7 @@ export default function RestQueuedMessageHandler($q, $injector, $timeout, RestUR
 			const { headers, config, status } = response;
 
 			if (status === ACCEPTED_STATUS && ALLOWED_METHODS.includes(config.method) && !config.async) {
-				return loop(`${RestURLs.serverUrl}${headers('Location')}`)
+				return loop(`${RestURLs.serverUrl}${headers('Location')}`, config.statusCallback)
 					.then((data) => {
 						const $http = $injector.get('$http');
 						return data.result.downloadUrl ? $http({
