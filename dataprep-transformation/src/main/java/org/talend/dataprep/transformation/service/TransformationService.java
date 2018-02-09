@@ -29,7 +29,6 @@ import static org.talend.dataprep.transformation.format.JsonFormat.JSON;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
@@ -63,7 +62,11 @@ import org.talend.dataprep.api.preparation.Preparation;
 import org.talend.dataprep.api.preparation.Step;
 import org.talend.dataprep.api.preparation.StepDiff;
 import org.talend.dataprep.async.*;
+import org.talend.dataprep.async.conditional.PrepMetadataNotInCacheCondition;
 import org.talend.dataprep.async.conditional.PreparationExportNotInCacheCondition;
+import org.talend.dataprep.async.generator.ExportParametersExecutionIdGenerator;
+import org.talend.dataprep.async.generator.PrepMetadataExecutionIdGenerator;
+import org.talend.dataprep.async.result.PrepMetadataGetContentUrlGenerator;
 import org.talend.dataprep.async.result.PreparationGetContentUrlGenerator;
 import org.talend.dataprep.cache.ContentCache;
 import org.talend.dataprep.cache.ContentCacheKey;
@@ -194,7 +197,8 @@ public class TransformationService extends BaseTransformationService {
     @VolumeMetered
     @AsyncOperation(conditionalClass = PreparationExportNotInCacheCondition.class, //
             resultUrlGenerator = PreparationGetContentUrlGenerator.class, //
-            executionIdGeneratorClass = ExportParametersExecutionIdGenerator.class)
+            executionIdGeneratorClass = ExportParametersExecutionIdGenerator.class //
+    )
     public StreamingResponseBody execute(@ApiParam(value = "Preparation id to apply.") @RequestBody @Valid @AsyncParameter @AsyncExecutionId final ExportParameters parameters) throws IOException {
 
         ExportParameters completeParameters = parameters;
@@ -217,8 +221,13 @@ public class TransformationService extends BaseTransformationService {
     @ApiOperation(value = "Run the transformation given the provided export parameters",
             notes = "This operation transforms the dataset or preparation using parameters in export parameters.")
     @VolumeMetered
-    public DataSetMetadata executeMetadata(@PathVariable("preparationId") String preparationId,
-                                           @PathVariable("stepId") String stepId) {
+    @AsyncOperation(
+            conditionalClass = PrepMetadataNotInCacheCondition.class, //
+            resultUrlGenerator = PrepMetadataGetContentUrlGenerator.class, //
+            executionIdGeneratorClass = PrepMetadataExecutionIdGenerator.class
+    )
+    public DataSetMetadata executeMetadata(@PathVariable("preparationId") @AsyncParameter String preparationId,
+                                           @PathVariable("stepId") @AsyncParameter String stepId) {
 
         LOG.debug("getting preparation metadata for #{}, step {}", preparationId, stepId);
 
@@ -231,27 +240,33 @@ public class TransformationService extends BaseTransformationService {
             if (!contentCache.has(cacheKey)) {
                 try {
                     LOG.debug("Metadata not available for preparation '{}' at step '{}'", preparationId, headId);
-                    final ExportParameters parameters = new ExportParameters();
+
+                    ExportParameters parameters = new ExportParameters();
                     parameters.setPreparationId(preparationId);
                     parameters.setExportType("JSON");
                     parameters.setStepId(headId);
                     parameters.setFrom(HEAD);
-                    execute(parameters);
+
+                    // we regenerate cache
+                    parameters = exportParametersUtil.populateFromPreparationExportParameter(parameters);
+                    preparationExportStrategy.performPreparation(parameters, new NullOutputStream());
+
                 } catch (Exception e) {
                     throw new TDPException(TransformationErrorCodes.METADATA_NOT_FOUND, e);
                 }
             }
 
             // Return transformation cached content (after sanity check)
-            if (!contentCache.has(cacheKey)) {
+//            if (!contentCache.has(cacheKey)) {
                 // Not expected: We've just ran a transformation, yet no metadata cached?
 //                throw new TDPException(TransformationErrorCodes.METADATA_NOT_FOUND);
-                return null;
-            }
-            try (InputStream stream = contentCache.get(cacheKey)) {
-                return mapper.readerFor(DataSetMetadata.class).readValue(stream);
-            } catch (IOException e) {
-                throw new TDPException(CommonErrorCodes.UNEXPECTED_EXCEPTION, e);
+//            }
+            if (contentCache.has(cacheKey)) {
+                try (InputStream stream = contentCache.get(cacheKey)) {
+                    return mapper.readerFor(DataSetMetadata.class).readValue(stream);
+                } catch (IOException e) {
+                    throw new TDPException(CommonErrorCodes.UNEXPECTED_EXCEPTION, e);
+                }
             }
         } else {
             LOG.debug("No step in preparation '{}', falls back to get dataset metadata (id: {})", preparationId,
@@ -259,7 +274,7 @@ public class TransformationService extends BaseTransformationService {
             DataSetGetMetadata getMetadata = context.getBean(DataSetGetMetadata.class, preparation.getDataSetId());
             return getMetadata.execute();
         }
-
+        return null;
     }
 
     /**

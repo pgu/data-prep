@@ -290,7 +290,7 @@ public class PreparationAPI extends APIService {
     @RequestMapping(value = "/api/preparations/{id}/metadata", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get preparation metadata by id and at a given version.", notes = "Returns the preparation metadata at version.")
     @Timed
-    public DataSetMetadata getPreparationMetadata( //
+    public ResponseEntity<DataSetMetadata> getPreparationMetadata( //
                                                  @PathVariable(value = "id") @ApiParam(name = "id", value = "Preparation id.") String preparationId, //
                                                  @RequestParam(value = "version", defaultValue = "head") @ApiParam(name = "version", value = "Version of the preparation (can be 'origin', 'head' or the version id). Defaults to 'head'.") String version) {
 
@@ -299,8 +299,7 @@ public class PreparationAPI extends APIService {
         }
 
         try {
-            HystrixCommand<DataSetMetadata> command = getCommand(PreparationGetMetadata.class, preparationId, version);
-            return command.execute();
+            return getCommand(PreparationGetMetadata.class, preparationId, version).execute();
         } finally {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Retrieved preparation metadata (pool: {} )...", getConnectionStats());

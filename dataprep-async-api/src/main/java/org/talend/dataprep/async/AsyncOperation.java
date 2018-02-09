@@ -17,6 +17,9 @@ import java.lang.annotation.*;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.talend.dataprep.async.conditional.AlwaysTrueCondition;
 import org.talend.dataprep.async.conditional.ConditionalTest;
+import org.talend.dataprep.async.generator.AnnotationExecutionIdGenerator;
+import org.talend.dataprep.async.generator.AnnotationGroupIdGenerator;
+import org.talend.dataprep.async.generator.ExecutionIdGenerator;
 import org.talend.dataprep.async.result.EmptyUrlGenerator;
 import org.talend.dataprep.async.result.ResultUrlGenerator;
 

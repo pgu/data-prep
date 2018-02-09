@@ -13,10 +13,7 @@
 package org.talend.dataprep.async;
 
 import java.lang.reflect.Method;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -31,9 +28,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.talend.daikon.exception.TalendRuntimeException;
 import org.talend.dataprep.async.conditional.ConditionalTest;
+import org.talend.dataprep.async.generator.ExecutionIdGenerator;
 import org.talend.dataprep.async.repository.ManagedTaskRepository;
 import org.talend.dataprep.async.result.ResultUrlGenerator;
 import org.talend.dataprep.exception.TDPException;

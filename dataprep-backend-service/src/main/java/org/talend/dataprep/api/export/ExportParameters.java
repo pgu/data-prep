@@ -17,6 +17,7 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.talend.dataprep.api.dataset.DataSet;
 import org.talend.dataprep.async.AsyncGroupKey;
 import org.talend.dataprep.validation.OneNotBlank;
@@ -215,6 +216,6 @@ public class ExportParameters implements AsyncGroupKey {
     }
 
     public String generateUniqueId(){
-        return preparationId +"_" + stepId + "_" + datasetId + "_" + from +"_" + filter;
+        return DigestUtils.sha1Hex(preparationId +"_" + stepId + "_" + datasetId + "_" + from +"_" + filter);
     }
 }

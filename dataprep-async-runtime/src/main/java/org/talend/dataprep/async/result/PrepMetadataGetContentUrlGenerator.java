@@ -15,31 +15,28 @@ package org.talend.dataprep.async.result;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.stereotype.Component;
-import org.talend.dataprep.api.export.ExportParameters;
 import org.talend.dataprep.async.AsyncExecutionResult;
 
 @Component
-public class PreparationGetContentUrlGenerator implements ResultUrlGenerator {
+public class PrepMetadataGetContentUrlGenerator implements ResultUrlGenerator {
 
     @Override
     public AsyncExecutionResult generateResultUrl(Object... args) {
 
         // check pre-condition
         assert args != null;
-        assert args.length == 1;
-        assert args[0] instanceof ExportParameters;
+        assert args.length == 2;
+        assert args[0] instanceof String;
+        assert args[1] instanceof String;
 
-        ExportParameters param = (ExportParameters) args[0];
+        String preparationId = (String) args[0];
+        String headId = (String) args[1];
 
         URIBuilder builder = new URIBuilder();
-        builder.setPath("/api/preparations/" + param.getPreparationId() + "/content");
+        builder.setPath("/api/preparations/" + preparationId + "/metadata");
 
-        if (StringUtils.isNotEmpty(param.getStepId())) {
-            builder.setParameter("version", param.getStepId());
-        }
-
-        if (param.getFrom() != null) {
-            builder.setParameter("from", param.getFrom().name());
+        if (StringUtils.isNotEmpty(headId)) {
+            builder.setParameter("version", headId);
         }
 
         return new AsyncExecutionResult(builder.toString());
