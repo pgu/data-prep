@@ -14,7 +14,13 @@
 const ACCEPTED_STATUS = 202;
 const LOOP_DELAY = 1000;
 const RUNNING_STATUS = 'RUNNING';
-const ALLOWED_METHODS = ['GET', 'HEAD'];
+
+const METHODS = {
+	POST: 'POST',
+	GET: 'GET',
+	HEAD: 'HEAD',
+};
+const ALLOWED_METHODS = [METHODS.POST, METHODS.GET, METHODS.HEAD];
 
 /**
  * @ngdoc service
@@ -52,14 +58,14 @@ export default function RestQueuedMessageHandler($q, $injector, $timeout, RestUR
 		response(response) {
 			const { headers, config, status } = response;
 
-			if (status === ACCEPTED_STATUS && ALLOWED_METHODS.includes(config.method)) {
+			if (status === ACCEPTED_STATUS && ALLOWED_METHODS.includes(config.method) && !config.async) {
 				return loop(`${RestURLs.serverUrl}${headers('Location')}`)
 					.then((data) => {
 						const $http = $injector.get('$http');
-						return $http({
-							method: config.method,
+						return data.result.downloadUrl ? $http({
+							method: config.method === METHODS.HEAD ? METHODS.HEAD : METHODS.GET,
 							url: `${RestURLs.serverUrl}${data.result.downloadUrl}`,
-						});
+						}) : $q.resolve(data);
 					});
 			}
 
