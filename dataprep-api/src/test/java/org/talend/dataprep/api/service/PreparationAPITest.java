@@ -993,7 +993,7 @@ public class PreparationAPITest extends ApiServiceTestBase {
      * see <a href="https://jira.talendforge.org/browse/TDP-5057">TDP-5057</a>
      */
     @Test
-    public void testPreparationPreviewOnPreparationWithTrimAction_TDP_5057() throws IOException {
+    public void testPreparationPreviewOnPreparationWithTrimAction_TDP_5057() throws IOException, InterruptedException {
         //Create a dataset from csv
         final String datasetId = testClient.createDataset("preview/best_sad_songs_of_all_time.csv", "testPreview");
         // Create a preparation
@@ -1011,7 +1011,9 @@ public class PreparationAPITest extends ApiServiceTestBase {
         testClient.applyAction(preparationId, Trim.TRIM_ACTION_NAME, trimParameters);
 
         // check column is date valid after trim action
-        RowMetadata preparationContent = testClient.getPreparationContent(preparationId);
+        InputStream inputStream = getPreparation(preparationId).asInputStream();
+        mapper.getDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        RowMetadata preparationContent = mapper.readValue(inputStream, Data.class).metadata;
 
         List<PatternFrequency> patternFrequencies =
                 preparationContent.getColumns().get(8).getStatistics().getPatternFrequencies();
