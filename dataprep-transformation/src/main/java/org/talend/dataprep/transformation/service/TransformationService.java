@@ -19,7 +19,6 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 import static org.talend.daikon.exception.ExceptionContext.build;
 import static org.talend.dataprep.api.dataset.ColumnMetadata.Builder.column;
-import static org.talend.dataprep.api.export.ExportParameters.SourceType.FILTER;
 import static org.talend.dataprep.api.export.ExportParameters.SourceType.HEAD;
 import static org.talend.dataprep.exception.error.PreparationErrorCodes.PREPARATION_DOES_NOT_EXIST;
 import static org.talend.dataprep.exception.error.TransformationErrorCodes.UNEXPECTED_EXCEPTION;
@@ -209,7 +208,7 @@ public class TransformationService extends BaseTransformationService {
 
             ContentCacheKey cacheKey = cacheKeyGenerator.generateContentKey(completeParameters);
 
-            if(!contentCache.has(cacheKey) && completeParameters.getFrom() != FILTER) {
+            if(!contentCache.has(cacheKey)) {
                 preparationExportStrategy.performPreparation(completeParameters, new NullOutputStream());
             }
         }

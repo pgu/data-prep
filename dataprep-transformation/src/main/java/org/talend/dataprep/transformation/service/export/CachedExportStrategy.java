@@ -45,6 +45,9 @@ public class CachedExportStrategy extends BaseSampleExportStrategy {
         if (parameters == null) {
             return false;
         }
+        if (parameters.getFrom() == ExportParameters.SourceType.FILTER) {
+            return false;
+        }
         if (parameters.getContent() != null) {
             return false;
         }
