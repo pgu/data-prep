@@ -43,7 +43,10 @@ export default function RestQueuedMessageHandler($q, $injector, $timeout, RestUR
 	function loop(url, callback) {
 		function checker(url) {
 			return checkStatus(url)
-				.then(callback || NOOP)
+				.then((data) => {
+					(callback || NOOP)(data);
+					return data;
+				})
 				.catch((data) => {
 					(callback || NOOP)(data);
 					return $timeout(LOOP_DELAY).then(() => checker(url));
