@@ -63,7 +63,7 @@ public abstract class AppSettingsConfigurer<T> {
      */
     public boolean isUserAuthorized() {
         // default is TDP users
-        return security.isTDPUser();
+        return true;
     }
 
     /**
