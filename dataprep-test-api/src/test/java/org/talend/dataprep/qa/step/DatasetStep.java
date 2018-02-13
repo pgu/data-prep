@@ -86,7 +86,7 @@ public class DatasetStep extends DataPrepStep {
     }
 
     @Then("^I check that the semantic type \"(.*)\" exists the types list of the column \"(.*)\" of the dataset$")
-    public void removePreparation(String semanticTypeId, String columnId) throws IOException {
+    public void thenICheckSemanticTypeExist(String semanticTypeId, String columnId) throws IOException {
         String dataSetId = context.getObject("dataSetId").toString();
         Response response = api.getDatasetsColumnSemanticTypes(columnId, dataSetId);
         response.then().statusCode(200);
